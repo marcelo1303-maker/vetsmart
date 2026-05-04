@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Receitas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .nav-active { color: #D2B48C !important; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-center items-center p-4">
+            <h1 class="font-black text-2xl uppercase">Minhas <span class="text-vetsmart-gold">Receitas</span></h1>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-10 flex flex-col items-center justify-center text-center space-y-6 min-h-[60vh]">
+
+        <div class="glass-panel p-10 rounded-3xl w-full">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-vetsmart-gold/10 border-2 border-vetsmart-gold/30 mb-6">
+                <i class="fa-solid fa-flask text-4xl text-vetsmart-gold"></i>
+            </div>
+            <h2 class="text-2xl font-black text-vetsmart-green mb-3">Em Breve</h2>
+            <p class="text-vetsmart-green/60 text-sm leading-relaxed">
+                A funcionalidade de <strong>Receitas Veterinárias</strong> está em desenvolvimento e estará disponível em breve.
+            </p>
+            <p class="text-vetsmart-green/50 text-xs mt-4 leading-relaxed">
+                Você poderá visualizar e baixar todas as receitas emitidas pelos veterinários para os seus cavalos diretamente por aqui.
+            </p>
+            <div class="mt-6 inline-flex items-center gap-2 bg-vetsmart-gold/10 border border-vetsmart-gold/30 rounded-full px-4 py-2">
+                <i class="fa-solid fa-clock text-vetsmart-gold text-sm"></i>
+                <span class="text-vetsmart-green font-bold text-xs">Disponível em breve</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-vetsmart-green/95 backdrop-blur-md border-t border-white/10">
+        <div class="max-w-md mx-auto flex justify-around items-center py-2 px-2">
+            <a href="dashboard-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Início</span>
+            </a>
+            <a href="cavalos-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-horse text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Cavalos</span>
+            </a>
+            <a href="faturas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-file-invoice text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Faturas</span>
+            </a>
+            <a href="receitas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl nav-active">
+                <i class="fa-solid fa-flask text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Receitas</span>
+            </a>
+            <a href="financeiro-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-chart-line text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Financeiro</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.replace('index-proprietario.html'); return; }
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (!snap.exists()) { await auth.signOut(); window.location.replace('index-proprietario.html'); }
+        });
+    </script>
+</body>
+</html>

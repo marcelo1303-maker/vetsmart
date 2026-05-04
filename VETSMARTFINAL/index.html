@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Bem-vindo</title>
+    
+    <!-- PWA MANIFEST -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- PWA META TAGS -->
+    <meta name="theme-color" content="#2D5A4E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HorseSmart">
+    <meta name="description" content="Plataforma de gestão de práticas veterinárias equinas com atendimentos, financeiro, estoque e relatórios em campo.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Poppins:wght@300;400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: radial-gradient(circle at top right, #3a7565, #2D5A4E);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Efeito Liquid Glass */
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        /* Animação de Entrada */
+        .fade-up {
+            animation: fadeUp 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Efeito de Clique "Saltitante" */
+        .btn-bounce {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-bounce:active {
+            transform: scale(0.92);
+        }
+
+        /* Círculos decorativos de fundo */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-6 relative">
+
+    <div class="blob w-64 h-64 bg-vetsmart-gold top-[-50px] right-[-50px]"></div>
+    <div class="blob w-80 h-80 bg-black bottom-[-100px] left-[-100px]"></div>
+
+    <main class="w-full max-w-md text-center fade-up">
+        
+        <div class="mb-12">
+            <div class="inline-block p-4 mb-4">
+                <i class="fa-solid fa-hand-holding-medical text-5xl text-white drop-shadow-lg"></i>
+            </div>
+            <h1 class="text-6xl font-black tracking-tighter uppercase leading-none">
+                <span class="text-white">Vet</span><span class="text-vetsmart-gold">Smart</span>
+            </h1>
+            <p class="text-white/80 mt-4 font-light text-lg tracking-wide italic">
+                A excelência que a sua rotina <br>
+                <span class="font-bold text-white">veterinária merece.</span>
+            </p>
+        </div>
+
+        <div class="space-y-4">
+            
+            <a href="login.html" class="btn-bounce block w-full liquid-glass py-5 px-8 rounded-3xl flex items-center justify-between group">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-vetsmart-gold rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                        <i class="fa-solid fa-horse text-vetsmart-green text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="block text-white font-bold text-lg leading-none uppercase">Já tenho conta</span>
+                        <span class="text-white/50 text-xs">Entrar no sistema</span>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-white/30 group-hover:text-vetsmart-gold transition-colors"></i>
+            </a>
+
+            <a href="cadastro.html" class="btn-bounce block w-full bg-white py-5 px-8 rounded-3xl flex items-center justify-between shadow-2xl group">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-vetsmart-green/10 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fa-solid fa-pen-nib text-vetsmart-green text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="block text-vetsmart-green font-bold text-lg leading-none uppercase">Criar conta</span>
+                        <span class="text-vetsmart-green/50 text-xs">Começar agora</span>
+                    </div>
+                </div>
+                <i class="fa-solid fa-arrow-right text-vetsmart-green/30 group-hover:text-vetsmart-green transition-colors"></i>
+            </a>
+
+            <a href="proprietarios/index-proprietario.html" class="btn-bounce block w-full py-5 px-8 rounded-3xl flex items-center justify-between group" style="background: linear-gradient(135deg, #C19A6B, #D2B48C);">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fa-solid fa-person text-white text-xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="block text-white font-bold text-lg leading-none uppercase">Portal do Proprietário</span>
+                        <span class="text-white/70 text-xs">Acompanhe seus animais</span>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-white/50 group-hover:text-white transition-colors"></i>
+            </a>
+
+        </div>
+
+        <footer class="mt-16 text-white/40 text-xs font-medium uppercase tracking-[0.2em]">
+            Precision & Performance Management
+        </footer>
+
+    </main>
+
+    <!-- FIREBASE AUTH CHECK -->
+    <!-- B6: Verifica se o usuário autenticado é veterinário antes de redirecionar -->
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const vetSnap = await getDoc(doc(db, 'veterinarios', user.uid));
+                    if (vetSnap.exists()) {
+                        window.location.replace('dashboard.html');
+                    } else {
+                        // Usuário autenticado não é veterinário — fazer signOut silencioso
+                        await auth.signOut();
+                    }
+                } catch (e) {
+                    await auth.signOut();
+                }
+            }
+        });
+    </script>
+
+    <!-- SERVICE WORKER REGISTRATION (PWA) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker registrado com sucesso!');
+                        console.log('Escopo:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.warn('⚠️ Erro ao registrar Service Worker:', error);
+                    });
+            });
+        } else {
+            console.warn('⚠️ Service Worker não suportado neste navegador');
+        }
+    </script>
+
+</body>
+</html>

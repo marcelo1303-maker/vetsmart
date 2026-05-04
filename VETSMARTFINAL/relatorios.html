@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> HORSESMART | Relatórios & Dados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- date-fns adapter and locale -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns/locale/pt-BR/index.js"></script>
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+        .toggle-btn.active { background-color: #2D5A4E; color: white; }
+        .toggle-btn { background-color: #E5E7EB; color: #374151; transition: all 0.2s; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex items-center justify-center p-4">
+            <h1 class="font-black text-xl uppercase tracking-tight">Relatórios <span class="text-vetsmart-gold">& Dados</span></h1>
+        </div>
+    </header>
+
+    <main id="report-content" class="max-w-md mx-auto px-4 mt-6 space-y-6">
+        
+        <div class="glass-panel p-4 rounded-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="font-bold text-vetsmart-green">Faturamento</h2>
+                <div id="faturamento-toggle" class="flex items-center text-sm rounded-lg overflow-hidden">
+                    <button data-period="semanal" class="toggle-btn active py-1 px-3">Semanal</button>
+                    <button data-period="mensal" class="toggle-btn py-1 px-3">Mensal</button>
+                </div>
+            </div>
+            <canvas id="faturamentoChart"></canvas>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <a href="atendimentos.html" class="glass-panel p-4 rounded-2xl block active:scale-[0.98] transition-transform">
+                <p class="text-sm font-bold text-vetsmart-green/90">Receita Bruta</p>
+                <p id="receita-bruta" class="font-black text-2xl text-green-600">R$ 0,00</p>
+            </a>
+            <div class="glass-panel p-4 rounded-2xl">
+                <p class="text-sm font-bold text-vetsmart-green/90">Receita Líquida</p>
+                <p id="receita-liquida" class="font-black text-2xl text-green-600">R$ 0,00</p>
+            </div>
+             <div class="glass-panel p-4 rounded-2xl col-span-2">
+                <div class="flex justify-between items-center">
+                    <p class="text-sm font-bold text-vetsmart-green/90">Atendimentos Totais</p>
+                    <div id="atendimentos-toggle" class="flex items-center text-xs rounded-lg overflow-hidden">
+                        <button data-period="semanal" class="toggle-btn active py-1 px-2">7d</button>
+                        <button data-period="mensal" class="toggle-btn py-1 px-2">Mês</button>
+                    </div>
+                </div>
+                <p id="atendimentos-totais" class="font-black text-3xl text-green-600 mt-2">0</p>
+            </div>
+        </div>
+
+        <div class="glass-panel p-4 rounded-2xl">
+            <h2 class="font-bold text-vetsmart-green mb-4">Atendimentos por Tipo</h2>
+            <div id="pie-chart-container" class="min-h-[250px] flex items-center justify-center">
+                 <canvas id="tiposAtendimentoChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+
+        <!-- PDF Download Button -->
+        <div class="text-center pt-4">
+            <button id="download-pdf-btn" class="bg-vetsmart-gold text-vetsmart-green font-bold py-3 rounded-xl uppercase tracking-widest active:scale-95 transition-all w-full max-w-[200px] mx-auto">
+                <i class="fa-solid fa-file-pdf mr-2"></i> Baixar PDF
+            </button>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto p-2">
+            <div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center">
+                 <a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] mt-1">Início</span></a>
+                <a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green"><i class="fa-solid fa-notes-medical text-lg"></i><span class="text-[10px] mt-1">Atender</span></a>
+                <a href="clientes.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green"><i class="fa-solid fa-horse text-lg"></i><span class="text-[10px] mt-1">Cavalos</span></a>
+                <a href="financeiro.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green"><i class="fa-solid fa-dollar-sign text-lg"></i><span class="text-[10px] mt-1">Caixa</span></a>
+                 <a href="relatorios.html" class="flex flex-col items-center text-vetsmart-gold font-bold"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px] mt-1">Relatórios</span></a>
+                <a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green"><i class="fa-solid fa-box-open text-lg"></i><span class="text-[10px] mt-1">Estoque</span></a>
+            </div>
+        </div>
+    </nav>
+    
+    <div id="atendimento-modal" class="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div id="atendimento-modal-content" class="glass-panel w-full max-w-sm rounded-2xl p-6 transition-all duration-300 scale-95" onclick="event.stopPropagation()">
+             <h3 class="text-lg font-black text-vetsmart-green mb-4">Detalhes do Atendimento</h3>
+            <div id="atendimento-details" class="space-y-2 text-vetsmart-green/90"></div>
+            <button id="close-modal-btn" class="w-full mt-6 bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-3 rounded-xl uppercase tracking-widest active:scale-95 transition-all">Fechar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+        let currentUser, faturamentoChartInstance, tiposChartInstance;
+        let allAtendimentos = [];
+        let currentFaturamentoPeriod = 'semanal';
+        let currentAtendimentosPeriod = 'semanal';
+        const pieColors = ['#2D5A4E', '#D2B48C', '#8A6240', '#A9A9A9', '#6B8E23', '#4682B4'];
+    
+        Chart.defaults.locale = 'pt-BR';
+        const formatCurrency = (value) => `R$ ${(value || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loadReportData(user.uid);
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+    
+        function loadReportData(uid) {
+            const q = query(collection(db, "atendimentos"), where("userId", "==", uid));
+            onSnapshot(q, (snapshot) => {
+                allAtendimentos = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                    timestamp: doc.data().timestamp, // Padronizado
+                }));
+                updateAllVisualizations();
+            }, error => console.error("Erro ao carregar relatório:", error));
+        }
+
+        function updateAllVisualizations() {
+            updateFaturamentoChart(currentFaturamentoPeriod);
+            updateStatsBoxes(currentAtendimentosPeriod);
+            updateTiposChart();
+        }
+    
+        function updateFaturamentoChart(period) {
+            const { data } = getFaturamentoData(period);
+            renderLineChart(data);
+        }
+    
+        function getFaturamentoData(period) {
+            const now = new Date();
+            let minDate, maxDate;
+
+            if (period === 'semanal') {
+                const base = new Date(now);
+                const firstDayOfWeek = base.getDate() - base.getDay();
+                minDate = new Date(base.getFullYear(), base.getMonth(), firstDayOfWeek);
+                maxDate = new Date(minDate);
+                maxDate.setDate(minDate.getDate() + 6);
+            } else {
+                minDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                maxDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            }
+            minDate.setHours(0,0,0,0);
+            maxDate.setHours(23,59,59,999);
+    
+            const data = allAtendimentos
+                .filter(at => {
+                    if (!at.timestamp?.toDate) return false;
+                    const atDate = at.timestamp.toDate();
+                    return atDate >= minDate && atDate <= maxDate;
+                })
+                .map(at => ({
+                    x: at.timestamp.toDate(),
+                    y: at.total_geral || 0,
+                    details: at
+                }));
+    
+            return { data, minDate, maxDate };
+        }
+    
+        function renderLineChart(data) {
+            const ctx = document.getElementById('faturamentoChart').getContext('2d');
+            if (faturamentoChartInstance) faturamentoChartInstance.destroy();
+            
+            faturamentoChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Atendimento',
+                        data: data,
+                        borderColor: '#2D5A4E',
+                        backgroundColor: 'rgba(45, 90, 78, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    onClick: (e, el) => {
+                        if(el.length) {
+                            const details = e.chart.data.datasets[0].data[el[0].index].details;
+                            abrirAtendimentoModal(details);
+                        }
+                    },
+                    scales: { x: { type: 'time', time: { unit: 'day' } }, y: { beginAtZero: true } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (c) => formatCurrency(c.raw.y) } }
+                    }
+                }
+            });
+        }
+    
+        function abrirAtendimentoModal(details) {
+            const dataAtend = details.timestamp?.toDate ? details.timestamp.toDate().toLocaleDateString('pt-BR') : 'N/A';
+            document.getElementById('atendimento-details').innerHTML = `
+                <p><strong>Cavalo:</strong> ${details.nome_cavalo || 'N/I'}</p>
+                <p><strong>Serviço:</strong> ${details.tipo_atendimento || 'N/A'}</p>
+                <p><strong>Data:</strong> ${dataAtend}</p>
+                <p><strong>Valor:</strong> ${formatCurrency(details.total_geral || 0)}</p>
+                <p><strong>Status:</strong> ${details.status || 'Não informado'}</p>
+            `;
+            document.getElementById('atendimento-modal').classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('atendimento-modal-content').classList.remove('scale-95');
+        }
+    
+        function fecharAtendimentoModal() {
+            const modal = document.getElementById('atendimento-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modal.querySelector('#atendimento-modal-content').classList.add('scale-95');
+        }
+    
+        function updateStatsBoxes(period) {
+            const now = new Date();
+            let minDate;
+            if (period === 'semanal') {
+                minDate = new Date(now);
+                minDate.setDate(now.getDate() - 7);
+            } else {
+                minDate = new Date(now.getFullYear(), now.getMonth(), 1);
+            }
+            minDate.setHours(0,0,0,0);
+
+            const atendimentosFiltrados = allAtendimentos.filter(item => {
+                return item.timestamp?.toDate && item.timestamp.toDate() >= minDate;
+            });
+
+            const receitaBrutaFiltrada = atendimentosFiltrados.reduce((sum, item) => sum + (item.total_geral || 0), 0);
+            const custoFiltrado = atendimentosFiltrados.reduce((sum, item) => {
+                return sum + (item.insumos?.reduce((iSum, i) => iSum + ((i.custo || 0) * (i.quantidade || 0)), 0) || 0);
+            }, 0);
+
+            document.getElementById('receita-bruta').innerText = formatCurrency(receitaBrutaFiltrada);
+            document.getElementById('receita-liquida').innerText = formatCurrency(receitaBrutaFiltrada - custoFiltrado);
+            document.getElementById('atendimentos-totais').innerText = atendimentosFiltrados.length;
+        }
+    
+        function updateTiposChart() {
+            const tiposCount = allAtendimentos.reduce((acc, item) => {
+                const tipo = item.tipo_atendimento || 'Outro';
+                acc[tipo] = (acc[tipo] || 0) + 1;
+                return acc;
+            }, {});
+    
+            const labels = Object.keys(tiposCount);
+            const data = Object.values(tiposCount);
+            
+            renderDoughnutChart(labels.length ? labels : ['Sem dados'], data.length ? data : [1], pieColors, !data.length);
+        }
+    
+        function renderDoughnutChart(labels, data, colors, isEmpty) {
+            const ctx = document.getElementById('tiposAtendimentoChart').getContext('2d');
+            if (tiposChartInstance) tiposChartInstance.destroy();
+            
+            tiposChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: isEmpty ? 0 : 1 }] },
+                options: {
+                    responsive: true, cutout: '70%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: !isEmpty } }
+                }
+            });
+        }
+    
+        async function generatePDF() {
+            const btn = document.getElementById('download-pdf-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Gerando...';
+            btn.disabled = true;
+    
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const W = pdf.internal.pageSize.getWidth();
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+                // --- Cabeçalho ---
+                pdf.setFillColor(45, 90, 78);
+                pdf.rect(0, 0, W, 22, 'F');
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(16);
+                pdf.text('HORSESMART', 14, 10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(9);
+                pdf.text('Relatório de Desempenho Veterinário', 14, 16);
+                pdf.setTextColor(210, 180, 140);
+                pdf.setFontSize(8);
+                pdf.text(dateStr, W - 14, 10, { align: 'right' });
+
+                let y = 30;
+                pdf.setTextColor(45, 90, 78);
+
+                // --- Receitas ---
+                const recBruta = document.getElementById('receita-bruta').innerText;
+                const recLiq = document.getElementById('receita-liquida').innerText;
+                const atend = document.getElementById('atendimentos-totais').innerText;
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(11);
+                pdf.text('Resumo Financeiro', 14, y); y += 7;
+
+                pdf.setFillColor(240, 245, 243);
+                pdf.roundedRect(14, y, W-28, 28, 3, 3, 'F');
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(9);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('Receita Bruta', 22, y + 7);
+                pdf.text('Receita Líquida', 22, y + 18);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(45, 90, 78);
+                pdf.text(recBruta, W - 22, y + 7, { align: 'right' });
+                pdf.text(recLiq, W - 22, y + 18, { align: 'right' });
+                y += 36;
+
+                // --- Atendimentos ---
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(11);
+                pdf.setTextColor(45, 90, 78);
+                pdf.text('Atendimentos', 14, y); y += 7;
+                pdf.setFillColor(240, 245, 243);
+                pdf.roundedRect(14, y, W-28, 16, 3, 3, 'F');
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(9);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('Total de Atendimentos (período)', 22, y + 9);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(45, 90, 78);
+                pdf.text(atend, W - 22, y + 9, { align: 'right' });
+                y += 24;
+
+                // --- Tipos de atendimento (texto) ---
+                const tiposCount = allAtendimentos.reduce((acc, item) => {
+                    const tipo = item.tipo_atendimento || 'Outro';
+                    acc[tipo] = (acc[tipo] || 0) + 1;
+                    return acc;
+                }, {});
+
+                if (Object.keys(tiposCount).length > 0) {
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(11);
+                    pdf.setTextColor(45, 90, 78);
+                    pdf.text('Distribuição por Tipo', 14, y); y += 7;
+
+                    Object.entries(tiposCount).forEach(([tipo, qtd]) => {
+                        if (y > 270) { pdf.addPage(); y = 20; }
+                        pdf.setFillColor(240, 245, 243);
+                        pdf.roundedRect(14, y, W-28, 12, 2, 2, 'F');
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setFontSize(9);
+                        pdf.setTextColor(100, 100, 100);
+                        pdf.text(tipo, 22, y + 8);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(45, 90, 78);
+                        pdf.text(`${qtd}x`, W - 22, y + 8, { align: 'right' });
+                        y += 14;
+                    });
+                }
+
+                // --- Rodapé ---
+                pdf.setFont('helvetica', 'italic');
+                pdf.setFontSize(7);
+                pdf.setTextColor(160, 160, 160);
+                pdf.text('Gerado pelo HorseSmart · horsesmart.com.br', W / 2, 290, { align: 'center' });
+
+                pdf.save(`relatorio-horsesmart-${now.toISOString().slice(0,10)}.pdf`);
+            } catch(error) {
+                console.error("Erro ao gerar PDF:", error);
+                alert("Não foi possível gerar o PDF. Tente novamente.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        document.getElementById('faturamento-toggle').addEventListener('click', e => {
+            if (e.target.tagName !== 'BUTTON') return;
+            currentFaturamentoPeriod = e.target.dataset.period;
+            document.querySelectorAll('#faturamento-toggle button').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            updateFaturamentoChart(currentFaturamentoPeriod);
+        });
+    
+        document.getElementById('atendimentos-toggle').addEventListener('click', e => {
+            if (e.target.tagName !== 'BUTTON') return;
+            currentAtendimentosPeriod = e.target.dataset.period;
+            document.querySelectorAll('#atendimentos-toggle button').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            updateStatsBoxes(currentAtendimentosPeriod);
+        });
+    
+        document.getElementById('download-pdf-btn').addEventListener('click', generatePDF);
+        document.getElementById('close-modal-btn').addEventListener('click', fecharAtendimentoModal);
+        document.getElementById('atendimento-modal').addEventListener('click', fecharAtendimentoModal);
+
+    </script>
+</body>
+</html>

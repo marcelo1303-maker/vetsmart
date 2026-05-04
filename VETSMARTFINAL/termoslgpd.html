@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Horse Smart | Termos & LGPD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: { 'sans': ['Poppins', 'Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Poppins', 'Inter', sans-serif; background: linear-gradient(135deg, #F0F5F3 0%, #E8EFF0 100%); color: #1A3A31; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+        .accord-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .accord-body.open { max-height: 2000px; }
+        .accord-icon { transition: transform 0.3s ease; }
+        .accord-icon.open { transform: rotate(180deg); }
+        .section-accord { border-left: 3px solid #D2B48C; }
+        .section-accord.open { border-left-color: #2D5A4E; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(45,90,78,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #D2B48C; border-radius: 10px; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg border-b-4 border-vetsmart-gold">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button onclick="window.history.back()" class="text-white/80 hover:text-white active:scale-90 transition-all">
+                <i class="fa-solid fa-chevron-left text-xl"></i>
+            </button>
+            <h1 class="font-black text-xl tracking-tight absolute left-1/2 -translate-x-1/2 text-white uppercase">Termos & LGPD</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-5 fade-in">
+
+        <!-- HERO -->
+        <div class="glass-panel p-8 rounded-3xl text-center border-b-4 border-vetsmart-green/20 relative overflow-hidden">
+            <div class="absolute -right-8 -top-8 opacity-5"><i class="fa-solid fa-shield-halved text-9xl"></i></div>
+            <div class="absolute -left-6 -bottom-6 opacity-5"><i class="fa-solid fa-file-contract text-8xl"></i></div>
+            <div class="relative z-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-vetsmart-green mb-4 shadow-lg">
+                    <i class="fa-solid fa-shield-halved text-2xl text-vetsmart-gold"></i>
+                </div>
+                <h2 class="font-black text-2xl text-vetsmart-green-dark mb-2">Privacidade & Proteção</h2>
+                <p class="text-vetsmart-green/90 text-sm font-medium">Transparência total sobre como tratamos seus dados e os dados dos seus clientes.</p>
+                <div class="mt-4 inline-flex items-center gap-2 bg-vetsmart-green/10 px-4 py-2 rounded-full">
+                    <i class="fa-solid fa-circle-check text-vetsmart-green text-xs"></i>
+                    <span class="text-xs font-black text-vetsmart-green uppercase tracking-widest">Em conformidade com a LGPD</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- VERSÃO -->
+        <div class="glass-panel p-4 rounded-2xl flex items-center justify-between">
+            <div>
+                <p class="text-[10px] font-black text-vetsmart-green/50 uppercase tracking-widest">Última atualização</p>
+                <p class="font-bold text-vetsmart-green-dark text-sm">Janeiro de 2025 — v2.1</p>
+            </div>
+            <div class="text-right">
+                <p class="text-[10px] font-black text-vetsmart-green/50 uppercase tracking-widest">Vigência</p>
+                <p class="font-bold text-vetsmart-green-dark text-sm">Imediata</p>
+            </div>
+        </div>
+
+        <!-- ACORDEÕES -->
+        <div class="space-y-3">
+
+            <!-- 1 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord open" id="accord-1">
+                <button onclick="toggleAccord('accord-1')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-green/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-handshake text-vetsmart-green text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">1. Aceitação dos Termos</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon open" id="icon-accord-1"></i>
+                </button>
+                <div class="accord-body open px-5 pb-5" id="body-accord-1">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-3">Ao criar uma conta e utilizar o <strong>Horse Smart</strong>, você concorda integralmente com estes Termos de Uso e nossa Política de Privacidade, em conformidade com a <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD)</strong>.</p>
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed">Caso não concorde com qualquer disposição aqui prevista, recomendamos que interrompa o uso da plataforma e entre em contato conosco.</p>
+                </div>
+            </div>
+
+            <!-- 2 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord" id="accord-2">
+                <button onclick="toggleAccord('accord-2')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-gold/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-database text-vetsmart-gold-dark text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">2. Dados Coletados</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon" id="icon-accord-2"></i>
+                </button>
+                <div class="accord-body px-5 pb-5" id="body-accord-2">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-4">Coletamos as seguintes categorias de dados para o funcionamento da plataforma:</p>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 p-3 bg-white/50 rounded-xl">
+                            <i class="fa-solid fa-user-doctor text-vetsmart-green mt-0.5 text-sm flex-shrink-0"></i>
+                            <div><p class="font-black text-vetsmart-green-dark text-xs uppercase">Dados do Veterinário</p><p class="text-xs text-vetsmart-green/90 mt-1">Nome, CRMV, e-mail, telefone e dados de pagamento via Stripe.</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-white/50 rounded-xl">
+                            <i class="fa-solid fa-horse text-vetsmart-gold-dark mt-0.5 text-sm flex-shrink-0"></i>
+                            <div><p class="font-black text-vetsmart-green-dark text-xs uppercase">Dados dos Animais</p><p class="text-xs text-vetsmart-green/90 mt-1">Nome, raça, pelagem, sexo, idade, histórico clínico e laudos gerados.</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-white/50 rounded-xl">
+                            <i class="fa-solid fa-people-group text-vetsmart-green mt-0.5 text-sm flex-shrink-0"></i>
+                            <div><p class="font-black text-vetsmart-green-dark text-xs uppercase">Dados dos Proprietários</p><p class="text-xs text-vetsmart-green/90 mt-1">Nome, CPF/CNPJ, telefone (WhatsApp) e informações de contato.</p></div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-white/50 rounded-xl">
+                            <i class="fa-solid fa-chart-line text-vetsmart-gold-dark mt-0.5 text-sm flex-shrink-0"></i>
+                            <div><p class="font-black text-vetsmart-green-dark text-xs uppercase">Dados de Uso</p><p class="text-xs text-vetsmart-green/90 mt-1">Logs de acesso, dispositivos utilizados e padrões de navegação na plataforma.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord" id="accord-3">
+                <button onclick="toggleAccord('accord-3')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-green/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-gears text-vetsmart-green text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">3. Finalidade do Tratamento</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon" id="icon-accord-3"></i>
+                </button>
+                <div class="accord-body px-5 pb-5" id="body-accord-3">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-4">Seus dados são utilizados exclusivamente para:</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle-check text-vetsmart-gold mt-0.5 text-xs flex-shrink-0"></i>Prestação e melhoria dos serviços da plataforma Horse Smart</li>
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle-check text-vetsmart-gold mt-0.5 text-xs flex-shrink-0"></i>Geração de laudos, prontuários e relatórios clínicos</li>
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle-check text-vetsmart-gold mt-0.5 text-xs flex-shrink-0"></i>Processamento de cobranças e pagamentos via Stripe</li>
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle-check text-vetsmart-gold mt-0.5 text-xs flex-shrink-0"></i>Envio de comunicações via WhatsApp (somente com sua autorização)</li>
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle-check text-vetsmart-gold mt-0.5 text-xs flex-shrink-0"></i>Cumprimento de obrigações legais e regulatórias</li>
+                    </ul>
+                    <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
+                        <i class="fa-solid fa-ban text-red-400 mt-0.5 text-sm flex-shrink-0"></i>
+                        <p class="text-xs text-red-600 font-medium">Seus dados <strong>jamais</strong> são vendidos, cedidos ou compartilhados com terceiros para fins comerciais.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord" id="accord-4">
+                <button onclick="toggleAccord('accord-4')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-gold/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-scale-balanced text-vetsmart-gold-dark text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">4. Seus Direitos (LGPD)</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon" id="icon-accord-4"></i>
+                </button>
+                <div class="accord-body px-5 pb-5" id="body-accord-4">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-4">Como titular de dados, você possui os seguintes direitos garantidos pela LGPD:</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="p-3 bg-white/60 rounded-xl text-center"><i class="fa-solid fa-eye text-vetsmart-green mb-1"></i><p class="text-[10px] font-black text-vetsmart-green-dark uppercase">Acesso</p><p class="text-[10px] text-vetsmart-green/50 mt-1">Consultar seus dados armazenados</p></div>
+                        <div class="p-3 bg-white/60 rounded-xl text-center"><i class="fa-solid fa-pen text-vetsmart-gold-dark mb-1"></i><p class="text-[10px] font-black text-vetsmart-green-dark uppercase">Correção</p><p class="text-[10px] text-vetsmart-green/50 mt-1">Atualizar dados incompletos</p></div>
+                        <div class="p-3 bg-white/60 rounded-xl text-center"><i class="fa-solid fa-trash text-red-400 mb-1"></i><p class="text-[10px] font-black text-vetsmart-green-dark uppercase">Exclusão</p><p class="text-[10px] text-vetsmart-green/50 mt-1">Solicitar remoção de dados</p></div>
+                        <div class="p-3 bg-white/60 rounded-xl text-center"><i class="fa-solid fa-file-export text-vetsmart-green mb-1"></i><p class="text-[10px] font-black text-vetsmart-green-dark uppercase">Portabilidade</p><p class="text-[10px] text-vetsmart-green/50 mt-1">Exportar seus dados</p></div>
+                        <div class="p-3 bg-white/60 rounded-xl text-center"><i class="fa-solid fa-hand text-vetsmart-gold-dark mb-1"></i><p class="text-[10px] font-black text-vetsmart-green-dark uppercase">Revogação</p><p class="text-[10px] text-vetsmart-green/50 mt-1">Revogar consentimento</p></div>
+                        <div class="p-3 bg-white/60 rounded-xl text-center"><i class="fa-solid fa-circle-info text-vetsmart-green mb-1"></i><p class="text-[10px] font-black text-vetsmart-green-dark uppercase">Informação</p><p class="text-[10px] text-vetsmart-green/50 mt-1">Saber com quem compartilhamos</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord" id="accord-5">
+                <button onclick="toggleAccord('accord-5')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-green/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-lock text-vetsmart-green text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">5. Segurança dos Dados</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon" id="icon-accord-5"></i>
+                </button>
+                <div class="accord-body px-5 pb-5" id="body-accord-5">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-4">Utilizamos infraestrutura de ponta para proteger seus dados:</p>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-white/50 rounded-xl">
+                            <div class="w-8 h-8 bg-vetsmart-green rounded-lg flex items-center justify-center flex-shrink-0"><i class="fa-brands fa-google text-white text-xs"></i></div>
+                            <div><p class="font-black text-vetsmart-green-dark text-xs">Firebase / Google Cloud</p><p class="text-[10px] text-vetsmart-green/50">Banco de dados com criptografia em repouso e em trânsito (TLS 1.3)</p></div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white/50 rounded-xl">
+                            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-credit-card text-white text-xs"></i></div>
+                            <div><p class="font-black text-vetsmart-green-dark text-xs">Stripe (PCI DSS Nível 1)</p><p class="text-[10px] text-vetsmart-green/50">Dados financeiros processados com o mais alto padrão de segurança</p></div>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-white/50 rounded-xl">
+                            <div class="w-8 h-8 bg-vetsmart-gold rounded-lg flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-key text-vetsmart-green-dark text-xs"></i></div>
+                            <div><p class="font-black text-vetsmart-green-dark text-xs">Autenticação Segura</p><p class="text-[10px] text-vetsmart-green/50">Acesso protegido com Firebase Auth e regras de segurança por usuário</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord" id="accord-6">
+                <button onclick="toggleAccord('accord-6')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-gold/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-clock-rotate-left text-vetsmart-gold-dark text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">6. Retenção de Dados</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon" id="icon-accord-6"></i>
+                </button>
+                <div class="accord-body px-5 pb-5" id="body-accord-6">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-3">Seus dados são armazenados enquanto sua conta estiver ativa. Após o encerramento:</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle text-vetsmart-gold mt-1.5 text-[6px] flex-shrink-0"></i>Dados clínicos e laudos mantidos por <strong>5 anos</strong> (obrigação legal CFV)</li>
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle text-vetsmart-gold mt-1.5 text-[6px] flex-shrink-0"></i>Dados financeiros mantidos por <strong>5 anos</strong> (legislação tributária)</li>
+                        <li class="flex items-start gap-2 text-sm text-vetsmart-green/90"><i class="fa-solid fa-circle text-vetsmart-gold mt-1.5 text-[6px] flex-shrink-0"></i>Demais dados pessoais excluídos em até <strong>30 dias</strong> após solicitação</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 7 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord" id="accord-7">
+                <button onclick="toggleAccord('accord-7')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-green/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-cookie-bite text-vetsmart-green text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">7. Cookies</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon" id="icon-accord-7"></i>
+                </button>
+                <div class="accord-body px-5 pb-5" id="body-accord-7">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-3">Utilizamos cookies estritamente necessários para manter sua sessão ativa. <strong>Não utilizamos cookies de rastreamento publicitário.</strong></p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="p-3 bg-green-50 border border-green-100 rounded-xl">
+                            <i class="fa-solid fa-circle-check text-green-500 text-xs mb-1"></i>
+                            <p class="text-[10px] font-black text-green-700 uppercase">Utilizamos</p>
+                            <p class="text-[10px] text-green-600 mt-1">Sessão, autenticação e preferências</p>
+                        </div>
+                        <div class="p-3 bg-red-50 border border-red-100 rounded-xl">
+                            <i class="fa-solid fa-ban text-red-400 text-xs mb-1"></i>
+                            <p class="text-[10px] font-black text-red-600 uppercase">Não utilizamos</p>
+                            <p class="text-[10px] text-red-500 mt-1">Publicidade, remarketing e terceiros</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8 -->
+            <div class="glass-panel rounded-2xl overflow-hidden section-accord" id="accord-8">
+                <button onclick="toggleAccord('accord-8')" class="w-full p-5 flex items-center justify-between text-left">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-vetsmart-gold/20 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-envelope text-vetsmart-gold-dark text-sm"></i>
+                        </div>
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase tracking-wide">8. Contato & DPO</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold accord-icon" id="icon-accord-8"></i>
+                </button>
+                <div class="accord-body px-5 pb-5" id="body-accord-8">
+                    <p class="text-sm text-vetsmart-green/90 leading-relaxed mb-4">Para exercer seus direitos, esclarecer dúvidas ou reportar incidentes, entre em contato com nosso Encarregado de Proteção de Dados (DPO):</p>
+                    <div class="space-y-3">
+                        <a href="mailto:privacidade@horsesmart.com.br" class="flex items-center gap-3 p-4 bg-white/70 rounded-xl hover:bg-vetsmart-gold/10 transition-all active:scale-95">
+                            <div class="w-10 h-10 bg-vetsmart-green rounded-xl flex items-center justify-center"><i class="fa-solid fa-envelope text-white text-sm"></i></div>
+                            <div>
+                                <p class="text-[10px] font-black text-vetsmart-green/50 uppercase">E-mail DPO</p>
+                                <p class="font-bold text-vetsmart-green-dark text-sm">privacidade@horsesmart.com.br</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-vetsmart-gold ml-auto"></i>
+                        </a>
+                        <a href="https://wa.me/5511999999999" target="_blank" class="flex items-center gap-3 p-4 bg-white/70 rounded-xl hover:bg-vetsmart-gold/10 transition-all active:scale-95">
+                            <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center"><i class="fa-brands fa-whatsapp text-white text-sm"></i></div>
+                            <div>
+                                <p class="text-[10px] font-black text-vetsmart-green/50 uppercase">WhatsApp Suporte</p>
+                                <p class="font-bold text-vetsmart-green-dark text-sm">Seg–Sex, 9h–18h</p>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-vetsmart-gold ml-auto"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ACEITE -->
+        <div class="glass-panel p-6 rounded-3xl border-t-4 border-vetsmart-green space-y-4">
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-widest text-sm">Confirmação de Leitura</h3>
+            <p class="text-xs text-vetsmart-green/90 text-center leading-relaxed">Ao usar o Horse Smart, você confirma que leu, entendeu e concorda com todos os termos acima descritos.</p>
+            <div class="flex items-start gap-3 p-4 bg-vetsmart-green/5 rounded-2xl cursor-pointer" id="check-wrapper" onclick="toggleCheck()">
+                <div id="checkbox" class="w-6 h-6 rounded-lg border-2 border-vetsmart-green/30 flex items-center justify-center flex-shrink-0 transition-all">
+                    <i class="fa-solid fa-check text-white text-xs hidden" id="check-icon"></i>
+                </div>
+                <p class="text-sm text-vetsmart-green/90 font-medium">Li e concordo com os Termos de Uso e a Política de Privacidade do Horse Smart.</p>
+            </div>
+            <button id="btn-aceitar" onclick="aceitarTermos()" disabled
+                class="w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed bg-vetsmart-green text-vetsmart-gold shadow-lg">
+                <i class="fa-solid fa-shield-halved mr-2"></i> Confirmar e Continuar
+            </button>
+        </div>
+
+        <!-- RODAPÉ -->
+        <div class="text-center pb-4">
+            <p class="text-[10px] text-vetsmart-green/40 font-medium uppercase tracking-widest">Horse Smart © 2025</p>
+            <p class="text-[10px] text-vetsmart-green/30 mt-1">CNPJ 00.000.000/0001-00 · São Paulo, Brasil</p>
+        </div>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto p-2">
+            <div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center">
+                <a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] mt-1">Início</span></a>
+                <a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-notes-medical text-lg"></i><span class="text-[10px] mt-1">Atender</span></a>
+                <a href="clientes.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-horse text-lg"></i><span class="text-[10px] mt-1">Cavalos</span></a>
+                <a href="financeiro.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-dollar-sign text-lg"></i><span class="text-[10px] mt-1">Caixa</span></a>
+                <a href="relatorios.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-chart-line text-lg"></i><span class="text-[10px] mt-1">Relatórios</span></a>
+                <a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-box-open text-lg"></i><span class="text-[10px] mt-1">Estoque</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let currentUser = null;
+        let checked = false;
+
+        window.toggleAccord = function(id) {
+            document.getElementById(id).classList.toggle('open');
+            document.getElementById(`body-${id}`).classList.toggle('open');
+            document.getElementById(`icon-${id}`).classList.toggle('open');
+        }
+
+        window.toggleCheck = function() {
+            checked = !checked;
+            const checkbox = document.getElementById('checkbox');
+            const checkIcon = document.getElementById('check-icon');
+            const btn = document.getElementById('btn-aceitar');
+
+            if (checked) {
+                checkbox.classList.add('bg-vetsmart-green', 'border-vetsmart-green');
+                checkbox.classList.remove('border-vetsmart-green/30');
+                checkIcon.classList.remove('hidden');
+                btn.disabled = false;
+            } else {
+                checkbox.classList.remove('bg-vetsmart-green', 'border-vetsmart-green');
+                checkbox.classList.add('border-vetsmart-green/30');
+                checkIcon.classList.add('hidden');
+                btn.disabled = true;
+            }
+        }
+
+        window.aceitarTermos = async function() {
+            if (!currentUser || !checked) return;
+
+            const btn = document.getElementById('btn-aceitar');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Salvando...';
+
+            try {
+                await setDoc(doc(db, "veterinarios", currentUser.uid), {
+                    termosAceitos: true,
+                    termosAceitosEm: serverTimestamp(),
+                    termosVersao: '2.1',
+                }, { merge: true });
+
+                btn.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> Termos Aceitos!';
+                setTimeout(() => window.location.href = 'dashboard.html', 1200);
+            } catch (error) {
+                console.error("Erro ao salvar aceite:", error);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-shield-halved mr-2"></i> Confirmar e Continuar';
+            }
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                try {
+                    const vetSnap = await getDoc(doc(db, "veterinarios", user.uid));
+                    if (vetSnap.exists() && vetSnap.data().termosAceitos) {
+                        const btn = document.getElementById('btn-aceitar');
+                        btn.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> Termos Já Aceitos';
+                        btn.disabled = false;
+                        btn.onclick = () => window.history.back();
+                    }
+                } catch (e) {
+                    console.error("Erro ao verificar termos:", e);
+                }
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+    </script>
+</body>
+</html>

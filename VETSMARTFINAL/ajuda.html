@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Ajuda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F5F3;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2D5A4E;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        #side-menu {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        input, textarea {
+            border: 1px solid #e5e7eb;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #D2B48C;
+            outline: none;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- ========== HEADER ========== -->
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button id="menu-btn" class="text-white/80 hover:text-white transition-colors">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <h1 class="font-black text-2xl">
+                <span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span>
+            </h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <!-- ========== SIDE MENU ========== -->
+    <div id="side-menu" class="fixed inset-y-0 left-0 w-64 bg-vetsmart-green text-white p-6 z-[100] shadow-xl transform -translate-x-full">
+        <h2 class="font-black text-2xl mb-8">
+            <span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span>
+        </h2>
+        <nav class="space-y-2">
+            <a href="perfil.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-user-circle w-5 text-center"></i>
+                <span class="text-sm font-medium">Perfil</span>
+            </a>
+            <a href="seguranca.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                <span class="text-sm font-medium">Segurança</span>
+            </a>
+            <a href="ajuda.html" class="flex items-center gap-3 p-3 rounded-lg bg-white/20 transition-colors">
+                <i class="fa-solid fa-circle-question w-5 text-center"></i>
+                <span class="text-sm font-medium">Ajuda</span>
+            </a>
+            <a href="faq.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-book w-5 text-center"></i>
+                <span class="text-sm font-medium">FAQ</span>
+            </a>
+        </nav>
+        <button id="logout-btn" class="absolute bottom-6 left-6 right-6 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Fazer Log Out</span>
+        </button>
+    </div>
+
+    <!-- ========== MENU OVERLAY ========== -->
+    <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-[90] hidden cursor-pointer"></div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="max-w-md mx-auto px-4 mt-8 pb-8">
+        <!-- Title -->
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-black text-vetsmart-green">Central de Ajuda</h2>
+            <p class="text-vetsmart-green/70 text-sm mt-2">Estamos aqui para ajudar você</p>
+        </div>
+
+        <!-- Help Form Card -->
+        <div class="glass-panel p-6 rounded-3xl">
+            <p class="text-center text-vetsmart-green/80 text-sm mb-6 leading-relaxed">
+                Preencha o formulário abaixo e nossa equipe entrará em contato em até 24 horas.
+            </p>
+
+            <form id="help-form" class="space-y-4">
+                <!-- Nome -->
+                <div>
+                    <label for="nome-contato" class="block text-sm font-bold text-vetsmart-green mb-2">
+                        Seu Nome <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nome-contato" 
+                        name="nome-contato" 
+                        placeholder="Seu nome completo"
+                        class="w-full rounded-lg bg-white/70 p-3 text-sm transition-all"
+                        required
+                    >
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email-contato" class="block text-sm font-bold text-vetsmart-green mb-2">
+                        Seu Email <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email-contato" 
+                        name="email-contato" 
+                        placeholder="seuemail@exemplo.com"
+                        class="w-full rounded-lg bg-white/70 p-3 text-sm transition-all"
+                        required
+                    >
+                </div>
+
+                <!-- Telefone -->
+                <div>
+                    <label for="telefone-contato" class="block text-sm font-bold text-vetsmart-green mb-2">
+                        Seu Telefone <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="telefone-contato" 
+                        name="telefone-contato" 
+                        placeholder="(XX) XXXXX-XXXX"
+                        class="w-full rounded-lg bg-white/70 p-3 text-sm transition-all"
+                        required
+                    >
+                </div>
+
+                <!-- Mensagem -->
+                <div>
+                    <label for="mensagem-ajuda" class="block text-sm font-bold text-vetsmart-green mb-2">
+                        Descreva como podemos ajudá-lo <span class="text-red-500">*</span>
+                    </label>
+                    <textarea 
+                        id="mensagem-ajuda" 
+                        name="mensagem-ajuda" 
+                        rows="5" 
+                        placeholder="Descreva sua dúvida ou problema em detalhes..."
+                        class="w-full rounded-lg bg-white/70 p-3 text-sm resize-none transition-all"
+                        required
+                    ></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    id="submit-btn"
+                    class="w-full bg-vetsmart-green hover:bg-vetsmart-green active:scale-95 text-white font-black py-3 px-4 rounded-xl text-sm transition-all shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                    ENVIAR SOLICITAÇÃO
+                </button>
+            </form>
+
+            <!-- Info Text -->
+            <p class="text-center text-vetsmart-green/70 text-xs mt-5">
+                Pode demorar até 24 horas para que um especialista entre em contato com você.
+            </p>
+        </div>
+    </main>
+
+    <!-- ========== BOTTOM NAVIGATION ========== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto p-2">
+            <div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center">
+                <a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green font-bold transition-all">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-[10px] mt-1">Início</span>
+                </a>
+                <a href="novo-atendimento_1775208974082.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-notes-medical text-lg"></i>
+                    <span class="text-[10px] mt-1">Atender</span>
+                </a>
+                <a href="clientes.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-horse text-lg"></i>
+                    <span class="text-[10px] mt-1">Cavalos</span>
+                </a>
+                <a href="financeiro.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-dollar-sign text-lg"></i>
+                    <span class="text-[10px] mt-1">Caixa</span>
+                </a>
+                <a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                    <span class="text-[10px] mt-1">Atendimentos</span>
+                </a>
+                <a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-box-open text-lg"></i>
+                    <span class="text-[10px] mt-1">Estoque</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script type="module">
+        import { auth, db } from './firebase.js';
+        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ===== Configuration =====
+        const SUPPORT_EMAIL = 'horsesmartajuda@proton.me';
+        const WHATSAPP_COMPANY = '+55XXXXXXXXXX'; // DEFINA: WhatsApp da empresa (formato: +55 + DDD + número)
+        const EMAILJS_SERVICE_ID = 'seu_service_id'; // DEFINA: EmailJS Service ID
+        const EMAILJS_TEMPLATE_CLIENT = 'seu_template_cliente'; // DEFINA: Template para cliente
+        const EMAILJS_TEMPLATE_SUPPORT = 'seu_template_suporte'; // DEFINA: Template para suporte
+        const EMAILJS_PUBLIC_KEY = 'sua_chave_publica'; // DEFINA: Chave pública EmailJS
+
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+
+        // ===== Initialization =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAuth();
+            initializeMenuToggle();
+            initializeFormSubmission();
+        });
+
+        // ===== Authentication Check =====
+        function initializeAuth() {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    window.location.replace('login.html');
+                }
+            });
+        }
+
+        // ===== Menu Toggle =====
+        function initializeMenuToggle() {
+            const menuBtn = document.getElementById('menu-btn');
+            const sideMenu = document.getElementById('side-menu');
+            const menuOverlay = document.getElementById('menu-overlay');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            menuBtn.addEventListener('click', () => {
+                sideMenu.classList.remove('-translate-x-full');
+                menuOverlay.classList.remove('hidden');
+            });
+
+            menuOverlay.addEventListener('click', () => {
+                sideMenu.classList.add('-translate-x-full');
+                menuOverlay.classList.add('hidden');
+            });
+
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+
+        // ===== Form Submission =====
+        function initializeFormSubmission() {
+            const helpForm = document.getElementById('help-form');
+            const submitBtn = document.getElementById('submit-btn');
+
+            helpForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!validateForm()) {
+                    return;
+                }
+
+                const formData = getFormData();
+                const protocolNumber = generateProtocolNumber();
+
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'ENVIANDO...';
+
+                try {
+                    await saveSupportRequest(formData, protocolNumber);
+                } catch (error) {
+                    console.error("Erro ao salvar solicitação:", error);
+                    showErrorMessage();
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'ENVIAR SOLICITAÇÃO';
+                    return;
+                }
+
+                // Tentativas secundárias (email/WhatsApp) — falhas não bloqueiam o fluxo
+                try { await sendClientEmail(formData, protocolNumber); } catch (e) { console.warn("EmailJS (cliente) falhou:", e); }
+                try { await sendSupportEmail(formData, protocolNumber); } catch (e) { console.warn("EmailJS (suporte) falhou:", e); }
+                try { await sendWhatsAppNotification(formData, protocolNumber); } catch (e) { console.warn("WhatsApp notif falhou:", e); }
+
+                try {
+                    showSuccessMessage(protocolNumber);
+                    helpForm.reset();
+                } catch (error) {
+                    console.error("Erro inesperado:", error);
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'ENVIAR SOLICITAÇÃO';
+                }
+            });
+        }
+
+        // ===== Generate Protocol Number =====
+        function generateProtocolNumber() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `HS${timestamp}${random}`;
+        }
+
+        // ===== Form Validation =====
+        function validateForm() {
+            const nome = document.getElementById('nome-contato').value.trim();
+            const email = document.getElementById('email-contato').value.trim();
+            const telefone = document.getElementById('telefone-contato').value.trim();
+            const mensagem = document.getElementById('mensagem-ajuda').value.trim();
+
+            if (!nome || !email || !telefone || !mensagem) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Por favor, insira um endereço de e-mail válido.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // ===== Get Form Data =====
+        function getFormData() {
+            return {
+                nome: document.getElementById('nome-contato').value.trim(),
+                email: document.getElementById('email-contato').value.trim(),
+                telefone: document.getElementById('telefone-contato').value.trim(),
+                mensagem: document.getElementById('mensagem-ajuda').value.trim(),
+            };
+        }
+
+        // ===== Save to Firebase =====
+        // K4: Garantir que userId está presente antes de salvar (regra Firestore exige)
+        async function saveSupportRequest(formData, protocolNumber) {
+            const uid = auth.currentUser?.uid;
+            if (!uid) {
+                throw new Error('Usuário não autenticado. Faça login e tente novamente.');
+            }
+            const suporteData = {
+                nome: formData.nome,
+                email: formData.email,
+                telefone: formData.telefone,
+                mensagem: formData.mensagem,
+                numeroProtocolo: protocolNumber,
+                userId: uid,
+                criadoEm: serverTimestamp(),
+                status: 'pendente'
+            };
+
+            await addDoc(collection(db, "pedidos_ajuda"), suporteData);
+        }
+
+        // ===== Send Email to Client =====
+        async function sendClientEmail(formData, protocolNumber) {
+            const dataAtual = new Date().toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const templateParams = {
+                to_email: formData.email,
+                client_name: formData.nome,
+                protocol_number: protocolNumber,
+                data_envio: dataAtual
+            };
+
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_CLIENT, templateParams);
+        }
+
+        // ===== Send Email to Support =====
+        async function sendSupportEmail(formData, protocolNumber) {
+            const dataAtual = new Date().toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            const templateParams = {
+                to_email: SUPPORT_EMAIL,
+                protocol_number: protocolNumber,
+                client_name: formData.nome,
+                client_email: formData.email,
+                client_phone: formData.telefone,
+                client_message: formData.mensagem,
+                data_envio: dataAtual
+            };
+
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_SUPPORT, templateParams);
+        }
+
+        // ===== Send WhatsApp Notification =====
+        async function sendWhatsAppNotification(formData, protocolNumber) {
+            // INTEGRAÇÃO COM EVOLUTION API OU OUTRO SERVIÇO
+            // Descomente e configure conforme sua infraestrutura:
+            /*
+            const horaAtual = new Date().toLocaleTimeString('pt-BR');
+            const whatsappMessage = `
+🎯 *NOVA SOLICITAÇÃO DE SUPORTE*
+
+📋 *Protocolo:* ${protocolNumber}
+👤 *Cliente:* ${formData.nome}
+📧 *Email:* ${formData.email}
+📱 *Telefone:* ${formData.telefone}
+
+💬 *Mensagem:*
+${formData.mensagem}
+
+⏰ *Hora:* ${horaAtual}
+⌛ *Status:* Pendente
+            `;
+
+            await fetch('https://seu-dominio/api/evolution/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    phone: WHATSAPP_COMPANY,
+                    message: whatsappMessage
+                })
+            });
+            */
+
+            console.log('WhatsApp notification ready for:', WHATSAPP_COMPANY);
+        }
+
+        // ===== Success Message =====
+        function showSuccessMessage(protocolNumber) {
+            alert(`✅ Solicitação enviada com sucesso!\n\n📋 Protocolo: ${protocolNumber}\n\nNossa equipe entrará em contato em até 24 horas.`);
+        }
+
+        // ===== Error Message =====
+        function showErrorMessage() {
+            alert('❌ Erro ao enviar solicitação. Por favor, tente novamente.');
+        }
+
+        // ===== Logout =====
+        function handleLogout() {
+            signOut(auth)
+                .then(() => {
+                    window.location.replace('login.html');
+                })
+                .catch((error) => {
+                    console.error("Erro ao fazer logout:", error);
+                    alert('Ocorreu um erro ao tentar fazer logout. Tente novamente.');
+                });
+        }
+    </script>
+
+</body>
+</html>

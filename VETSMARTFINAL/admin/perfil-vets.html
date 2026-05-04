@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HorseSmart Admin | Perfil do Vet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { gold: '#D2B48C', 'gold-dark': '#C19A6B', hs: '#2D5A4E' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0D1B18; }
+        .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .card { background: #1A2F2A; border: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-link { display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.55);transition:all .2s; }
+        .sidebar-link:hover { background:rgba(255,255,255,0.06);color:white; }
+        .sidebar-link.active { background:rgba(210,180,140,0.12);color:#D2B48C; }
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#2D5A4E;border-radius:4px}
+        .field-label { font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);font-weight:700;margin-bottom:2px; }
+        .field-value { font-size:14px;font-weight:600;color:white; }
+        #confirm-modal { display:none; }
+        #confirm-modal.open { display:flex; }
+    </style>
+</head>
+<body class="min-h-screen flex text-white">
+
+    <!-- SIDEBAR -->
+    <aside class="w-56 bg-[#111F1C] flex-shrink-0 flex flex-col h-screen sticky top-0 border-r border-white/5">
+        <div class="p-6 border-b border-white/5">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-horse text-gold text-lg"></i>
+                <span class="font-black text-sm tracking-tight">HORSE<span class="text-gold">SMART</span></span>
+            </div>
+            <p class="text-white/30 text-[10px] uppercase tracking-widest mt-1">Admin</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="dashboard.html" class="sidebar-link">
+                <i class="fa-solid fa-chart-line w-4 text-center"></i> Dashboard
+            </a>
+            <a href="cadastro-vets.html" class="sidebar-link active">
+                <i class="fa-solid fa-user-doctor w-4 text-center"></i> Veterinários
+            </a>
+            <a href="ajuda-vets.html" class="sidebar-link">
+                <i class="fa-solid fa-headset w-4 text-center"></i> Central de Ajuda
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/5">
+            <button id="logout-btn" class="sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-auto p-8">
+        <div class="max-w-3xl mx-auto space-y-6">
+
+            <!-- Back -->
+            <a href="cadastro-vets.html" class="inline-flex items-center gap-2 text-white/40 hover:text-white text-sm transition-colors">
+                <i class="fa-solid fa-arrow-left text-xs"></i> Voltar para lista
+            </a>
+
+            <!-- Loading state -->
+            <div id="loading-state" class="card rounded-2xl p-12 text-center">
+                <i class="fa-solid fa-circle-notch fa-spin text-gold text-2xl"></i>
+                <p class="text-white/40 text-sm mt-3">Carregando dossier...</p>
+            </div>
+
+            <!-- Profile content (hidden until loaded) -->
+            <div id="profile-content" class="hidden space-y-6">
+
+                <!-- Header card -->
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-start justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-user-doctor text-gold text-xl"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-black" id="prof-nome">—</h1>
+                                <p class="text-white/40 text-sm" id="prof-email">—</p>
+                                <span id="prof-status-badge" class="inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-bold">—</span>
+                            </div>
+                        </div>
+                        <button id="deactivate-btn"
+                            class="flex-shrink-0 flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-bold text-xs px-4 py-2 rounded-xl transition-colors uppercase tracking-widest">
+                            <i class="fa-solid fa-ban"></i> Desativar Conta
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Financial highlights -->
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="card rounded-2xl p-4 text-center space-y-1">
+                        <p class="text-white/30 text-[10px] uppercase tracking-widest">Faturamento Gerado</p>
+                        <p class="text-xl font-black text-gold" id="prof-faturamento">—</p>
+                        <p class="text-white/30 text-xs">atendimentos pagos</p>
+                    </div>
+                    <div class="card rounded-2xl p-4 text-center space-y-1">
+                        <p class="text-white/30 text-[10px] uppercase tracking-widest">Comissão à Plataforma</p>
+                        <p class="text-xl font-black text-emerald-400" id="prof-comissao">—</p>
+                        <p class="text-white/30 text-xs">assinatura HorseSmart</p>
+                    </div>
+                    <div class="card rounded-2xl p-4 text-center space-y-1">
+                        <p class="text-white/30 text-[10px] uppercase tracking-widest">Atendimentos</p>
+                        <p class="text-xl font-black" id="prof-atendimentos">—</p>
+                        <p class="text-white/30 text-xs" id="prof-atend-pagos"></p>
+                    </div>
+                </div>
+
+                <!-- Personal Data -->
+                <div class="card rounded-2xl p-6 space-y-5">
+                    <h2 class="font-black text-sm uppercase tracking-widest text-gold/80">Dados Pessoais / Empresa</h2>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div><p class="field-label">Tipo de Conta</p><p class="field-value" id="prof-tipo">—</p></div>
+                        <div><p class="field-label">Telefone / WhatsApp</p><p class="field-value" id="prof-telefone">—</p></div>
+                        <div><p class="field-label">CPF</p><p class="field-value" id="prof-cpf">—</p></div>
+                        <div><p class="field-label">CNPJ</p><p class="field-value" id="prof-cnpj">—</p></div>
+                        <div><p class="field-label">Nascimento</p><p class="field-value" id="prof-nasc">—</p></div>
+                        <div><p class="field-label">Razão Social</p><p class="field-value" id="prof-razao">—</p></div>
+                        <div><p class="field-label">Nome Representante</p><p class="field-value" id="prof-rep">—</p></div>
+                        <div><p class="field-label">CPF Representante</p><p class="field-value" id="prof-cpfrep">—</p></div>
+                    </div>
+                </div>
+
+                <!-- Professional Data -->
+                <div class="card rounded-2xl p-6 space-y-5">
+                    <h2 class="font-black text-sm uppercase tracking-widest text-gold/80">Dados Profissionais</h2>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div><p class="field-label">CRMV</p><p class="field-value" id="prof-crmv">—</p></div>
+                        <div><p class="field-label">Estado CRMV</p><p class="field-value" id="prof-uf">—</p></div>
+                        <div class="col-span-2"><p class="field-label">Endereço</p><p class="field-value" id="prof-end">—</p></div>
+                        <div><p class="field-label">CEP</p><p class="field-value" id="prof-cep">—</p></div>
+                        <div><p class="field-label">Número</p><p class="field-value" id="prof-numero">—</p></div>
+                        <div><p class="field-label">Data de Cadastro</p><p class="field-value" id="prof-created">—</p></div>
+                        <div><p class="field-label">UID Firebase</p><p class="field-value text-xs text-white/50 break-all" id="prof-uid">—</p></div>
+                    </div>
+                </div>
+
+                <!-- Stripe Data -->
+                <div class="card rounded-2xl p-6 space-y-5">
+                    <h2 class="font-black text-sm uppercase tracking-widest text-gold/80">Dados Stripe / Assinatura</h2>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div><p class="field-label">Stripe Status</p><p class="field-value" id="prof-stripe-status">—</p></div>
+                        <div><p class="field-label">Subscription ID</p><p class="field-value text-xs text-white/50 break-all" id="prof-sub-id">—</p></div>
+                        <div><p class="field-label">Status Assinatura</p><p class="field-value" id="prof-sub-status">—</p></div>
+                        <div><p class="field-label">Próxima Cobrança</p><p class="field-value" id="prof-sub-end">—</p></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- DEACTIVATE MODAL -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/70 z-50 items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-[#1A2F2A] border border-white/10 rounded-3xl p-8 w-full max-w-sm space-y-5">
+            <div class="text-center">
+                <div class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl"></i>
+                </div>
+                <h3 class="font-black text-lg">Desativar Conta</h3>
+                <p class="text-white/50 text-sm mt-2">Esta ação desabilitará o acesso do veterinário à plataforma. Insira o código de confirmação.</p>
+            </div>
+            <div>
+                <label class="block text-white/40 text-xs uppercase tracking-widest mb-2">Código de Confirmação</label>
+                <input type="password" id="confirm-code" maxlength="6" placeholder="••••••"
+                    class="w-full text-center text-2xl tracking-[0.5em] bg-white/5 border border-white/10 text-white rounded-xl py-3 focus:outline-none focus:border-red-400/50 transition-colors">
+                <p id="modal-error" class="text-red-400 text-xs text-center mt-2 hidden">Código incorreto. Tente novamente.</p>
+            </div>
+            <div class="flex gap-3">
+                <button id="modal-cancel" class="flex-1 glass py-3 rounded-xl font-bold text-sm text-white/60 hover:text-white transition-colors">Cancelar</button>
+                <button id="modal-confirm" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-black py-3 rounded-xl text-sm transition-colors">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = sessionStorage.getItem('adminToken');
+        if (!TOKEN) { window.location.replace('/admin/index.html'); throw new Error('Sem autenticação'); }
+
+        // NOVO-04: Verificar token ANTES de qualquer renderização (sem race condition)
+        fetch('/api/admin/verify-token', { headers: { 'X-Admin-Token': TOKEN } })
+            .then(r => { if (!r.ok) { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); return; } loadProfile(); setInterval(loadProfile, 30000); })
+            .catch(() => { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); });
+
+        const uid = new URLSearchParams(location.search).get('uid');
+        if (!uid) window.location.href = '/admin/cadastro-vets.html';
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('adminToken');
+            window.location.href = '/admin/index.html';
+        });
+
+        function fmtDate(ts) {
+            if (!ts) return '—';
+            const d = ts._seconds ? new Date(ts._seconds * 1000) : new Date(ts);
+            if (isNaN(d)) return '—';
+            return d.toLocaleDateString('pt-BR');
+        }
+
+        function fmtBRL(v) {
+            return `R$ ${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        }
+
+        function set(id, val) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val || '—';
+        }
+
+        async function loadProfile() {
+            try {
+                const res = await fetch(`/api/admin/vet/${uid}`, { headers: { 'X-Admin-Token': TOKEN } });
+                const d = await res.json();
+                if (!res.ok) throw new Error(d.error);
+
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('profile-content').classList.remove('hidden');
+
+                set('prof-nome', d.nome || d.razao_social);
+                set('prof-email', d.email);
+                set('prof-uid', d.uid);
+
+                const isAtivo = d.stripeStatus === 'active' || d.stripeStatus === 'trial' || d.subscriptionStatus === 'active';
+                const badge = document.getElementById('prof-status-badge');
+                badge.textContent = isAtivo ? 'Ativo' : 'Inativo';
+                badge.className = `inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-bold ${isAtivo ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`;
+
+                set('prof-faturamento', fmtBRL(d.faturamentoTotal));
+                set('prof-comissao', fmtBRL(d.comissao));
+                set('prof-atendimentos', d.atendimentosCount);
+                set('prof-atend-pagos', `${d.atendimentosPagos ?? '—'} pagos`);
+
+                set('prof-tipo', d.tipo === 'pf' ? 'Pessoa Física' : 'Pessoa Jurídica');
+                set('prof-telefone', d.telefone);
+                set('prof-cpf', d.cpf ? d.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : null);
+                set('prof-cnpj', d.cnpj || null);
+                set('prof-nasc', d.nascimento || null);
+                set('prof-razao', d.razao_social || null);
+                set('prof-rep', d.nome_rep || null);
+                set('prof-cpfrep', d.cpf_rep || null);
+
+                set('prof-crmv', d.crmv);
+                set('prof-uf', d.crmv_uf);
+                set('prof-end', d.endereco);
+                set('prof-cep', d.cep);
+                set('prof-numero', d.numero);
+                set('prof-created', fmtDate(d.createdAt));
+
+                set('prof-stripe-status', d.stripeStatus);
+                set('prof-sub-id', d.stripeSubscriptionId);
+                if (d.stripeData) {
+                    set('prof-sub-status', d.stripeData.status);
+                    const nextDate = d.stripeData.currentPeriodEnd ? new Date(d.stripeData.currentPeriodEnd * 1000).toLocaleDateString('pt-BR') : '—';
+                    set('prof-sub-end', nextDate);
+                }
+
+            } catch (e) {
+                document.getElementById('loading-state').innerHTML = `
+                    <div class="text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-red-400 text-2xl mb-3"></i>
+                        <p class="text-white/40 text-sm">Erro ao carregar: ${e.message}</p>
+                    </div>`;
+            }
+        }
+
+        // ── Deactivation ────────────────────────────────────────────────
+        const modal = document.getElementById('confirm-modal');
+        document.getElementById('deactivate-btn').addEventListener('click', () => {
+            document.getElementById('confirm-code').value = '';
+            document.getElementById('modal-error').classList.add('hidden');
+            modal.classList.add('open');
+        });
+        document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+        document.getElementById('modal-confirm').addEventListener('click', async () => {
+            const code = document.getElementById('confirm-code').value.trim();
+            const errEl = document.getElementById('modal-error');
+            const btn = document.getElementById('modal-confirm');
+
+            errEl.classList.add('hidden');
+            btn.textContent = 'Processando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/vet/deactivate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': TOKEN },
+                    body: JSON.stringify({ uid, confirmCode: code })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    modal.classList.remove('open');
+                    alert('Conta desativada com sucesso.');
+                    window.location.href = '/admin/cadastro-vets.html';
+                } else {
+                    errEl.textContent = data.error || 'Código incorreto. Tente novamente.';
+                    errEl.classList.remove('hidden');
+                    btn.textContent = 'Confirmar';
+                    btn.disabled = false;
+                }
+            } catch {
+                errEl.textContent = 'Erro de conexão.';
+                errEl.classList.remove('hidden');
+                btn.textContent = 'Confirmar';
+                btn.disabled = false;
+            }
+        });
+
+    </script>
+</body>
+</html>

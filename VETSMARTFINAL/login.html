@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background-color: #F0F5F3; height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid #2D5A4E; box-shadow: 0 10px 30px rgba(45, 90, 78, 0.1); }
+        .input-field { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(45, 90, 78, 0.1); transition: all 0.3s ease; }
+        .input-field:focus { border-color: #D2B48C; box-shadow: 0 0 0 3px rgba(210, 180, 140, 0.2); outline: none; }
+        .btn-bounce { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-bounce:active { transform: scale(0.95); }
+        #loader { display: none; border-radius: 2rem; }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-md mx-auto w-full mb-8">
+        <a href="index.html" class="h-10 w-10 bg-white rounded-full flex items-center justify-center text-vetsmart-green shadow-sm active:scale-90 transition-transform">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+    </div>
+
+    <main class="max-w-md mx-auto w-full space-y-8 flex-1 flex flex-col justify-center">
+        <div class="text-center">
+            <h2 class="text-3xl font-black text-vetsmart-green uppercase tracking-tight">Bem-vindo <span class="text-vetsmart-gold">de volta</span></h2>
+            <p class="text-vetsmart-green/90 text-sm mt-2 font-medium">Acesso exclusivo para veterinários</p>
+        </div>
+
+        <div class="glass-card rounded-[2rem] p-8 space-y-6 relative overflow-hidden">
+            <div id="loader" class="absolute inset-0 bg-white/90 z-50 flex items-center justify-center">
+                <i class="fa-solid fa-circle-notch fa-spin text-vetsmart-green text-3xl"></i>
+            </div>
+
+            <form id="login-form" class="space-y-4" novalidate>
+                <div>
+                    <label class="block text-[10px] uppercase tracking-widest font-bold text-vetsmart-green/50 ml-4 mb-1">E-mail</label>
+                    <div class="relative">
+                        <i class="fa-regular fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-vetsmart-green/40"></i>
+                        <input type="text" id="email" required placeholder="seu@email.com" autocomplete="username" class="input-field w-full py-4 pl-12 pr-4 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] uppercase tracking-widest font-bold text-vetsmart-green/50 ml-4 mb-1">Senha</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-vetsmart-green/40"></i>
+                        <input type="password" id="password" required placeholder="••••••••" class="input-field w-full py-4 pl-12 pr-4 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                </div>
+
+                <div class="text-center py-1">
+                    <a href="recuperacao.html" class="text-xs font-bold text-vetsmart-gold-dark hover:text-vetsmart-green transition-all border-b border-transparent hover:border-vetsmart-green pb-0.5">
+                        Esqueceu sua senha?
+                    </a>
+                </div>
+
+                <button type="submit" class="btn-bounce w-full bg-vetsmart-green text-white font-bold py-5 rounded-2xl shadow-xl shadow-green-900/20 uppercase tracking-widest text-sm">
+                    Entrar no Sistema
+                </button>
+            </form>
+        </div>
+
+        <p class="text-center text-sm font-medium text-vetsmart-green/90">
+            Novo por aqui? <a href="cadastro.html" class="text-vetsmart-green font-bold underline decoration-vetsmart-gold decoration-2 underline-offset-4">Criar conta</a>
+        </p>
+    </main>
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const form = document.getElementById('login-form');
+        const loader = document.getElementById('loader');
+
+        // B7: Verificar se usuário autenticado é veterinário antes de redirecionar
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const vetSnap = await getDoc(doc(db, 'veterinarios', user.uid));
+                    if (vetSnap.exists()) {
+                        window.location.replace('dashboard.html');
+                    } else {
+                        await auth.signOut();
+                    }
+                } catch (e) {
+                    await auth.signOut();
+                }
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loader.style.display = 'flex';
+
+            const emailOrUser = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!emailOrUser || !password) {
+                alert("Por favor, preencha e-mail e senha.");
+                loader.style.display = 'none';
+                return;
+            }
+
+            // ── Acesso Admin ────────────────────────────────────────────
+            // Admin login: tentativa com credenciais fornecidas (validação feita no servidor)
+            if (emailOrUser && emailOrUser.toLowerCase().startsWith('admin')) {
+                try {
+                    const res = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: emailOrUser, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.token) {
+                        sessionStorage.setItem('adminToken', data.token);
+                        window.location.replace('/admin/dashboard.html');
+                    } else {
+                        loader.style.display = 'none';
+                        alert(data.error || 'Credenciais de administrador incorretas.');
+                    }
+                } catch {
+                    loader.style.display = 'none';
+                    alert('Erro de conexão. Tente novamente.');
+                }
+                return;
+            }
+
+            // ── Acesso Veterinário (Firebase) ───────────────────────────
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, emailOrUser, password);
+                const user = userCredential.user;
+
+                const vetDocRef = doc(db, "veterinarios", user.uid);
+                const vetDocSnap = await getDoc(vetDocRef);
+
+                if (vetDocSnap.exists()) {
+                    window.location.replace('dashboard.html');
+                } else {
+                    await auth.signOut();
+                    loader.style.display = 'none';
+                    alert("Este usuário não tem permissão para acessar o sistema. Verifique suas credenciais ou contate o suporte.");
+                }
+
+            } catch (error) {
+                loader.style.display = 'none';
+                alert(getFriendlyErrorMessage(error.code));
+            }
+        });
+
+        function getFriendlyErrorMessage(errorCode) {
+            switch (errorCode) {
+                case 'auth/invalid-credential':
+                    return 'E-mail ou senha incorretos. Por favor, verifique e tente novamente.';
+                case 'auth/invalid-email':
+                    return 'O formato do e-mail é inválido.';
+                case 'auth/too-many-requests':
+                    return 'Acesso temporariamente bloqueado devido a muitas tentativas. Tente novamente mais tarde.';
+                case 'auth/network-request-failed':
+                    return 'Falha de rede. Verifique sua conexão com a internet.';
+                default:
+                    return 'Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.';
+            }
+        }
+    </script>
+</body>
+</html>

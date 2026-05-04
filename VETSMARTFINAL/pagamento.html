@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Página de Pagamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <main id="payment-container" class="w-full max-w-md mx-auto bg-white shadow-2xl rounded-3xl p-8 text-center hidden">
+
+        <div id="loader" class="py-10">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-4xl"></i>
+            <p class="mt-4 text-vetsmart-green/70">Carregando fatura...</p>
+        </div>
+
+        <div id="payment-content" class="hidden">
+            <div class="mb-6">
+                <i class="fa-solid fa-horse text-3xl text-vetsmart-green"></i>
+                <h1 id="horse-name" class="text-2xl font-black text-vetsmart-green uppercase mt-2"></h1>
+                <p class="text-sm text-vetsmart-green/90">Atendimento Veterinário</p>
+            </div>
+
+            <div class="bg-vetsmart-green/5 p-6 rounded-2xl">
+                <p class="text-sm text-vetsmart-green/90">Valor a pagar</p>
+                <p id="total-amount" class="text-5xl font-black text-vetsmart-green mt-1"></p>
+            </div>
+
+            <div id="pix-section" class="mt-6">
+                <h2 class="font-bold text-lg text-vetsmart-green">Pague com Pix</h2>
+                <p class="text-xs text-vetsmart-green/90 mb-4">Aponte a câmera do seu celular para o QR Code</p>
+                <div id="qr-code-placeholder" class="w-48 h-48 bg-gray-200 mx-auto rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-qrcode text-6xl text-gray-400"></i>
+                </div>
+                <button id="copy-pix-key" class="mt-4 bg-vetsmart-gold text-vetsmart-green font-bold py-2 px-4 rounded-lg text-sm">
+                    <i class="fa-solid fa-copy mr-2"></i>Copiar Chave Pix
+                </button>
+            </div>
+
+            <div id="status-section" class="mt-8">
+                <div id="status-badge" class="py-3 px-5 rounded-full text-white font-bold inline-block">
+                    
+                </div>
+            </div>
+
+            <!-- B1/B2: Botão "Marcar como Pago" removido — apenas o backend/webhook pode marcar como pago -->
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const paymentContainer = document.getElementById('payment-container');
+        const loader = document.getElementById('loader');
+        const paymentContent = document.getElementById('payment-content');
+        const horseNameEl = document.getElementById('horse-name');
+        const totalAmountEl = document.getElementById('total-amount');
+        const statusBadge = document.getElementById('status-badge');
+
+        const getTransactionId = () => {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        };
+
+        const transactionId = getTransactionId();
+
+        if (!transactionId) {
+            paymentContainer.classList.remove('hidden');
+            loader.classList.add('hidden');
+            paymentContent.innerHTML = `<p class="text-red-500">ID da transação não fornecido.</p>`;
+            paymentContent.classList.remove('hidden');
+        } else {
+            const transactionRef = doc(db, "atendimentos", transactionId);
+
+            onSnapshot(transactionRef, (docSnap) => {
+                paymentContainer.classList.remove('hidden');
+                if (!docSnap.exists()) {
+                    loader.classList.add('hidden');
+                    paymentContent.innerHTML = `<p class="text-red-500">Fatura não encontrada.</p>`;
+                    paymentContent.classList.remove('hidden');
+                    return;
+                }
+
+                const data = docSnap.data();
+                displayPaymentDetails(data);
+                loader.classList.add('hidden');
+                paymentContent.classList.remove('hidden');
+            });
+        }
+
+        function displayPaymentDetails(data) {
+            horseNameEl.textContent = data.nome_cavalo || 'Pagamento';
+            totalAmountEl.textContent = (data.total_geral || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            let statusText = 'Status desconhecido';
+            let statusColor = 'bg-gray-400';
+
+            switch (data.status) {
+                case 'pendente':
+                    statusText = 'Aguardando Pagamento';
+                    statusColor = 'bg-yellow-500';
+                    break;
+                case 'pago':
+                    statusText = 'Pagamento Confirmado';
+                    statusColor = 'bg-green-500';
+                    break;
+                case 'nao-finalizado':
+                    statusText = 'Atendimento não finalizado';
+                    statusColor = 'bg-blue-500';
+                    break;
+            }
+
+            statusBadge.textContent = statusText;
+            statusBadge.className = `py-3 px-5 rounded-full text-white font-bold inline-block ${statusColor}`;
+        }
+
+    </script>
+
+</body>
+</html>

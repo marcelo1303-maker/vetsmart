@@ -1,0 +1,36 @@
+{
+  "functions": {
+    "source": "functions"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "serviceAccountKey.json",
+      "server.js",
+      "rate-limit.js",
+      "validators.js",
+      "validators.cjs",
+      "package.json",
+      "package-lock.json",
+      "firestore.rules",
+      "firestore.indexes.json",
+      ".env",
+      ".env.local",
+      "functions/**",
+      "scripts/**",
+      "*.txt",
+      "*.md",
+      "*.nix",
+      "ARQUIVOS-DEV/**",
+      "attached_assets/**",
+      "novo-atendimento_*.html"
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

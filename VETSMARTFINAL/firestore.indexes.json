@@ -1,0 +1,75 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "atendimentos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "data", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "atendimentos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "atendimentos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "horseId", "order": "ASCENDING" },
+        { "fieldPath": "tipo_atendimento", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "atendimentos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "data", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "clientes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "nome_cavalo", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "estoque",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "categoria", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "proprietarios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "stripeSubscriptionId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "veterinarios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "stripeSubscriptionId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "veterinarios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "stripeCustomerId", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

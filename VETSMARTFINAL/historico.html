@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Histórico do Animal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #F0F5F3; }
+        .timeline-item { border-left: 3px solid #D2B48C; padding-left: 20px; position: relative; }
+        .timeline-item::before { content: ''; width: 15px; height: 15px; background-color: #D2B48C; border-radius: 50%; position: absolute; left: -9px; top: 0; }
+        .info-card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .icon-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px; background-color: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); color: #6b7280; font-weight: 500; font-size: 12px; transition: all 0.2s; }
+        .icon-nav a.active { color: #D2B48C; font-weight: 700; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a id="back-link" href="dossie.html" class="text-white/80 hover:text-white"><i class="fa-solid fa-chevron-left text-xl"></i></a>
+            <h1 class="font-black text-2xl tracking-tight absolute left-1/2 -translate-x-1/2">HISTÓRICO</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-4 space-y-5" id="historico-container">
+        <div id="loading-spinner" class="text-center py-10">
+            <i class="fa-solid fa-spinner fa-spin text-vetsmart-green text-4xl"></i>
+        </div>
+        <div id="historico-content" class="hidden space-y-5">
+            <div id="horse-header" class="info-card text-center"></div>
+            <div id="icon-menu" class="grid grid-cols-4 gap-3 icon-nav my-4"></div>
+            <div id="timeline-container" class="space-y-6"></div>
+            <div id="delete-section" class="mt-6"></div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50"><div class="max-w-md mx-auto p-2"><div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center"><a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] mt-1">Início</span></a><a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-notes-medical text-lg"></i><span class="text-[10px] mt-1">Atender</span></a><a href="clientes.html" class="flex flex-col items-center text-vetsmart-gold font-bold transition-all"><i class="fa-solid fa-horse text-lg"></i><span class="text-[10px] mt-1">Cavalos</span></a><a href="financeiro.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-dollar-sign text-lg"></i><span class="text-[10px] mt-1">Caixa</span></a><a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-calendar-check text-lg"></i><span class="text-[10px] mt-1">Atendimentos</span></a><a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-box-open text-lg"></i><span class="text-[10px] mt-1">Estoque</span></a></div></div></nav>
+<!-- HISTÓRICO.HTML SCRIPT -->
+<script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { doc, getDoc, collection, query, where, getDocs, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const historicoContainer = document.getElementById('historico-container');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const historicoContent = document.getElementById('historico-content');
+    const backLink = document.getElementById('back-link');
+    
+    const params = new URLSearchParams(window.location.search);
+    const clientDocId = params.get('id');
+    let currentUser = null;
+
+    historicoContainer.addEventListener('click', async (event) => {
+        const deleteButton = event.target.closest('#btn-delete-client');
+        if (deleteButton) {
+            if (!clientDocId) return;
+            if (confirm("Tem certeza que deseja EXCLUIR este cadastro?\n\nEsta ação é IRREVERSÍVEL e todos os dados do animal e do proprietário serão perdidos para sempre.")) {
+                try {
+                    deleteButton.disabled = true;
+                    deleteButton.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> EXCLUINDO...`;
+                    await deleteDoc(doc(db, "clientes", clientDocId));
+                    alert("Cadastro excluído com sucesso!");
+                    window.location.href = 'clientes.html';
+                } catch (error) {
+                    console.error("Erro ao excluir o cliente: ", error);
+                    alert(`Ocorreu um erro ao tentar excluir o cadastro: ${error.message}`);
+                    deleteButton.disabled = false;
+                    deleteButton.innerHTML = `<i class="fa-solid fa-trash-alt mr-2"></i> EXCLUIR CADASTRO`;
+                }
+            }
+        }
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            if (clientDocId) {
+                backLink.href = `dossie.html?id=${clientDocId}`;
+                loadData(user.uid, clientDocId);
+            } else {
+                showError("ID do cliente não fornecido.");
+            }
+        } else {
+            window.location.replace('login.html');
+        }
+    });
+
+    async function loadData(uid, docId) {
+        try {
+            const clientDocRef = doc(db, "clientes", docId);
+            const clientDocSnap = await getDoc(clientDocRef);
+
+            if (!clientDocSnap.exists() || clientDocSnap.data().userId !== uid) {
+                showError("Cliente não encontrado ou acesso não autorizado.");
+                return;
+            }
+            const clientData = clientDocSnap.data();
+
+            renderLayout(clientData, docId);
+            
+            const atendimentosQuery = query(
+                collection(db, "atendimentos"), 
+                where("userId", "==", uid),
+                where("horseId", "==", docId)
+            );
+            const atendimentosSnap = await getDocs(atendimentosQuery);
+            const sortedDocs = atendimentosSnap.docs.sort((a, b) => {
+                const ta = a.data().data?.toDate ? a.data().data.toDate() : new Date(a.data().data || 0);
+                const tb = b.data().data?.toDate ? b.data().data.toDate() : new Date(b.data().data || 0);
+                return tb - ta;
+            });
+            
+            renderTimeline(sortedDocs);
+
+        } catch (error) {
+            console.error("Erro ao carregar histórico: ", error);
+            showError("Esse cavalo não possui nenhum atendimento registrado até o momento.");
+        } finally {
+            loadingSpinner.classList.add('hidden');
+            historicoContent.classList.remove('hidden');
+        }
+    }
+
+    function escapeHTML(str) {
+        return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function renderLayout(data, docId) {
+        historicoContent.querySelector('#horse-header').innerHTML = `<h2 class="font-black text-2xl text-vetsmart-green-dark">${escapeHTML(data.nome_cavalo)}</h2><p class="font-mono text-sm text-gray-500">${escapeHTML(docId)}</p>`;
+        historicoContent.querySelector('#icon-menu').innerHTML = `
+            <a href="dossie.html?id=${docId}"><i class="fa-solid fa-info-circle"></i><span>Informações</span></a>
+            <a href="#" class="active"><i class="fa-solid fa-book-medical"></i><span>Histórico</span></a>
+            <a href="vacinas.html?id=${docId}"><i class="fa-solid fa-syringe"></i><span>Vacinas</span></a>
+            <a href="exames.html?id=${docId}"><i class="fa-solid fa-file-alt"></i><span>Exames</span></a>
+        `;
+        historicoContent.querySelector('#delete-section').innerHTML = `
+            <button id="btn-delete-client" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-all">
+                <i class="fa-solid fa-trash-alt mr-2"></i> EXCLUIR CADASTRO
+            </button>
+        `;
+    }
+
+    function renderTimeline(atendimentoDocs) {
+        const timelineContainer = historicoContent.querySelector('#timeline-container');
+        if (atendimentoDocs.length === 0) {
+            timelineContainer.innerHTML = `<div class="info-card text-center"><p class="text-gray-500">Nenhum atendimento registrado para este animal.</p></div>`;
+            return;
+        }
+
+        let timelineHTML = '';
+        atendimentoDocs.forEach(doc => {
+            const data = doc.data();
+            const atendimentoDate = data.data?.toDate ? data.data.toDate().toLocaleDateString('pt-BR') : 'Data não informada';
+            const servico = data.servico || data.tipo_atendimento || 'Atendimento';
+            const valor = data.financeiro?.valorTotal || data.valor || 0;
+            
+            timelineHTML += `
+                <div class="timeline-item pb-6">
+                    <div class="info-card">
+                        <p class="font-bold text-lg text-vetsmart-green-dark">${escapeHTML(servico)}</p>
+                        <p class="text-sm text-gray-500 mb-2"><i class="fa-solid fa-calendar-alt mr-2"></i>${escapeHTML(atendimentoDate)}</p>
+                        <div class="text-gray-700 text-sm space-y-1">
+                            <p><strong>Valor:</strong> R$ ${parseFloat(valor).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                            <p><strong>Status:</strong> ${escapeHTML(data.status || 'Não informado')}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        timelineContainer.innerHTML = timelineHTML;
+    }
+
+    function showError(message) {
+        loadingSpinner.classList.add('hidden');
+        historicoContainer.innerHTML = `<p class="text-center text-red-500 p-8">${escapeHTML(message)}</p>`;
+    }
+</script>
+</body>
+</html>

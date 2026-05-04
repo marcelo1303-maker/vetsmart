@@ -1,0 +1,280 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Dossiê do Animal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+    </style>
+</head>
+<body class="pb-16">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="clientes.html" class="h-10 w-10 flex items-center justify-center mr-2"><i class="fa-solid fa-arrow-left"></i></a>
+            <h1 class="font-black text-xl uppercase">Dossiê do Animal</h1>
+            <button id="edit-btn" class="text-white"><i class="fa-solid fa-pencil-alt"></i></button>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-5 space-y-4">
+
+        <div id="loader" class="text-center py-10">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-3xl"></i>
+        </div>
+
+        <div id="dossie-content" class="hidden space-y-4">
+            <div class="glass-panel p-6 rounded-2xl text-center">
+                <h2 id="horse-name" class="text-3xl font-black text-vetsmart-green uppercase"></h2>
+                <p id="horse-owner" class="text-sm text-vetsmart-green/70"></p>
+                <p id="horse-id" class="text-xs font-mono bg-vetsmart-gold/20 text-vetsmart-gold-dark px-2 py-1 rounded-md inline-block mt-2"></p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="font-bold text-vetsmart-green border-b border-vetsmart-green/10 pb-2 mb-3">Ficha Técnica</h3>
+                <div id="horse-details" class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm"></div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="font-bold text-vetsmart-green border-b border-vetsmart-green/10 pb-2 mb-3">Histórico de Atendimentos</h3>
+                <div id="atendimentos-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Edição -->
+    <div id="edit-modal" class="fixed inset-0 bg-black/40 z-[100] hidden items-end justify-center">
+        <div class="bg-white w-full max-w-md rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto">
+            <h2 class="font-bold text-xl text-vetsmart-green mb-4">Editar Informações</h2>
+            <form id="edit-form" class="space-y-3"></form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, updateDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const loader = document.getElementById('loader');
+        const dossieContent = document.getElementById('dossie-content');
+        const horseNameEl = document.getElementById('horse-name');
+        const horseOwnerEl = document.getElementById('horse-owner');
+        const horseIdEl = document.getElementById('horse-id');
+        const horseDetailsEl = document.getElementById('horse-details');
+        const atendimentosListEl = document.getElementById('atendimentos-list');
+        const editBtn = document.getElementById('edit-btn');
+        const editModal = document.getElementById('edit-modal');
+        const editForm = document.getElementById('edit-form');
+
+        let currentHorseId = null;
+
+        const getHorseIdFromURL = () => {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        };
+
+        const loadHorseData = async (uid, horseId) => {
+            try {
+                const horseRef = doc(db, "clientes", horseId);
+                const horseSnap = await getDoc(horseRef);
+
+                if (horseSnap.exists() && horseSnap.data().userId === uid) {
+                    const data = horseSnap.data();
+                    displayHorseData(data, horseId);
+                    await loadAtendimentos(uid, horseId);
+                    loader.classList.add('hidden');
+                    dossieContent.classList.remove('hidden');
+                } else {
+                    handleDataError("Animal não encontrado ou acesso negado.");
+                }
+            } catch (error) {
+                console.error("Erro ao carregar dados do cavalo:", error);
+                handleDataError("Erro ao carregar dados. Tente novamente.");
+            }
+        };
+
+        const displayHorseData = (data, horseId) => {
+            currentHorseId = horseId;
+            horseNameEl.textContent = data.nome_cavalo || 'Nome não informado';
+            horseOwnerEl.textContent = `Proprietário: ${data.nome_proprietario || 'Não informado'}`;
+            horseIdEl.textContent = `ID: ${data.horseId || horseId}`;
+
+            const details = {
+                'Idade': data.idade,
+                'Raça': data.raca,
+                'Pelagem': data.pelagem,
+                'Altura': data.altura,
+                'Sexo': data.sexo_cavalo,
+                'CPF/CNPJ do Prop.': data.cpf_cnpj,
+                'Telefone': data.telefone_proprietario,
+            };
+
+            horseDetailsEl.innerHTML = Object.entries(details).map(([key, value]) => {
+                return value ? `<div class="font-bold text-vetsmart-green/90">${key}:</div><div class="font-medium text-vetsmart-green">${value}</div>` : '';
+            }).join('');
+        };
+
+        const loadAtendimentos = async (uid, horseId) => {
+            const q = query(
+                collection(db, "atendimentos"),
+                where("userId", "==", uid),
+                where("horseId", "==", horseId)
+            );
+
+            try {
+                const snapshot = await getDocs(q);
+                const sorted = snapshot.docs.sort((a, b) => {
+                    const ta = a.data().data?.toDate ? a.data().data.toDate() : new Date(a.data().data || 0);
+                    const tb = b.data().data?.toDate ? b.data().data.toDate() : new Date(b.data().data || 0);
+                    return tb - ta;
+                });
+                atendimentosListEl.innerHTML = !sorted.length
+                    ? '<p class="text-center text-vetsmart-green/50">Nenhum atendimento registrado.</p>'
+                    : sorted.map(doc => renderAtendimentoCard(doc.data())).join('');
+            } catch (error) {
+                console.error("Erro ao carregar atendimentos:", error);
+                atendimentosListEl.innerHTML = '<p class="text-center text-red-500">Erro ao carregar histórico.</p>';
+            }
+        };
+
+        const renderAtendimentoCard = (data) => {
+            const dataAtendimento = data.data?.toDate().toLocaleDateString('pt-BR') || 'Data indefinida';
+            const tipo = data.tipo_atendimento || data.servico || 'Atendimento';
+            const valor = data.total_geral !== undefined ? `R$ ${data.total_geral.toFixed(2)}` : (data.financeiro?.valorTotal !== undefined ? `R$ ${data.financeiro.valorTotal.toFixed(2)}` : 'A definir');
+
+            return `
+                <div class="bg-white/80 p-3 rounded-xl border border-vetsmart-green/10">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-bold text-vetsmart-green text-sm">${escapeHTML(tipo)}</p>
+                            <p class="text-xs text-gray-500">${escapeHTML(dataAtendimento)}</p>
+                        </div>
+                        <p class="font-bold text-vetsmart-gold-dark">${escapeHTML(valor)}</p>
+                    </div>
+                </div>
+            `;
+        };
+
+        function escapeHTML(str) {
+            return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        const handleDataError = (message) => {
+            loader.innerHTML = `<p class="text-red-500">${escapeHTML(message)}</p>`;
+            dossieContent.classList.add('hidden');
+        };
+
+        // --- EDIÇÃO ---
+        const openEditModal = async () => {
+            if (!currentHorseId) return;
+            try {
+                const horseRef = doc(db, "clientes", currentHorseId);
+                const horseSnap = await getDoc(horseRef);
+                if (horseSnap.exists()) {
+                    populateEditForm(horseSnap.data());
+                    editModal.classList.remove('hidden');
+                    editModal.classList.add('flex');
+                } else {
+                    alert("Não foi possível encontrar os dados para edição.");
+                }
+            } catch (error) {
+                alert("Erro ao carregar dados para edição.");
+            }
+        };
+
+        const closeEditModal = () => {
+            editModal.classList.add('hidden');
+            editModal.classList.remove('flex');
+            editForm.innerHTML = ''; // Limpa o formulário
+        };
+
+        const populateEditForm = (data) => {
+            const fields = {
+                'nome_cavalo': { label: 'Nome do Cavalo', type: 'text' },
+                'nome_proprietario': { label: 'Nome do Proprietário', type: 'text' },
+                'idade': { label: 'Idade', type: 'number' },
+                'raca': { label: 'Raça', type: 'text' },
+                'pelagem': { label: 'Pelagem', type: 'text' },
+                'altura': { label: 'Altura', type: 'text' },
+                'sexo_cavalo': { label: 'Sexo', type: 'text' },
+                'cpf_cnpj': { label: 'CPF/CNPJ', type: 'text' },
+                'telefone_proprietario': { label: 'Telefone', type: 'tel' },
+            };
+
+            editForm.innerHTML = Object.entries(fields).map(([key, {label, type}]) => `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">${label}</label>
+                    <input type="${type}" name="${key}" value="${data[key] || ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-vetsmart-gold focus:ring focus:ring-vetsmart-gold focus:ring-opacity-50 p-2">
+                </div>
+            `).join('') + `
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="cancel-edit-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md">Cancelar</button>
+                    <button type="submit" class="bg-vetsmart-green text-white px-4 py-2 rounded-md">Salvar</button>
+                </div>
+            `;
+
+            document.getElementById('cancel-edit-btn').onclick = closeEditModal;
+        };
+
+        editForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(editForm);
+            const updatedData = {};
+            formData.forEach((value, key) => {
+                updatedData[key] = value;
+            });
+
+            try {
+                const horseRef = doc(db, "clientes", currentHorseId);
+                await updateDoc(horseRef, updatedData);
+                closeEditModal();
+                // Recarrega os dados na página principal
+                loadHorseData(auth.currentUser.uid, currentHorseId);
+            } catch (error) {
+                console.error("Erro ao atualizar:", error);
+                alert("Falha ao salvar as alterações.");
+            }
+        };
+
+        // --- INICIALIZAÇÃO ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const horseId = getHorseIdFromURL();
+                if (horseId) {
+                    currentHorseId = horseId;
+                    loadHorseData(user.uid, horseId);
+                    editBtn.addEventListener('click', openEditModal);
+                    editModal.addEventListener('click', (e) => {
+                        if (e.target === editModal) closeEditModal();
+                    });
+                } else {
+                    handleDataError("ID do animal não fornecido na URL.");
+                }
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+    </script>
+
+</body>
+</html>

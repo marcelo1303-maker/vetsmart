@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Cadastro Profissional</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background-color: #F0F5F3; min-height: 100vh; overflow-x: hidden; }
+        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid #2D5A4E; box-shadow: 0 10px 30px rgba(45, 90, 78, 0.1); }
+        .input-field { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(45, 90, 78, 0.1); transition: all 0.3s ease; }
+        .input-field:focus { border-color: #D2B48C; box-shadow: 0 0 0 3px rgba(210, 180, 140, 0.2); outline: none; }
+        .btn-bounce { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .btn-bounce:active { transform: scale(0.95); }
+        #loader { display: none; border-radius: 2rem; }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-xl mx-auto w-full mb-6">
+        <a href="index.html" class="h-10 w-10 bg-white rounded-full flex items-center justify-center text-vetsmart-green shadow-sm active:scale-90 transition-transform">
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+    </div>
+
+    <main class="max-w-xl mx-auto w-full space-y-6 pb-12">
+        <div class="text-center">
+            <h2 class="text-3xl font-black text-vetsmart-green uppercase tracking-tight">Nova <span class="text-vetsmart-gold">Conta</span></h2>
+            <p class="text-vetsmart-green/90 text-sm mt-2 font-medium">Perfil Profissional</p>
+        </div>
+
+        <div class="glass-card rounded-[2rem] p-6 md:p-10 space-y-6 relative overflow-hidden">
+            <div id="loader" class="absolute inset-0 bg-white/90 z-50 flex items-center justify-center flex-col">
+                <i class="fa-solid fa-circle-notch fa-spin text-vetsmart-green text-3xl mb-2"></i>
+                <span class="text-vetsmart-green font-bold text-xs uppercase tracking-widest">Validando Dados...</span>
+            </div>
+
+            <div class="flex p-1 bg-vetsmart-green/5 rounded-2xl border border-vetsmart-green/10">
+                <button type="button" onclick="toggleAccountType('pf')" id="tab-pf" class="flex-1 py-3 rounded-xl font-bold text-sm uppercase bg-vetsmart-green text-white shadow-lg transition-all">Pessoa Física</button>
+                <button type="button" onclick="toggleAccountType('pj')" id="tab-pj" class="flex-1 py-3 rounded-xl font-bold text-sm uppercase text-vetsmart-green/90 transition-all">Pessoa Jurídica</button>
+            </div>
+
+            <form id="register-form" class="space-y-5">
+                
+                <div id="section-pf" class="space-y-4">
+                    <div>
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Nome Completo</label>
+                        <input type="text" id="nome_pf" placeholder="Como no CPF" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">CPF</label>
+                            <input type="text" id="cpf_pf" placeholder="000.000.000-00" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium mask-cpf">
+                        </div>
+                        <div>
+                            <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Nascimento</label>
+                            <input type="text" id="nascimento" placeholder="DD/MM/AAAA" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium mask-date">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-pj" class="space-y-4 hidden-section">
+                    <div>
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Razão Social</label>
+                        <input type="text" id="razao_social" placeholder="Nome da Empresa" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">CNPJ</label>
+                            <input type="text" id="cnpj" placeholder="00.000.000/0000-00" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium mask-cnpj">
+                        </div>
+                        <div>
+                            <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">CPF Representante</label>
+                            <input type="text" id="cpf_rep" placeholder="CPF do Sócio" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium mask-cpf">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Nome do Representante Legal</label>
+                        <input type="text" id="nome_rep" placeholder="Nome Completo" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                </div>
+
+                <div class="border-t border-vetsmart-green/5 pt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">E-mail Profissional</label>
+                        <input type="email" id="email" required placeholder="seu@email.com" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">WhatsApp (+55)</label>
+                        <input type="text" id="telefone" required placeholder="(00) 00000-0000" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium mask-phone">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-2">
+                            <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">CRMV</label>
+                            <input type="text" id="crmv" required placeholder="0000" class="input-field w-full py-4 px-4 rounded-2xl text-vetsmart-green font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">UF</label>
+                            <select id="crmv_uf" class="input-field w-full py-4 px-2 rounded-2xl text-vetsmart-green font-bold text-xs appearance-none">
+                                <option value="RS">RS</option><option value="SC">SC</option><option value="PR">PR</option><option value="SP">SP</option><option value="RJ">RJ</option><option value="MG">MG</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">CEP</label>
+                        <input type="text" id="cep" required placeholder="00000-000" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium mask-cep">
+                    </div>
+                    <div>
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Número</label>
+                        <input type="text" id="end_numero" required placeholder="123" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Endereço Completo</label>
+                        <input type="text" id="logradouro" readonly placeholder="Preenchimento automático via CEP" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium opacity-60 italic">
+                    </div>
+                </div>
+
+                <div class="border-t border-vetsmart-green/5 pt-4">
+                    <div>
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Senha</label>
+                        <input type="password" id="password" required placeholder="Min. 6 caracteres" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-[15px] uppercase tracking-widest font-bold text-vetsmart-green ml-4 mb-1">Confirmar Senha</label>
+                        <input type="password" id="confirm_password" required placeholder="Repita a senha" class="input-field w-full py-4 px-6 rounded-2xl text-vetsmart-green font-medium">
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" id="terms" required class="mt-1">
+                    <label for="terms" class="text-xs text-vetsmart-green/70">Li e concordo com os <a href="termoslgpd.html" class="underline font-bold">Termos de Serviço</a>, <a href="termoslgpd.html" class="underline font-bold">Política de Privacidade</a> e <a href="termoslgpd.html" class="underline font-bold">Termos e Permissões LGPD</a></label>
+                </div>
+
+                <button type="submit" class="btn-bounce w-full bg-vetsmart-green text-white font-bold py-5 rounded-2xl shadow-xl shadow-green-900/20 uppercase tracking-widest text-sm">
+                    Criar Conta
+                </button>
+            </form>
+        </div>
+    </main>
+    <script type="module">
+        import { auth } from "./firebase.js";
+        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+        let currentType = 'pf';
+    
+        function toggleAccountType(type) {
+            currentType = type;
+            document.getElementById('section-pf').classList.toggle('hidden-section', type !== 'pf');
+            document.getElementById('section-pj').classList.toggle('hidden-section', type !== 'pj');
+            document.getElementById('tab-pf').classList.toggle('bg-vetsmart-green', type === 'pf');
+            document.getElementById('tab-pf').classList.toggle('text-white', type === 'pf');
+            document.getElementById('tab-pf').classList.toggle('text-vetsmart-green/90', type !== 'pf');
+            document.getElementById('tab-pj').classList.toggle('bg-vetsmart-green', type === 'pj');
+            document.getElementById('tab-pj').classList.toggle('text-white', type === 'pj');
+            document.getElementById('tab-pj').classList.toggle('text-vetsmart-green/90', type !== 'pj');
+        }
+    
+        window.toggleAccountType = toggleAccountType;
+    
+        $(document).ready(function() {
+            $('.mask-cpf').mask('000.000.000-00');
+            $('.mask-cnpj').mask('00.000.000/0000-00');
+            $('.mask-date').mask('00/00/0000');
+            $('.mask-cep').mask('00000-000');
+            $('.mask-phone').mask('(00) 00000-0000');
+    
+            $('#cep').on('blur', function() {
+                const cep = $(this).val().replace(/\D/g, '');
+                if(cep.length === 8) {
+                    $.getJSON(`https://viacep.com.br/ws/${cep}/json/`, function(data) {
+                        if(!data.erro) $('#logradouro').val(`${data.logradouro}, ${data.bairro} - ${data.localidade}/${data.uf}`);
+                    });
+                }
+            });
+        });
+    
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const loader = document.getElementById('loader');
+    
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+            const crmv = document.getElementById('crmv').value.replace(/\D/g, '');
+            const uf = document.getElementById('crmv_uf').value;
+            const crmvKey = `${crmv}-${uf}`.toUpperCase();
+            const email = document.getElementById('email').value.trim();
+    
+            // Validações básicas
+            if (!crmv || !uf) return alert("Informe o CRMV e o estado.");
+            if (!email) return alert("Informe seu e-mail profissional.");
+            if (pass !== confirm) return alert("As senhas não coincidem!");
+            if (pass.length < 6) return alert("A senha deve ter pelo menos 6 caracteres.");
+    
+            if (currentType === 'pf') {
+                const nome = document.getElementById('nome_pf').value.trim();
+                const cpf = document.getElementById('cpf_pf').value.replace(/\D/g, '');
+                if (!nome || cpf.length !== 11) return alert("Preencha seu nome completo e um CPF válido.");
+            } else {
+                const razao = document.getElementById('razao_social').value.trim();
+                const cnpj = document.getElementById('cnpj').value.replace(/\D/g, '');
+                if (!razao || cnpj.length !== 14) return alert("Preencha a razão social e um CNPJ válido.");
+            }
+    
+            loader.style.display = 'flex';
+    
+            try {
+            // 1. Criar usuário no Firebase Auth e pegar o UID
+            const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+            const userUid = userCredential.user.uid;
+
+            // 2. Preparar dados
+            const vetData = {
+                uid: userUid, // Voltamos a usar o UID
+                tipo: currentType,
+                crmv_uf_key: crmvKey, // O CRMV continua salvo aqui para você pesquisar depois
+                crmv,
+                crmv_uf: uf,
+                email,
+                telefone: document.getElementById('telefone').value,
+                endereco: document.getElementById('logradouro').value,
+                numero: document.getElementById('end_numero').value,
+                complemento: document.getElementById('complemento')?.value || '',
+                cep: document.getElementById('cep').value.replace(/\D/g, ''),
+                stripeStatus: 'pending',
+                subscriptionStatus: 'inactive',
+                trialEndsAt: null,
+            };
+
+            if (currentType === 'pf') {
+                vetData.nome = document.getElementById('nome_pf').value.trim();
+                vetData.cpf = document.getElementById('cpf_pf').value.replace(/\D/g, '');
+                vetData.nascimento = document.getElementById('nascimento').value;
+            } else {
+                vetData.razao_social = document.getElementById('razao_social').value.trim();
+                vetData.cnpj = document.getElementById('cnpj').value.replace(/\D/g, '');
+                vetData.nome_rep = document.getElementById('nome_rep').value.trim();
+                vetData.cpf_rep = document.getElementById('cpf_rep').value.replace(/\D/g, '');
+            }
+
+            // 3. MANDAR O userUid COMO CHAVE (vetKey) PARA A FUNÇÃO
+            const createRecordResponse = await fetch('https://southamerica-east1-vetsmart-11674145-f2ba3.cloudfunctions.net/createVeterinarianRecord', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vetKey: userUid, vetData, email })
+            });
+
+            if (!createRecordResponse.ok) throw new Error("Erro ao criar registro");
+
+            // 4. Configurar Stripe
+            try {
+                const stripeResponse = await fetch('https://southamerica-east1-vetsmart-11674145-f2ba3.cloudfunctions.net/createStripeConnectAccount', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ vetKey: userUid, email }) // Passando userUid
+                });
+
+                if (!stripeResponse.ok) throw new Error("Erro na configuração do Stripe");
+
+                const stripeData = await stripeResponse.json();
+                if (stripeData.url) {
+                    window.location.href = stripeData.url;
+                } else {
+                    throw new Error(stripeData.error);
+                }
+            } catch (stripeErr) {
+                alert("Conta criada! Configure pagamentos no painel.");
+                window.location.href = 'dashboard.html';
+            }
+    
+            } catch (err) {
+                loader.style.display = 'none';
+                console.error("Erro no cadastro:", err);
+                
+                const msgs = {
+                    'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
+                    'auth/invalid-email': 'E-mail inválido.',
+                    'auth/weak-password': 'Senha fraca. Use 6+ caracteres.',
+                    'auth/operation-not-allowed': 'Cadastro temporariamente desabilitado. Tente novamente.',
+                    'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.'
+                };
+                alert(msgs[err.code] || err.message || 'Erro inesperado durante o cadastro.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Financeiro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .input-glass, .select-glass { background: rgba(240,245,243,0.8); border: 2px solid transparent; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .input-glass:focus, .select-glass:focus { border-color: #D2B48C; outline: none; }
+        .form-input { background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 10px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .form-input:focus { border-color: #D2B48C; outline: none; box-shadow: 0 0 0 2px #d2b48c30; }
+        .filter-btn { background-color: rgba(255,255,255,0.7); color: #2D5A4E; padding: 0.5rem; border-radius: 8px; transition: all .2s; border: 1px solid transparent; font-size: 0.8rem; }
+        .filter-btn.active { background-color: #2D5A4E; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(45,90,78,0.2); }
+        .toggle-btn { background-color: transparent; color: #2D5A4E; padding: 0.75rem; border-radius: 9px; flex-grow: 1; text-align: center; cursor: pointer; transition: all .2s; border: 1px solid transparent; }
+        .toggle-btn.active { background-color: #2D5A4E; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(45,90,78,0.2); }
+        #lancamento-modal { transition: opacity 0.3s ease-in-out; }
+        #modal-content { transition: transform 0.3s ease-in-out; }
+
+        .search-dropdown { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border: 1px solid #e5e7eb; z-index: 200; max-height: 200px; overflow-y: auto; }
+        .search-dropdown-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; transition: background .15s; }
+        .search-dropdown-item:last-child { border-bottom: none; }
+        .search-dropdown-item:hover { background: #F0F5F3; }
+        .search-dropdown-item:active { background: #d2b48c30; }
+
+        .quick-add-panel { background: linear-gradient(135deg, #2D5A4E08, #D2B48C15); border: 1.5px dashed #D2B48C80; border-radius: 12px; padding: 12px; margin-top: 8px; }
+        .insumo-tag { display: flex; justify-content: space-between; align-items: center; background: white; border: 1px solid #2D5A4E20; border-left: 3px solid #2D5A4E; border-radius: 10px; padding: 8px 12px; font-size: 0.85rem; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-center items-center p-4 text-center">
+            <h1 class="font-black text-2xl tracking-tight text-white">GESTÃO <span class="text-vetsmart-gold">FINANCEIRA</span></h1>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-4">
+
+        <div class="glass-panel p-5 rounded-2xl mt-6 gap-3">
+            <label class="text-xs font-bold text-vetsmart-green uppercase tracking-wider">Buscar Lançamento</label>
+            <div class="flex gap-2 mt-2">
+                <input type="text" id="search-input" placeholder="Valor, cliente ou cavalo..." class="form-input flex-1">
+                <button id="btn-search" class="bg-vetsmart-green text-white font-bold px-5 rounded-lg active:scale-95 transition-transform"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+            <div class="max-w-md mx-auto px-4 mt-4">
+                <button id="btn-lancar" class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-4 rounded-2xl shadow-lg active:scale-[0,98] transition-all flex itens-center justify-center gap-3 mt-3">
+                    <i class="fa-solid fa-plus-circle"></i>REALIZAR LANÇAMENTO
+                </button>
+            </div>
+        </div>
+        <div id="summary-boxes" class="grid grid-cols-2 gap-3 mb-4 mt-6">
+            <div class="glass-panel p-4 rounded-2xl"><p class="text-sm font-semibold text-green-700">Total Recebido</p><p id="total-recebido" class="text-2xl font-black text-vetsmart-green">R$ 0,00</p></div>
+            <div class="glass-panel p-4 rounded-2xl"><p class="text-sm font-semibold text-red-500">Total Pendente</p><p id="total-pendente" class="text-2xl font-black text-vetsmart-green">R$ 0,00</p></div>
+            <div class="glass-panel p-4 rounded-2xl"><p class="text-sm font-semibold text-yellow-500">Aguardando</p><p id="total-aguardando" class="text-2xl font-black text-vetsmart-green">R$ 0,00</p></div>
+            <div class="glass-panel p-4 rounded-2xl"><p class="text-sm font-semibold text-gray-500">Despesas</p><p id="total-despesas" class="text-2xl font-black text-vetsmart-green">R$ 0,00</p></div>
+        </div>
+
+        <div class="mt-4">
+            <div id="status-filters" class="mt-2 grid grid-cols-4 gap-1 text-sm mb-4">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="pago">Pago</button>
+                <button class="filter-btn" data-filter="pendente">Em Aberto</button>
+                <button class="filter-btn" data-filter="aguardando">Aguardando</button>
+            </div>
+            <div id="date-filters" class="mt-2 grid grid-cols-3 gap-2 text-sm">
+                <button class="filter-btn" data-date-filter="diario">Diário</button>
+                <button class="filter-btn" data-date-filter="semanal">Semanal</button>
+                <button class="filter-btn active" data-date-filter="mensal">Mensal</button>
+            </div>
+        </div>
+
+        <div id="transaction-list" class="mt-4 space-y-3"></div>
+    </main>
+
+    <div id="lancamento-modal" class="fixed inset-0 bg-black/40 z-[100] flex items-end justify-center opacity-0 pointer-events-none">
+        <div id="modal-content" class="glass-panel w-full max-w-md rounded-t-3xl p-6 max-h-[92vh] overflow-y-auto translate-y-full">
+            <form id="form-lancamento" autocomplete="off">
+
+                <div class="flex bg-vetsmart-green/10 p-1 rounded-xl mb-4">
+                    <div id="btn-toggle-cobranca" class="toggle-btn active">Cobrança</div>
+                    <div id="btn-toggle-despesa" class="toggle-btn">Despesa</div>
+                </div>
+                <input type="hidden" name="tipo_lancamento" id="tipo_lancamento_hidden" value="cobranca">
+
+                <div id="cobranca-fields" class="space-y-4">
+
+                    <div class="p-4 bg-white/50 rounded-2xl border border-vetsmart-green/20 space-y-3">
+                        <label class="text-[11px] font-black text-vetsmart-green/70 uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-horse text-vetsmart-gold"></i> Dados do Paciente e Cliente
+                        </label>
+
+                        <div class="flex bg-vetsmart-green/10 p-1 rounded-lg text-[10px] font-bold text-vetsmart-green">
+                            <button type="button" id="btn-tab-buscar-cliente" class="flex-1 py-1.5 rounded bg-vetsmart-green text-white shadow transition-all">Buscar Cadastro</button>
+                            <button type="button" id="btn-tab-quick-cliente" class="flex-1 py-1.5 rounded transition-all">Cadastro Rápido</button>
+                        </div>
+
+                        <div id="tab-buscar-cliente" class="space-y-2">
+                            <div class="relative">
+                                <div class="flex gap-2">
+                                    <input type="text" id="busca-paciente-input" placeholder="Digite o nome do cavalo..." class="input-glass text-sm flex-1" autocomplete="off">
+                                </div>
+                                <div id="dropdown-paciente" class="search-dropdown hidden"></div>
+                            </div>
+
+                            <div id="box-paciente-selecionado" class="hidden mt-1 p-3 bg-vetsmart-gold/15 rounded-xl border border-vetsmart-gold flex justify-between items-center">
+                                <div>
+                                    <p class="text-sm font-black text-vetsmart-green uppercase" id="display-cavalo"></p>
+                                    <p class="text-xs text-vetsmart-green/70 font-medium"><i class="fa-solid fa-user text-[10px]"></i> <span id="display-cliente"></span></p>
+                                </div>
+                                <button type="button" id="btn-limpar-paciente" class="text-red-400 p-2 hover:text-red-600"><i class="fa-solid fa-times"></i></button>
+                            </div>
+                            <input type="hidden" id="input_hidden_cavalo_id">
+                            <input type="hidden" id="input_hidden_cavalo_nome">
+                            <input type="hidden" id="input_hidden_cliente_nome">
+                            <input type="hidden" id="input_hidden_cliente_telefone">
+                        </div>
+
+                        <div id="tab-quick-cliente" class="hidden space-y-2 mt-2">
+                            <input type="text" id="qr_nome_cavalo" placeholder="Nome do Cavalo" class="input-glass text-sm">
+                            <input type="text" id="qr_nome_cliente" placeholder="Nome do Proprietário" class="input-glass text-sm">
+                            <input type="tel" id="qr_telefone" placeholder="WhatsApp (ex: 54999999999)" class="input-glass text-sm">
+                        </div>
+                    </div>
+
+                    <textarea name="procedimento" placeholder="Resumo do Procedimento Veterinário" class="input-glass" rows="2"></textarea>
+
+                    <div class="p-4 bg-white/50 rounded-2xl border border-vetsmart-green/20 space-y-3">
+                        <h4 class="font-black text-vetsmart-green text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-box-open text-vetsmart-gold"></i> Insumos Aplicados
+                        </h4>
+                        <div class="relative">
+                            <input type="text" id="busca-insumo-input" placeholder="Buscar no estoque e adicionar..." class="input-glass text-sm" autocomplete="off">
+                            <div id="dropdown-insumo" class="search-dropdown hidden"></div>
+                        </div>
+
+                        <div>
+                            <button type="button" id="btn-toggle-quick-add" class="text-xs font-bold text-vetsmart-gold-dark flex items-center gap-1 hover:underline">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Cadastro rápido de insumo
+                                <i class="fa-solid fa-chevron-down text-[9px]" id="quick-add-chevron"></i>
+                            </button>
+                            <div id="quick-add-panel" class="quick-add-panel hidden mt-1">
+                                <p class="text-[10px] font-black text-vetsmart-green/90 uppercase mb-2">Insumo não cadastrado no estoque?</p>
+                                <div class="flex gap-2">
+                                    <input type="text" id="quick-add-nome" placeholder="Nome do insumo" class="input-glass text-sm flex-1">
+                                    <input type="text" id="quick-add-valor" placeholder="R$ 0,00" class="input-glass text-sm w-28 text-center">
+                                    <button type="button" id="btn-quick-add" class="bg-vetsmart-green text-white px-4 rounded-xl text-sm font-bold active:scale-90 transition-all flex-shrink-0"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="lista-insumos-adicionados" class="space-y-2"></div>
+
+                        <div id="subtotal-insumos-row" class="hidden flex justify-between items-center pt-1 border-t border-vetsmart-green/10">
+                            <span class="text-xs font-semibold text-vetsmart-green/90">Subtotal insumos</span>
+                            <span id="subtotal-insumos-val" class="text-sm font-black text-vetsmart-green">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-black text-vetsmart-green/90 uppercase mb-1 block">Valor Atendimento</label>
+                            <input id="valor_servico" name="valor_servico" type="text" placeholder="R$ 0,00" class="input-glass font-bold text-vetsmart-green text-center">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-black text-vetsmart-green/90 uppercase mb-1 block">Total Fatura</label>
+                            <input id="valor_total_fatura" type="text" value="R$ 0,00" class="input-glass font-black text-vetsmart-gold-dark bg-vetsmart-gold/10 border-vetsmart-gold text-center" readonly>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-white/50 rounded-2xl border border-vetsmart-green/20 space-y-3">
+                        <label class="text-[11px] font-black text-vetsmart-green/70 uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-money-bill-wave text-vetsmart-gold"></i> Status do Pagamento
+                        </label>
+                        <div>
+                            <label class="text-sm font-bold text-vetsmart-green">Esse pagamento já foi realizado?</label>
+                            <div class="flex gap-4 mt-2">
+                                <label class="flex items-center gap-2 text-sm font-bold text-vetsmart-green cursor-pointer"><input type="radio" name="pagamento_realizado" value="sim" class="accent-vetsmart-green w-4 h-4"> Sim</label>
+                                <label class="flex items-center gap-2 text-sm font-bold text-vetsmart-green cursor-pointer"><input type="radio" name="pagamento_realizado" value="nao" class="accent-vetsmart-green w-4 h-4" checked> Não</label>
+                            </div>
+                        </div>
+                        <div id="box-forma-pagamento" class="hidden mt-3">
+                            <label class="text-xs font-bold text-vetsmart-green/70 uppercase">Qual foi a forma de pagamento?</label>
+                            <select id="forma_pagamento_select" name="forma_pagamento" class="select-glass mt-1 text-sm">
+                                <option value="" disabled selected>Selecione...</option>
+                                <option value="Pix">Pix</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="despesa-fields" class="space-y-3 hidden">
+                    <select name="despesa_categoria" class="select-glass">
+                        <option value="" disabled selected>Selecione a Categoria</option>
+                        <option value="Alimentação">Alimentação</option>
+                        <option value="Combustível">Combustível</option>
+                        <option value="Medicamentos">Medicamentos</option>
+                        <option value="Geral">Geral</option>
+                    </select>
+                    <input name="despesa_descricao" type="text" placeholder="Descrição da Despesa" class="input-glass">
+                    <input id="despesa_valor" name="despesa_valor" type="text" placeholder="Valor da Despesa (R$)" class="input-glass">
+                </div>
+
+                <button type="submit" class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-4 rounded-2xl uppercase tracking-widest active:scale-95 transition-all mt-5 shadow-lg">
+                    Salvar Lançamento
+                </button>
+                <button type="button" id="btn-cancel" class="w-full text-center text-sm text-gray-500 py-2 mt-1">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto p-2">
+            <div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center">
+                <a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] mt-1">Início</span></a>
+                <a href="novo-atendimento_1775208974082.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-notes-medical text-lg"></i><span class="text-[10px] mt-1">Atender</span></a>
+                <a href="clientes.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-horse text-lg"></i><span class="text-[10px] mt-1">Cavalos</span></a>
+                <a href="financeiro.html" class="flex flex-col items-center text-vetsmart-gold font-bold transition-all"><i class="fa-solid fa-dollar-sign text-lg"></i><span class="text-[10px] mt-1">Caixa</span></a>
+                <a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-calendar-check text-lg"></i><span class="text-[10px] mt-1">Atendimentos</span></a>
+                <a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-box-open text-lg"></i><span class="text-[10px] mt-1">Estoque</span></a>
+            </div>
+        </div>
+    </nav>
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, onSnapshot, addDoc, doc, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // D1: escapeHTML — protege contra XSS em todas as interpolações de dados Firestore
+        function escapeHTML(s) {
+            if (s == null) return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/\//g, '&#x2F;');
+        }
+
+        let currentUser;
+        let allTransactions = [];
+        let allInsumos = [];
+        let allClientes = [];
+        let currentStatusFilter = 'all';
+        let currentDateFilter = 'mensal';
+        let searchTerm = '';
+        let insumosFatura = [];
+
+        const fmt = (val) => Number(val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const getRaw = (val) => {
+            if (typeof val !== 'string') return 0;
+            return parseFloat(val.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        };
+
+        // --- Modal Control ---
+        const lancamentoModal = document.getElementById('lancamento-modal');
+        const modalContent = document.getElementById('modal-content');
+        document.getElementById('btn-lancar').addEventListener('click', () => {
+            lancamentoModal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('translate-y-full');
+        });
+        const closeModal = () => {
+            modalContent.classList.add('translate-y-full');
+            lancamentoModal.classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('form-lancamento').reset();
+            insumosFatura = [];
+            renderInsumosFatura();
+            document.getElementById('box-paciente-selecionado').classList.add('hidden');
+            document.getElementById('busca-paciente-input').value = '';
+            document.getElementById('tab-buscar-cliente').classList.remove('hidden');
+            document.getElementById('tab-quick-cliente').classList.add('hidden');
+            document.getElementById('btn-tab-buscar-cliente').classList.add('bg-vetsmart-green', 'text-white', 'shadow');
+            document.getElementById('btn-tab-quick-cliente').classList.remove('bg-vetsmart-green', 'text-white', 'shadow');
+        };
+        document.getElementById('btn-cancel').addEventListener('click', closeModal);
+        lancamentoModal.addEventListener('click', (e) => { if (e.target === lancamentoModal) closeModal(); });
+
+        // --- Form Logic & Tabs ---
+        document.querySelectorAll('input[name="pagamento_realizado"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                document.getElementById('box-forma-pagamento').classList.toggle('hidden', e.target.value === 'nao');
+            });
+        });
+
+        ['valor_servico', 'quick-add-valor', 'despesa_valor'].forEach(id => {
+            const input = document.getElementById(id);
+            input.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                value = (parseInt(value, 10) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                if (value === 'NaN') value = '0,00';
+                e.target.value = value;
+                if(id === 'valor_servico') updateTotal();
+            });
+        });
+
+        // --- Total & Insumos ---
+        const updateTotal = () => {
+            const servico = getRaw(document.getElementById('valor_servico').value);
+            const subtotal = insumosFatura.reduce((s, i) => s + (i.valor * i.qtd), 0);
+            const total = servico + subtotal;
+            document.getElementById('valor_total_fatura').value = fmt(total);
+            const row = document.getElementById('subtotal-insumos-row');
+            if (subtotal > 0) {
+                row.classList.remove('hidden');
+                document.getElementById('subtotal-insumos-val').textContent = fmt(subtotal);
+            } else {
+                row.classList.add('hidden');
+            }
+        };
+
+        const renderInsumosFatura = () => {
+            const lista = document.getElementById('lista-insumos-adicionados');
+            lista.innerHTML = insumosFatura.map((ins, i) => `
+                <div class="insumo-tag">
+                    <div>
+                        <p class="font-bold text-vetsmart-green text-sm">${escapeHTML(ins.nome)}</p>
+                        <p class="text-xs text-vetsmart-green/70">${escapeHTML(ins.qtd)}x · ${fmt(ins.valor)}</p>
+                    </div>
+                    <button type="button" onclick="removeInsumo(${i})" class="text-red-400 hover:text-red-600 text-xs px-2"><i class="fa-solid fa-times"></i></button>
+                </div>
+            `).join('');
+            updateTotal();
+        };
+        window.removeInsumo = (i) => { insumosFatura.splice(i, 1); renderInsumosFatura(); };
+
+        // --- Toggle Cobrança / Despesa ---
+        document.getElementById('btn-toggle-cobranca').addEventListener('click', () => {
+            document.getElementById('tipo_lancamento_hidden').value = 'cobranca';
+            document.getElementById('cobranca-fields').classList.remove('hidden');
+            document.getElementById('despesa-fields').classList.add('hidden');
+            document.getElementById('btn-toggle-cobranca').classList.add('active');
+            document.getElementById('btn-toggle-despesa').classList.remove('active');
+        });
+        document.getElementById('btn-toggle-despesa').addEventListener('click', () => {
+            document.getElementById('tipo_lancamento_hidden').value = 'despesa';
+            document.getElementById('cobranca-fields').classList.add('hidden');
+            document.getElementById('despesa-fields').classList.remove('hidden');
+            document.getElementById('btn-toggle-despesa').classList.add('active');
+            document.getElementById('btn-toggle-cobranca').classList.remove('active');
+        });
+
+        // --- Abas Buscar / Cadastro Rápido Cliente ---
+        document.getElementById('btn-tab-buscar-cliente').addEventListener('click', () => {
+            document.getElementById('tab-buscar-cliente').classList.remove('hidden');
+            document.getElementById('tab-quick-cliente').classList.add('hidden');
+            document.getElementById('btn-tab-buscar-cliente').classList.add('bg-vetsmart-green', 'text-white', 'shadow');
+            document.getElementById('btn-tab-quick-cliente').classList.remove('bg-vetsmart-green', 'text-white', 'shadow');
+        });
+        document.getElementById('btn-tab-quick-cliente').addEventListener('click', () => {
+            document.getElementById('tab-buscar-cliente').classList.add('hidden');
+            document.getElementById('tab-quick-cliente').classList.remove('hidden');
+            document.getElementById('btn-tab-quick-cliente').classList.add('bg-vetsmart-green', 'text-white', 'shadow');
+            document.getElementById('btn-tab-buscar-cliente').classList.remove('bg-vetsmart-green', 'text-white', 'shadow');
+        });
+
+        // --- Limpar paciente selecionado ---
+        document.getElementById('btn-limpar-paciente').addEventListener('click', () => {
+            document.getElementById('box-paciente-selecionado').classList.add('hidden');
+            document.getElementById('input_hidden_cavalo_id').value = '';
+            document.getElementById('input_hidden_cavalo_nome').value = '';
+            document.getElementById('input_hidden_cliente_nome').value = '';
+            document.getElementById('input_hidden_cliente_telefone').value = '';
+            document.getElementById('busca-paciente-input').value = '';
+        });
+
+        // --- Quick Add Insumo (toggle painel) ---
+        document.getElementById('btn-toggle-quick-add').addEventListener('click', () => {
+            const panel = document.getElementById('quick-add-panel');
+            const chevron = document.getElementById('quick-add-chevron');
+            panel.classList.toggle('hidden');
+            chevron.classList.toggle('fa-chevron-down');
+            chevron.classList.toggle('fa-chevron-up');
+        });
+
+        // --- Quick Add Insumo (botão +) ---
+        document.getElementById('btn-quick-add').addEventListener('click', () => {
+            const nome = document.getElementById('quick-add-nome').value.trim();
+            const valor = getRaw(document.getElementById('quick-add-valor').value);
+            if (!nome) { alert('Informe o nome do insumo.'); return; }
+            insumosFatura.push({ id: null, nome, valor, qtd: 1 });
+            renderInsumosFatura();
+            document.getElementById('quick-add-nome').value = '';
+            document.getElementById('quick-add-valor').value = '';
+        });
+
+        // --- Busca de insumos do estoque ---
+        const insumoInput = document.getElementById('busca-insumo-input');
+        const insumoDropdown = document.getElementById('dropdown-insumo');
+        insumoInput.addEventListener('input', () => {
+            const term = insumoInput.value.toLowerCase();
+            if (!term) { insumoDropdown.classList.add('hidden'); return; }
+            const filtered = allInsumos.filter(i => (i.nome || '').toLowerCase().includes(term));
+            if (!filtered.length) { insumoDropdown.classList.add('hidden'); return; }
+            insumoDropdown.innerHTML = filtered.map(i =>
+                `<div class="search-dropdown-item" data-id="${escapeHTML(i.id)}">${escapeHTML(i.nome)} · ${fmt(i.valorVenda || i.valorUnitario || 0)} / ${escapeHTML(i.unidade || 'un')}</div>`
+            ).join('');
+            insumoDropdown.classList.remove('hidden');
+        });
+        insumoDropdown.addEventListener('click', (e) => {
+            const target = e.target.closest('.search-dropdown-item');
+            if (!target) return;
+            const ins = allInsumos.find(i => i.id === target.dataset.id);
+            if (ins) {
+                insumosFatura.push({ id: ins.id, nome: ins.nome, valor: ins.valorVenda || ins.valorUnitario || 0, qtd: 1 });
+                renderInsumosFatura();
+                insumoInput.value = '';
+                insumoDropdown.classList.add('hidden');
+            }
+        });
+        document.addEventListener('click', (e) => {
+            if (!insumoDropdown.contains(e.target) && e.target !== insumoInput) insumoDropdown.classList.add('hidden');
+            if (!pacienteDropdown.contains(e.target) && e.target !== pacienteInput) pacienteDropdown.classList.add('hidden');
+        });
+
+        // --- Salvar Lançamento ---
+        document.getElementById('form-lancamento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Salvando...';
+
+            const tipo = document.getElementById('tipo_lancamento_hidden').value;
+            let data = { userId: currentUser.uid, data: serverTimestamp() };
+
+            if (tipo === 'cobranca') {
+                const isQuick = !document.getElementById('tab-quick-cliente').classList.contains('hidden');
+                const cavaloNome = isQuick
+                    ? document.getElementById('qr_nome_cavalo').value.trim()
+                    : document.getElementById('input_hidden_cavalo_nome').value;
+                const clienteNome = isQuick
+                    ? document.getElementById('qr_nome_cliente').value.trim()
+                    : document.getElementById('input_hidden_cliente_nome').value;
+                const telefone = isQuick
+                    ? document.getElementById('qr_telefone').value.trim()
+                    : document.getElementById('input_hidden_cliente_telefone').value;
+
+                const valorServico = getRaw(document.getElementById('valor_servico').value);
+                const subtotalInsumos = insumosFatura.reduce((s, i) => s + (i.valor * i.qtd), 0);
+                const totalFatura = valorServico + subtotalInsumos;
+                const pagRealizado = document.querySelector('input[name="pagamento_realizado"]:checked')?.value;
+
+                data = {
+                    ...data,
+                    tipo_lancamento: 'cobranca',
+                    tipo_atendimento: 'Lançamento Manual',
+                    procedimento: document.querySelector('textarea[name="procedimento"]').value,
+                    cavalo_id: document.getElementById('input_hidden_cavalo_id').value || null,
+                    nome_cavalo: cavaloNome || 'N/I',
+                    nome_proprietario: clienteNome || 'N/I',
+                    telefone_proprietario: telefone || '',
+                    insumos_utilizados: insumosFatura,
+                    valor_servico: valorServico,
+                    total_geral: totalFatura,
+                    status: pagRealizado === 'sim' ? 'pago' : 'pendente',
+                    forma_pagamento: pagRealizado === 'sim'
+                        ? document.getElementById('forma_pagamento_select').value
+                        : null,
+                };
+            } else {
+                const valor = getRaw(document.getElementById('despesa_valor').value);
+                if (!valor) {
+                    alert('Informe o valor da despesa.');
+                    btn.disabled = false; btn.textContent = 'Salvar Lançamento'; return;
+                }
+                data = {
+                    ...data,
+                    tipo_lancamento: 'despesa',
+                    despesa_categoria: document.querySelector('select[name="despesa_categoria"]').value,
+                    despesa_descricao: document.querySelector('input[name="despesa_descricao"]').value,
+                    nome_proprietario: document.querySelector('input[name="despesa_descricao"]').value,
+                    total_geral: valor,
+                    status: 'despesa',
+                };
+            }
+
+            try {
+                await addDoc(collection(db, "atendimentos"), data);
+                closeModal();
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao salvar lançamento. Tente novamente.');
+            } finally {
+                btn.disabled = false; btn.textContent = 'Salvar Lançamento';
+            }
+        });
+
+        // --- Patient/Client Search ---
+        const pacienteInput = document.getElementById('busca-paciente-input');
+        const pacienteDropdown = document.getElementById('dropdown-paciente');
+        pacienteInput.addEventListener('input', () => {
+            const term = pacienteInput.value.toLowerCase();
+            if (!term) { pacienteDropdown.classList.add('hidden'); return; }
+            
+            const filtered = allClientes.filter(c => c.nome_cavalo.toLowerCase().includes(term) || c.nome_proprietario.toLowerCase().includes(term));
+            pacienteDropdown.innerHTML = filtered.map(c => `<div class="search-dropdown-item" data-id="${escapeHTML(c.id)}">${escapeHTML(c.nome_cavalo)} (${escapeHTML(c.nome_proprietario)})</div>`).join('');
+            pacienteDropdown.classList.remove('hidden');
+        });
+
+        pacienteDropdown.addEventListener('click', (e) => {
+            const target = e.target.closest('.search-dropdown-item');
+            if (!target) return;
+            
+            const cliente = allClientes.find(c => c.id === target.dataset.id);
+            if (cliente) {
+                document.getElementById('input_hidden_cavalo_id').value = cliente.id;
+                document.getElementById('input_hidden_cavalo_nome').value = cliente.nome_cavalo;
+                document.getElementById('input_hidden_cliente_nome').value = cliente.nome_proprietario;
+                document.getElementById('input_hidden_cliente_telefone').value = cliente.telefone_proprietario;
+                
+                document.getElementById('display-cavalo').textContent = cliente.nome_cavalo;
+                document.getElementById('display-cliente').textContent = cliente.nome_proprietario;
+                
+                document.getElementById('box-paciente-selecionado').classList.remove('hidden');
+                pacienteDropdown.classList.add('hidden');
+                pacienteInput.value = '';
+            }
+        });
+        
+        // --- Main Listeners ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                const uid = user.uid;
+                onSnapshot(query(collection(db, "atendimentos"), where("userId", "==", uid)), snap => {
+                    allTransactions = snap.docs
+                        .map(d => ({ id: d.id, ...d.data() }))
+                        .sort((a, b) => {
+                            const ta = a.data?.toDate ? a.data.toDate() : new Date(a.data || 0);
+                            const tb = b.data?.toDate ? b.data.toDate() : new Date(b.data || 0);
+                            return tb - ta;
+                        });
+                    renderTransactions();
+                }, err => console.error("Firestore atendimentos:", err));
+                onSnapshot(query(collection(db, "estoque"), where("userId", "==", uid)), snap => {
+                    allInsumos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                });
+                onSnapshot(query(collection(db, "clientes"), where("userId", "==", uid)), snap => {
+                    allClientes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                });
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+        // --- Render and Filter ---
+        const renderTransactions = () => {
+            let filtered = allTransactions.filter(t => {
+                const s = searchTerm.toLowerCase();
+                const searchMatch = !s || 
+                    (t.total_geral || 0).toString().includes(s) ||
+                    (t.nome_proprietario || '').toLowerCase().includes(s) || 
+                    (t.nome_cavalo || '').toLowerCase().includes(s) || 
+                    (t.procedimento || '').toLowerCase().includes(s) || 
+                    (t.despesa_descricao || '').toLowerCase().includes(s);
+
+                const toDate = dt => dt ? (dt.toDate ? dt.toDate() : new Date(dt)) : new Date(0);
+                const today = new Date(); today.setHours(0,0,0,0);
+                let dateMatch = false;
+                if (currentDateFilter === 'diario') {
+                    dateMatch = toDate(t.data) >= today;
+                } else if (currentDateFilter === 'semanal') {
+                    const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+                    dateMatch = toDate(t.data) >= weekAgo;
+                } else { // mensal
+                    const monthAgo = new Date(today); monthAgo.setMonth(monthAgo.getMonth() - 1);
+                    dateMatch = toDate(t.data) >= monthAgo;
+                }
+
+                const statusMatch = currentStatusFilter === 'all' || t.status === currentStatusFilter;
+                
+                return searchMatch && dateMatch && statusMatch;
+            });
+
+            const list = document.getElementById('transaction-list');
+            list.innerHTML = filtered.length ? '' : `<div class='glass-panel text-center p-8 rounded-2xl'><p class='text-vetsmart-green/70'>Nenhuma transação encontrada.</p></div>`;
+
+            const colors = { pago: 'border-green-500', pendente: 'border-red-400', aguardando: 'border-yellow-400', despesa: 'border-gray-500', 'nao-finalizado': 'border-blue-400' };
+            filtered.forEach(t => {
+                const item = document.createElement('a');
+                item.href = `detalhe-fatura.html?id=${t.id}`;
+                item.className = `glass-panel rounded-2xl p-4 block border-l-4 ${colors[t.status] || 'border-gray-400'}`;
+                const badgeMap = {
+                    pago: 'bg-green-100 text-green-700 border border-green-300',
+                    pendente: 'bg-red-100 text-red-700 border border-red-300',
+                    aguardando: 'bg-yellow-100 text-yellow-700 border border-yellow-300',
+                    despesa: 'bg-gray-100 text-gray-600 border border-gray-300',
+                    rascunho: 'bg-blue-100 text-blue-700 border border-blue-300',
+                    'nao-finalizado': 'bg-blue-100 text-blue-700 border border-blue-300',
+                };
+                const badgeLabelMap = {
+                    pago: 'RECEBIDO',
+                    pendente: 'PENDENTE',
+                    aguardando: 'AGUARDANDO',
+                    despesa: 'DESPESA',
+                    rascunho: 'RASCUNHO',
+                    'nao-finalizado': 'RASCUNHO',
+                };
+                const badgeClass = badgeMap[t.status] || 'bg-gray-100 text-gray-500 border border-gray-200';
+                const badgeLabel = badgeLabelMap[t.status] || (t.status || 'N/A').toUpperCase();
+                item.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-bold text-vetsmart-green text-lg">${fmt(t.total_geral)}</p>
+                            <p class="text-sm text-vetsmart-green/90 truncate">${escapeHTML(t.nome_proprietario || t.despesa_descricao || 'N/A')}</p>
+                            ${t.nome_cavalo ? `<p class="text-xs text-vetsmart-green/70 truncate">${escapeHTML(t.nome_cavalo)}</p>` : ''}
+                        </div>
+                        <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                            <span class="text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide ${badgeClass}">${escapeHTML(badgeLabel)}</span>
+                            <i class="fa-solid fa-chevron-right text-vetsmart-green/40 mt-1"></i>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+            updateSummary();
+        };
+
+        const updateSummary = () => {
+            const sum = (st) => allTransactions.filter(t => t.status === st).reduce((s, t) => s + (t.total_geral || 0), 0);
+            document.getElementById('total-recebido').textContent = fmt(sum('pago'));
+            document.getElementById('total-pendente').textContent = fmt(sum('pendente'));
+            document.getElementById('total-aguardando').textContent = fmt(sum('aguardando'));
+            document.getElementById('total-despesas').textContent = fmt(sum('despesa'));
+        };
+
+        document.getElementById('search-input').addEventListener('input', e => { searchTerm = e.target.value; renderTransactions(); });
+        document.getElementById('btn-search').addEventListener('click', () => { searchTerm = document.getElementById('search-input').value; renderTransactions(); });
+        document.getElementById('status-filters').addEventListener('click', e => {
+            if (e.target.tagName !== 'BUTTON') return;
+            currentStatusFilter = e.target.dataset.filter;
+            document.querySelectorAll('#status-filters button').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            renderTransactions();
+        });
+        document.getElementById('date-filters').addEventListener('click', e => {
+            if (e.target.tagName !== 'BUTTON') return;
+            currentDateFilter = e.target.dataset.dateFilter;
+            document.querySelectorAll('#date-filters button').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            renderTransactions();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Venda Rápida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .input-glass { background: rgba(240,245,243,0.8); border: 2px solid transparent; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .input-glass:focus { border-color: #D2B48C; outline: none; }
+        .select-glass { background: rgba(240,245,243,0.8); border: 2px solid transparent; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .form-input { background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 10px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .form-input:focus { border-color: #D2B48C; outline: none; box-shadow: 0 0 0 2px #d2b48c30; }
+        .search-dropdown { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: white; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); border: 1px solid #e5e7eb; z-index: 200; max-height: 220px; overflow-y: auto; }
+        .search-dropdown-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+        .search-dropdown-item:last-child { border-bottom: none; }
+        .search-dropdown-item:hover { background: #F0F5F3; }
+        #modal-med-bg, #modal-cli-bg { transition: opacity 0.3s; }
+        #modal-med, #modal-cli { transition: transform 0.3s; }
+    </style>
+</head>
+<body class="pb-36">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="estoque.html" class="text-white/80 hover:text-white"><i class="fa-solid fa-chevron-left text-xl"></i></a>
+            <h1 class="font-black text-xl tracking-tight uppercase absolute left-1/2 -translate-x-1/2">
+                <span class="text-white">VENDA</span> <span class="text-vetsmart-gold">RÁPIDA</span>
+            </h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+
+        <!-- Busca de Produtos -->
+        <div class="glass-panel p-5 rounded-2xl">
+            <label class="text-xs font-bold text-vetsmart-green uppercase tracking-wider">Buscar Produto</label>
+            <div class="relative mt-2">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-vetsmart-green/40 z-10"></i>
+                <input id="product-search" type="text" placeholder="Nome do produto..." class="input-glass pl-12" autocomplete="off">
+                <div id="search-results" class="search-dropdown hidden"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-3">
+                <button id="btn-quick-med" class="bg-vetsmart-green/10 border border-vetsmart-green/20 text-vetsmart-green font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <i class="fa-solid fa-pills text-vetsmart-gold"></i> Novo Medicamento
+                </button>
+                <button id="btn-quick-cli" class="bg-vetsmart-green/10 border border-vetsmart-green/20 text-vetsmart-green font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 active:scale-95 transition-all">
+                    <i class="fa-solid fa-user-plus text-vetsmart-gold"></i> Novo Cliente
+                </button>
+            </div>
+        </div>
+
+        <!-- Carrinho -->
+        <div id="cart-items" class="space-y-3">
+            <div class="glass-panel text-center p-8 rounded-2xl">
+                <p class="text-vetsmart-green/50 font-medium">Nenhum produto na venda.</p>
+            </div>
+        </div>
+
+        <!-- Cliente -->
+        <div class="glass-panel rounded-2xl p-5 space-y-3">
+            <p class="text-xs font-bold text-vetsmart-green uppercase tracking-wider">Cliente</p>
+            <div class="flex bg-vetsmart-green/10 p-1 rounded-lg text-[10px] font-bold text-vetsmart-green">
+                <button id="btn-tab-buscar" class="flex-1 py-1.5 rounded bg-vetsmart-green text-white shadow transition-all">Buscar Cadastro</button>
+                <button id="btn-tab-rapido" class="flex-1 py-1.5 rounded transition-all">Dados Rápidos</button>
+            </div>
+            <!-- Tab buscar -->
+            <div id="tab-buscar" class="relative">
+                <input type="text" id="search-cliente" placeholder="Nome do cavalo ou proprietário..." class="input-glass text-sm" autocomplete="off">
+                <div id="dropdown-cliente" class="search-dropdown hidden"></div>
+                <div id="box-cliente-sel" class="hidden mt-2 p-3 bg-vetsmart-gold/15 rounded-xl border border-vetsmart-gold flex justify-between items-center">
+                    <div>
+                        <p id="disp-cavalo" class="text-sm font-black text-vetsmart-green uppercase"></p>
+                        <p id="disp-prop" class="text-xs text-vetsmart-green/70"><i class="fa-solid fa-user text-[10px]"></i> <span></span></p>
+                    </div>
+                    <button id="btn-limpar-cli" class="text-red-400 p-1 text-sm"><i class="fa-solid fa-times"></i></button>
+                </div>
+                <input type="hidden" id="h-cli-id">
+                <input type="hidden" id="h-cavalo-nome">
+                <input type="hidden" id="h-prop-nome">
+            </div>
+            <!-- Tab rápido -->
+            <div id="tab-rapido" class="hidden space-y-2">
+                <input type="text" id="qr-nome" placeholder="Nome do Cliente / Proprietário" class="input-glass text-sm">
+                <input type="tel" id="qr-tel" placeholder="WhatsApp (opcional)" class="input-glass text-sm">
+            </div>
+        </div>
+
+        <!-- Forma de Pagamento -->
+        <div class="glass-panel p-5 rounded-2xl">
+            <p class="text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-3">Forma de Pagamento</p>
+            <div class="flex flex-wrap gap-3">
+                <label class="flex items-center gap-2 text-sm font-bold text-vetsmart-green cursor-pointer">
+                    <input type="radio" name="forma_pgto" value="Pix" class="accent-vetsmart-green w-4 h-4" checked> Pix
+                </label>
+                <label class="flex items-center gap-2 text-sm font-bold text-vetsmart-green cursor-pointer">
+                    <input type="radio" name="forma_pgto" value="Dinheiro" class="accent-vetsmart-green w-4 h-4"> Dinheiro
+                </label>
+                <label class="flex items-center gap-2 text-sm font-bold text-vetsmart-green cursor-pointer">
+                    <input type="radio" name="forma_pgto" value="Cartão" class="accent-vetsmart-green w-4 h-4"> Cartão
+                </label>
+                <label class="flex items-center gap-2 text-sm font-bold text-vetsmart-green cursor-pointer">
+                    <input type="radio" name="forma_pgto" value="Link" class="accent-vetsmart-green w-4 h-4"> Link Stripe
+                </label>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-5 left-0 right-0 flex flex-col items-center gap-2 z-[9999] pointer-events-none"></div>
+
+    <!-- Footer / Checkout -->
+    <footer class="fixed bottom-0 left-0 right-0 z-40">
+        <div class="max-w-md mx-auto p-4 bg-white/90 backdrop-blur-md border-t border-vetsmart-green/20">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-vetsmart-green/70 font-bold text-sm">Total da Venda</span>
+                <span id="total-price" class="font-black text-2xl text-vetsmart-green">R$ 0,00</span>
+            </div>
+            <button id="btn-finalizar" class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-4 rounded-2xl uppercase tracking-widest active:scale-95 transition-all shadow-lg">
+                <i class="fa-solid fa-bolt mr-2"></i> Finalizar Venda
+            </button>
+            <button id="btn-stripe" class="w-full mt-2 bg-vetsmart-green text-white font-black py-3 rounded-2xl uppercase tracking-widest active:scale-95 transition-all hidden">
+                <i class="fa-brands fa-stripe mr-2"></i> Gerar Link de Pagamento
+            </button>
+        </div>
+    </footer>
+
+    <!-- Modal Novo Medicamento -->
+    <div id="modal-med-bg" class="fixed inset-0 bg-black/40 z-[100] flex items-end justify-center opacity-0 pointer-events-none">
+        <div id="modal-med" class="glass-panel w-full max-w-md rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto translate-y-full">
+            <h3 class="font-black text-vetsmart-green text-lg mb-4">Novo Medicamento</h3>
+            <form id="form-med" class="space-y-3">
+                <input type="text" name="nome" placeholder="Nome do produto" class="input-glass" required>
+                <select name="tipo_insumo" class="select-glass">
+                    <option value="" disabled selected>Tipo de insumo</option>
+                    <option>Anti-inflamatório</option><option>Antibiótico</option>
+                    <option>Seringa</option><option>Agulha</option>
+                    <option>Vitaminas</option><option>Antiparasitário</option>
+                    <option>Anestésico</option><option>Outro</option>
+                </select>
+                <select name="unidade" class="select-glass">
+                    <option value="" disabled selected>Unidade</option>
+                    <option>unidade</option><option>ml</option><option>frasco</option>
+                    <option>comprimido</option><option>caixa</option><option>ampola</option><option>dose</option>
+                </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" name="quantidade" placeholder="Qtd inicial" min="1" value="1" class="input-glass">
+                    <input type="number" name="valorVenda" placeholder="Valor venda R$" step="0.01" min="0" class="input-glass">
+                </div>
+                <input type="number" name="valorUnitario" placeholder="Custo unitário R$ (opcional)" step="0.01" min="0" class="input-glass">
+                <button type="submit" class="w-full bg-vetsmart-gold text-vetsmart-green font-black py-3 rounded-2xl uppercase active:scale-95 transition-all">Salvar Medicamento</button>
+                <button type="button" id="btn-cancel-med" class="w-full text-sm text-gray-500 py-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Novo Cliente -->
+    <div id="modal-cli-bg" class="fixed inset-0 bg-black/40 z-[100] flex items-end justify-center opacity-0 pointer-events-none">
+        <div id="modal-cli" class="glass-panel w-full max-w-md rounded-t-3xl p-6 max-h-[80vh] overflow-y-auto translate-y-full">
+            <h3 class="font-black text-vetsmart-green text-lg mb-4">Cadastro Rápido de Cliente</h3>
+            <form id="form-cli" class="space-y-3">
+                <input type="text" name="nome_cavalo" placeholder="Nome do Cavalo *" class="input-glass" required>
+                <input type="text" name="nome_proprietario" placeholder="Nome do Proprietário *" class="input-glass" required>
+                <input type="tel" name="telefone_proprietario" placeholder="WhatsApp (opcional)" class="input-glass">
+                <select name="raca" class="select-glass">
+                    <option value="" disabled selected>Raça (opcional)</option>
+                    <option>SRD</option><option>Quarto de Milha</option><option>Crioulo</option>
+                    <option>Mangalarga Marchador</option><option>Puro Sangue Inglês</option><option>Outro</option>
+                </select>
+                <button type="submit" class="w-full bg-vetsmart-gold text-vetsmart-green font-black py-3 rounded-2xl uppercase active:scale-95 transition-all">Salvar Cliente</button>
+                <button type="button" id="btn-cancel-cli" class="w-full text-sm text-gray-500 py-2">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50 hidden"><!-- nav escondida (footer fixo acima) --></nav>
+
+    <script type="module">
+        import { auth, db, BASE_URL } from "./firebase.js";
+
+        function showToast(msg, isSuccess = true, duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-5 py-3 rounded-xl shadow-xl text-white text-sm font-bold flex items-center gap-2 transition-all duration-300 ${isSuccess ? 'bg-vetsmart-green' : 'bg-red-500'}`;
+            const icon = document.createElement('i');
+            icon.className = `fa-solid ${isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation'}`;
+            const span = document.createElement('span');
+            span.textContent = msg;
+            toast.appendChild(icon);
+            toast.appendChild(document.createTextNode(' '));
+            toast.appendChild(span);
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, getDocs, doc, addDoc, writeBatch, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let currentUser;
+        let products = [];
+        let allClientes = [];
+        let cart = [];
+
+        const fmt = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // ── Modais ────────────────────────────────────────────────────
+        const openModal = (bg, panel) => {
+            bg.classList.remove('opacity-0', 'pointer-events-none');
+            panel.classList.remove('translate-y-full');
+        };
+        const closeModal = (bg, panel) => {
+            panel.classList.add('translate-y-full');
+            bg.classList.add('opacity-0', 'pointer-events-none');
+        };
+
+        const medBg  = document.getElementById('modal-med-bg');
+        const medPan = document.getElementById('modal-med');
+        const cliBg  = document.getElementById('modal-cli-bg');
+        const cliPan = document.getElementById('modal-cli');
+
+        document.getElementById('btn-quick-med').addEventListener('click', () => openModal(medBg, medPan));
+        document.getElementById('btn-cancel-med').addEventListener('click', () => closeModal(medBg, medPan));
+        medBg.addEventListener('click', e => e.target === medBg && closeModal(medBg, medPan));
+
+        document.getElementById('btn-quick-cli').addEventListener('click', () => openModal(cliBg, cliPan));
+        document.getElementById('btn-cancel-cli').addEventListener('click', () => closeModal(cliBg, cliPan));
+        cliBg.addEventListener('click', e => e.target === cliBg && closeModal(cliBg, cliPan));
+
+        // ── Abas cliente ──────────────────────────────────────────────
+        document.getElementById('btn-tab-buscar').addEventListener('click', () => {
+            document.getElementById('tab-buscar').classList.remove('hidden');
+            document.getElementById('tab-rapido').classList.add('hidden');
+            document.getElementById('btn-tab-buscar').classList.add('bg-vetsmart-green','text-white','shadow');
+            document.getElementById('btn-tab-rapido').classList.remove('bg-vetsmart-green','text-white','shadow');
+        });
+        document.getElementById('btn-tab-rapido').addEventListener('click', () => {
+            document.getElementById('tab-buscar').classList.add('hidden');
+            document.getElementById('tab-rapido').classList.remove('hidden');
+            document.getElementById('btn-tab-rapido').classList.add('bg-vetsmart-green','text-white','shadow');
+            document.getElementById('btn-tab-buscar').classList.remove('bg-vetsmart-green','text-white','shadow');
+        });
+
+        // ── Toggle botão Stripe vs Finalizar ──────────────────────────
+        document.querySelectorAll('input[name="forma_pgto"]').forEach(r => {
+            r.addEventListener('change', () => {
+                const isLink = r.value === 'Link' && r.checked;
+                document.getElementById('btn-stripe').classList.toggle('hidden', !isLink);
+                document.getElementById('btn-finalizar').classList.toggle('hidden', isLink);
+            });
+        });
+
+        // ── Auth + Carga ──────────────────────────────────────────────
+        onAuthStateChanged(auth, async user => {
+            if (!user) { window.location.replace('login.html'); return; }
+            currentUser = user;
+            await loadInitialData(user.uid);
+        });
+
+        async function loadInitialData(uid) {
+            const [prodSnap, cliSnap] = await Promise.all([
+                getDocs(query(collection(db, "estoque"), where("userId", "==", uid))),
+                getDocs(query(collection(db, "clientes"), where("userId", "==", uid)))
+            ]);
+            products = prodSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            allClientes = cliSnap.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => (a.nome_cavalo || '').localeCompare(b.nome_cavalo || '', 'pt-BR'));
+        }
+
+        // ── Busca de Produtos ─────────────────────────────────────────
+        const productSearch = document.getElementById('product-search');
+        const searchResults = document.getElementById('search-results');
+
+        productSearch.addEventListener('input', () => {
+            const term = productSearch.value.toLowerCase();
+            if (term.length < 2) { searchResults.classList.add('hidden'); return; }
+            const filtered = products.filter(p => (p.nome || '').toLowerCase().includes(term) && p.quantidade > 0);
+            if (!filtered.length) { searchResults.classList.add('hidden'); return; }
+            searchResults.innerHTML = filtered.slice(0, 6).map(p => `
+                <div class="search-dropdown-item" data-id="${p.id}">
+                    <span class="font-bold text-vetsmart-green">${p.nome}</span>
+                    <span class="text-xs text-vetsmart-green/50 ml-1">${p.tipo_insumo || ''}</span>
+                    <span class="text-xs text-vetsmart-gold-dark font-bold ml-2">${fmt(p.valorVenda)}</span>
+                    <span class="text-[11px] text-gray-400 ml-1">(${p.quantidade} ${p.unidade || 'un'})</span>
+                </div>
+            `).join('');
+            searchResults.classList.remove('hidden');
+        });
+
+        searchResults.addEventListener('click', e => {
+            const target = e.target.closest('.search-dropdown-item');
+            if (!target) return;
+            addToCart(target.dataset.id);
+            productSearch.value = '';
+            searchResults.classList.add('hidden');
+        });
+
+        // ── Carrinho ──────────────────────────────────────────────────
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            const existing = cart.find(i => i.id === productId);
+            if (existing) {
+                if (existing.quantity < product.quantidade) existing.quantity++;
+                else { showToast('Quantidade máxima em estoque atingida.', false); return; }
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+            renderCart();
+        }
+
+        window.updateCartQty = (productId, change) => {
+            const item = cart.find(i => i.id === productId);
+            const prod = products.find(p => p.id === productId);
+            if (!item) return;
+            if (change > 0 && prod && item.quantity >= prod.quantidade) {
+                showToast('Quantidade máxima em estoque atingida.', false); return;
+            }
+            item.quantity += change;
+            if (item.quantity <= 0) cart = cart.filter(i => i.id !== productId);
+            renderCart();
+        };
+
+        function renderCart() {
+            const container = document.getElementById('cart-items');
+            if (!cart.length) {
+                container.innerHTML = `<div class="glass-panel text-center p-8 rounded-2xl"><p class="text-vetsmart-green/50 font-medium">Nenhum produto na venda.</p></div>`;
+                updateTotal(); return;
+            }
+            container.innerHTML = cart.map(item => `
+                <div class="glass-panel rounded-2xl p-4 flex justify-between items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-vetsmart-green leading-tight truncate">${item.nome}</p>
+                        <p class="text-xs text-vetsmart-green/60">${fmt(item.valorVenda)} · ${item.tipo_insumo || ''}</p>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <button onclick="updateCartQty('${item.id}',-1)" class="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center active:scale-90 transition-all"><i class="fa-solid fa-minus text-xs"></i></button>
+                        <span class="font-black text-lg text-vetsmart-green w-6 text-center">${item.quantity}</span>
+                        <button onclick="updateCartQty('${item.id}',1)" class="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center active:scale-90 transition-all"><i class="fa-solid fa-plus text-xs"></i></button>
+                    </div>
+                    <span class="font-black text-vetsmart-gold-dark text-sm flex-shrink-0">${fmt(item.valorVenda * item.quantity)}</span>
+                </div>
+            `).join('');
+            updateTotal();
+        }
+
+        function updateTotal() {
+            const total = cart.reduce((s, i) => s + (i.valorVenda * i.quantity), 0);
+            document.getElementById('total-price').textContent = fmt(total);
+        }
+
+        // ── Busca de Cliente ──────────────────────────────────────────
+        const searchCliente = document.getElementById('search-cliente');
+        const dropCliente   = document.getElementById('dropdown-cliente');
+
+        searchCliente.addEventListener('input', () => {
+            const term = searchCliente.value.toLowerCase();
+            if (!term) { dropCliente.classList.add('hidden'); return; }
+            const filtered = allClientes.filter(c =>
+                (c.nome_cavalo || '').toLowerCase().includes(term) ||
+                (c.nome_proprietario || '').toLowerCase().includes(term)
+            );
+            if (!filtered.length) { dropCliente.classList.add('hidden'); return; }
+            dropCliente.innerHTML = filtered.slice(0, 6).map(c => `
+                <div class="search-dropdown-item" data-id="${c.id}">
+                    <span class="font-bold text-vetsmart-green">${c.nome_cavalo}</span>
+                    <span class="text-xs text-vetsmart-green/60 ml-2">${c.nome_proprietario || ''}</span>
+                </div>
+            `).join('');
+            dropCliente.classList.remove('hidden');
+        });
+
+        dropCliente.addEventListener('click', e => {
+            const target = e.target.closest('.search-dropdown-item');
+            if (!target) return;
+            const c = allClientes.find(x => x.id === target.dataset.id);
+            if (c) {
+                document.getElementById('h-cli-id').value = c.id;
+                document.getElementById('h-cavalo-nome').value = c.nome_cavalo;
+                document.getElementById('h-prop-nome').value = c.nome_proprietario || '';
+                document.getElementById('disp-cavalo').textContent = c.nome_cavalo;
+                document.querySelector('#disp-prop span').textContent = c.nome_proprietario || '';
+                document.getElementById('box-cliente-sel').classList.remove('hidden');
+                dropCliente.classList.add('hidden');
+                searchCliente.value = '';
+            }
+        });
+
+        document.getElementById('btn-limpar-cli').addEventListener('click', () => {
+            document.getElementById('box-cliente-sel').classList.add('hidden');
+            ['h-cli-id','h-cavalo-nome','h-prop-nome'].forEach(id => document.getElementById(id).value = '');
+        });
+
+        document.addEventListener('click', e => {
+            if (!dropCliente.contains(e.target) && e.target !== searchCliente) dropCliente.classList.add('hidden');
+            if (!searchResults.contains(e.target) && e.target !== productSearch) searchResults.classList.add('hidden');
+        });
+
+        // ── Salvar Medicamento ────────────────────────────────────────
+        document.getElementById('form-med').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = e.target.querySelector('[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Salvando...';
+            const fd = new FormData(e.target);
+            try {
+                const ref = await addDoc(collection(db, "estoque"), {
+                    userId: currentUser.uid,
+                    nome: fd.get('nome').trim(),
+                    tipo_insumo: fd.get('tipo_insumo') || 'Outro',
+                    unidade: fd.get('unidade') || 'unidade',
+                    quantidade: parseInt(fd.get('quantidade')) || 1,
+                    valorVenda: parseFloat(fd.get('valorVenda')) || 0,
+                    valorUnitario: parseFloat(fd.get('valorUnitario')) || 0,
+                    minimoCritico: 5,
+                    createdAt: serverTimestamp(),
+                    ultimaAtualizacao: serverTimestamp(),
+                });
+                products.push({
+                    id: ref.id,
+                    nome: fd.get('nome').trim(),
+                    tipo_insumo: fd.get('tipo_insumo') || 'Outro',
+                    unidade: fd.get('unidade') || 'unidade',
+                    quantidade: parseInt(fd.get('quantidade')) || 1,
+                    valorVenda: parseFloat(fd.get('valorVenda')) || 0,
+                });
+                e.target.reset();
+                closeModal(medBg, medPan);
+            } catch (err) {
+                console.error(err); showToast('Erro ao salvar medicamento.', false);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Salvar Medicamento';
+            }
+        });
+
+        // ── Salvar Cliente Rápido ─────────────────────────────────────
+        document.getElementById('form-cli').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = e.target.querySelector('[type="submit"]');
+            btn.disabled = true; btn.textContent = 'Salvando...';
+            const fd = new FormData(e.target);
+            try {
+                const novoCliente = {
+                    userId: currentUser.uid,
+                    nome_cavalo: fd.get('nome_cavalo').trim(),
+                    nome_proprietario: fd.get('nome_proprietario').trim(),
+                    telefone_proprietario: fd.get('telefone_proprietario') || null,
+                    raca: fd.get('raca') || null,
+                    horseId: `VS-${Date.now().toString().slice(-6)}`,
+                    timestamp: serverTimestamp(),
+                };
+                const ref = await addDoc(collection(db, "clientes"), novoCliente);
+                const cli = { id: ref.id, ...novoCliente };
+                allClientes.push(cli);
+                // Selecionar automaticamente
+                document.getElementById('h-cli-id').value = ref.id;
+                document.getElementById('h-cavalo-nome').value = cli.nome_cavalo;
+                document.getElementById('h-prop-nome').value = cli.nome_proprietario;
+                document.getElementById('disp-cavalo').textContent = cli.nome_cavalo;
+                document.querySelector('#disp-prop span').textContent = cli.nome_proprietario;
+                document.getElementById('box-cliente-sel').classList.remove('hidden');
+                e.target.reset();
+                closeModal(cliBg, cliPan);
+            } catch (err) {
+                console.error(err); showToast('Erro ao salvar cliente.', false);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Salvar Cliente';
+            }
+        });
+
+        // ── Checkout ──────────────────────────────────────────────────
+        const finalizarVenda = async (gerarLink = false) => {
+            if (!cart.length) { showToast('Adicione pelo menos um produto.', false); return; }
+
+            const isQuick = !document.getElementById('tab-rapido').classList.contains('hidden');
+            const cavaloNome = isQuick ? '' : document.getElementById('h-cavalo-nome').value;
+            const propNome   = isQuick
+                ? document.getElementById('qr-nome').value.trim()
+                : document.getElementById('h-prop-nome').value;
+
+            const forma = document.querySelector('input[name="forma_pgto"]:checked')?.value || 'Pix';
+            const totalCents = Math.round(cart.reduce((s, i) => s + (i.valorVenda * i.quantity), 0) * 100);
+            const total = totalCents / 100;
+            const productName = `Venda Rápida (${cart.length} ${cart.length === 1 ? 'item' : 'itens'})`;
+
+            if (!propNome && !cavaloNome) {
+                showToast('Informe o cliente ou o nome do responsável.', false);
+                return;
+            }
+
+            const btn = gerarLink
+                ? document.getElementById('btn-stripe')
+                : document.getElementById('btn-finalizar');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Processando...';
+
+            try {
+                const batch = writeBatch(db);
+
+                // Decrementar estoque
+                cart.forEach(item => {
+                    batch.update(doc(db, "estoque", item.id), {
+                        quantidade: increment(-item.quantity),
+                        ultimaAtualizacao: serverTimestamp()
+                    });
+                });
+
+                // Criar atendimento
+                const transRef = doc(collection(db, "atendimentos"));
+                const transacaoId = transRef.id;
+                batch.set(transRef, {
+                    userId: currentUser.uid,
+                    data: serverTimestamp(),
+                    tipo_lancamento: 'cobranca',
+                    tipo_atendimento: 'Venda Rápida',
+                    clienteId: document.getElementById('h-cli-id').value || null,
+                    nome_cavalo: cavaloNome || 'Venda Balcão',
+                    nome_proprietario: propNome || 'Cliente Avulso',
+                    procedimento: productName,
+                    valor_servico: 0,
+                    total_geral: total,
+                    forma_pagamento: gerarLink ? 'Stripe Link' : forma,
+                    status: gerarLink ? 'aguardando' : 'pago',
+                    insumos: cart.map(i => ({ id: i.id, nome: i.nome, quantidade: i.quantity, precovenda: i.valorVenda })),
+                    ultimaAtualizacao: serverTimestamp()
+                });
+
+                await batch.commit();
+
+                if (gerarLink) {
+                    const idToken = await currentUser.getIdToken();
+                    const response = await fetch(`${BASE_URL}/create-payment-link`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        body: JSON.stringify({
+                            amount: totalCents,
+                            productName,
+                            transacaoId,
+                            userId: currentUser.uid
+                        }),
+                    });
+                    const data = await response.json();
+                    if (response.ok && data.url) {
+                        showToast('Link de pagamento gerado! Redirecionando...', true, 1500);
+                        setTimeout(() => { window.location.href = data.url; }, 1500);
+                    } else {
+                        showToast(`Venda registrada, mas erro no link: ${data.error || 'Verifique o Stripe.'}`, false, 4000);
+                        setTimeout(() => { window.location.href = 'financeiro.html'; }, 4000);
+                    }
+                } else {
+                    showToast(`Venda registrada! Total: ${fmt(total)}`, true, 2000);
+                    setTimeout(() => { window.location.href = 'financeiro.html'; }, 2000);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao processar a venda. Tente novamente.', false);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = gerarLink
+                    ? '<i class="fa-brands fa-stripe mr-2"></i> Gerar Link de Pagamento'
+                    : '<i class="fa-solid fa-bolt mr-2"></i> Finalizar Venda';
+            }
+        };
+
+        document.getElementById('btn-finalizar').addEventListener('click', () => finalizarVenda(false));
+        document.getElementById('btn-stripe').addEventListener('click', () => finalizarVenda(true));
+    </script>
+</body>
+</html>

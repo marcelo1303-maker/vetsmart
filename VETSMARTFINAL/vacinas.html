@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Carteira de Vacinas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: { 'sans': ['Poppins', 'Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Poppins', 'Inter', sans-serif; background: linear-gradient(135deg, #F0F5F3 0%, #E8EFF0 100%); color: #1A3A31; }
+        .glass-panel { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .icon-nav a { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:12px; background-color:white; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.05); color:#6b7280; font-weight:500; font-size:12px; transition:all 0.2s; text-decoration:none; }
+        .icon-nav a.active { color:#D2B48C; font-weight:700; }
+        .status-ok { background:#dcfce7; color:#16a34a; }
+        .status-warn { background:#fef9c3; color:#ca8a04; }
+        .status-late { background:#fee2e2; color:#dc2626; }
+        #notif-sheet { transition: transform 0.35s cubic-bezier(.32,.72,0,1), opacity 0.25s; }
+    </style>
+</head>
+<body class="pb-32">
+
+<header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg border-b-4 border-vetsmart-gold">
+    <div class="max-w-md mx-auto flex justify-between items-center p-4">
+        <a id="back-link" href="clientes.html" class="h-10 w-10 flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></a>
+        <h1 class="font-black text-xl uppercase tracking-tight">Carteira de Vacinas</h1>
+        <div class="w-10"></div>
+    </div>
+</header>
+
+<main class="max-w-md mx-auto px-4 mt-6 space-y-5">
+
+    <div id="loading-spinner" class="text-center py-16">
+        <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-4xl"></i>
+        <p class="text-vetsmart-green mt-4 font-medium">Carregando...</p>
+    </div>
+
+    <div id="main-content" class="hidden space-y-5">
+
+        <!-- Identificação do Animal -->
+        <div class="glass-panel rounded-3xl p-5">
+            <div class="flex items-center gap-4">
+                <div class="h-14 w-14 bg-vetsmart-green rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                    <i class="fa-solid fa-syringe text-vetsmart-gold text-2xl"></i>
+                </div>
+                <div class="overflow-hidden">
+                    <h2 id="display-horse-name" class="font-black text-xl text-vetsmart-green-dark truncate">---</h2>
+                    <p id="display-horse-owner" class="text-xs text-vetsmart-green/70 font-medium truncate">Proprietário: ---</p>
+                    <p class="text-[10px] font-black text-vetsmart-gold uppercase tracking-widest mt-1">Carteira de Vacinação</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu de abas -->
+        <div id="icon-menu" class="grid grid-cols-4 gap-3 icon-nav"></div>
+
+        <!-- Botão nova vacinação -->
+        <a id="btn-nova-vacina" href="#" class="flex items-center justify-center gap-3 w-full bg-vetsmart-gold text-vetsmart-green-dark font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all uppercase tracking-widest text-sm">
+            <i class="fa-solid fa-plus-circle text-lg"></i> Nova Vacinação
+        </a>
+
+        <!-- Lista de vacinações -->
+        <div id="vacinas-list" class="space-y-4"></div>
+
+    </div>
+</main>
+
+<!-- Modal de notificação -->
+<div id="notif-overlay" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-end justify-center">
+    <div id="notif-sheet" class="w-full max-w-md bg-white rounded-t-3xl p-6 translate-y-full opacity-0 max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-5">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 bg-vetsmart-green rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-bell text-vetsmart-gold"></i>
+                </div>
+                <div>
+                    <p class="font-black text-vetsmart-green-dark text-base">Notificações Agendadas</p>
+                    <p id="notif-vaccine-name" class="text-xs text-gray-500"></p>
+                </div>
+            </div>
+            <button id="btn-close-notif" class="h-9 w-9 bg-gray-100 rounded-full flex items-center justify-center active:scale-90 transition-transform">
+                <i class="fa-solid fa-xmark text-gray-600"></i>
+            </button>
+        </div>
+
+        <div id="notif-body" class="space-y-4"></div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-vetsmart-green text-white px-8 py-6 rounded-2xl font-black shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-center flex flex-col items-center gap-2 max-w-xs">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-4xl text-vetsmart-gold"></i>
+    <span id="toast-msg">OK!</span>
+</div>
+
+<script type="module">
+    import { auth, db } from './firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+    import { doc, getDoc, collection, query, where, getDocs, orderBy } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const horseId = urlParams.get('id');
+
+    let vetPhone = '';
+    let ownerPhone = '';
+    let horseName = '';
+
+    function mostrarToast(msg, ok = true) {
+        const t = document.getElementById('toast');
+        document.getElementById('toast-msg').textContent = msg;
+        document.getElementById('toast-icon').className = `fa-solid ${ok ? 'fa-circle-check text-vetsmart-gold' : 'fa-circle-xmark text-red-400'} text-4xl`;
+        t.classList.remove('opacity-0');
+        setTimeout(() => t.classList.add('opacity-0'), 3000);
+    }
+
+    // ─── Datas ────────────────────────────────────────────────────────────
+    const fmtDate = (str) => {
+        if (!str) return '---';
+        const d = new Date(str + 'T12:00:00');
+        return isNaN(d) ? str : d.toLocaleDateString('pt-BR');
+    };
+
+    const fmtTs = (ts) => {
+        if (!ts) return '---';
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return d.toLocaleDateString('pt-BR');
+    };
+
+    const calcStatus = (proximaDoseStr) => {
+        if (!proximaDoseStr) return null;
+        const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+        const proxima = new Date(proximaDoseStr + 'T12:00:00');
+        const diff = Math.ceil((proxima - hoje) / 86400000);
+        if (diff < 0) return { label: 'Vencida', cls: 'status-late', diff };
+        if (diff <= 10) return { label: `Vence em ${diff}d`, cls: 'status-warn', diff };
+        return { label: `Vence em ${diff}d`, cls: 'status-ok', diff };
+    };
+
+    const calcNotifDate = (proximaDoseStr) => {
+        if (!proximaDoseStr) return null;
+        const d = new Date(proximaDoseStr + 'T12:00:00');
+        d.setDate(d.getDate() - 10);
+        return d.toLocaleDateString('pt-BR');
+    };
+
+    // ─── Modal de notificação ─────────────────────────────────────────────
+    const overlay = document.getElementById('notif-overlay');
+    const sheet = document.getElementById('notif-sheet');
+
+    const openNotif = (vacina, atendimentoId) => {
+        document.getElementById('notif-vaccine-name').textContent = vacina.nome || 'Vacina';
+
+        const status = calcStatus(vacina.proximaDose);
+        const notifDate = calcNotifDate(vacina.proximaDose);
+
+        const msgOwner = encodeURIComponent(
+            `*LEMBRETE DE VACINAÇÃO — HORSE SMART*\n\n` +
+            `🐴 Animal: ${horseName}\n` +
+            `💉 Vacina: ${vacina.nome}\n` +
+            `📅 Próxima dose: ${fmtDate(vacina.proximaDose)}\n\n` +
+            `Por favor, agende a aplicação com seu veterinário.\n_Horse Smart_`
+        );
+        const msgVet = encodeURIComponent(
+            `*LEMBRETE DE VACINAÇÃO — HORSE SMART*\n\n` +
+            `🐴 Animal: ${horseName}\n` +
+            `💉 Vacina: ${vacina.nome}\n` +
+            `📅 Próxima dose: ${fmtDate(vacina.proximaDose)}\n\n` +
+            `Lembrete automático para agendamento.\n_Horse Smart_`
+        );
+
+        const ownerWpp = ownerPhone ? `https://wa.me/55${ownerPhone.replace(/\D/g, '')}?text=${msgOwner}` : null;
+        const vetWpp = vetPhone ? `https://wa.me/55${vetPhone.replace(/\D/g, '')}?text=${msgVet}` : null;
+
+        document.getElementById('notif-body').innerHTML = `
+            <div class="bg-vetsmart-green/5 rounded-2xl p-4 space-y-2">
+                <p class="text-[10px] font-black text-vetsmart-green uppercase tracking-widest">Calendário</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Data de Aplicação</span>
+                    <span class="font-bold text-vetsmart-green-dark">${fmtDate(vacina.dataAplicacao)}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Próxima Dose</span>
+                    <span class="font-bold text-vetsmart-green-dark">${fmtDate(vacina.proximaDose)}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Notificação (10 dias antes)</span>
+                    <span class="font-bold text-vetsmart-gold-dark">${notifDate || '---'}</span>
+                </div>
+                ${status ? `<div class="mt-2"><span class="px-3 py-1 rounded-full text-xs font-black ${status.cls}">${status.label}</span></div>` : ''}
+                ${vacina.lote ? `<div class="flex justify-between items-center"><span class="text-sm text-gray-600">Lote / Fabricante</span><span class="font-bold text-gray-700 text-sm">${vacina.lote}</span></div>` : ''}
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-[10px] font-black text-vetsmart-green uppercase tracking-widest">Enviar Lembrete via WhatsApp</p>
+                ${ownerWpp ? `
+                <a href="${ownerWpp}" target="_blank" class="flex items-center gap-3 bg-green-500 text-white font-bold py-3 px-4 rounded-2xl active:scale-95 transition-all shadow-md">
+                    <i class="fa-brands fa-whatsapp text-xl"></i>
+                    <div class="text-left">
+                        <p class="text-sm">Lembrete ao Proprietário</p>
+                        <p class="text-[10px] opacity-75">${ownerPhone}</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-sm opacity-70"></i>
+                </a>` : `<p class="text-sm text-gray-400 italic">Telefone do proprietário não cadastrado.</p>`}
+                ${vetWpp ? `
+                <a href="${vetWpp}" target="_blank" class="flex items-center gap-3 bg-vetsmart-green text-white font-bold py-3 px-4 rounded-2xl active:scale-95 transition-all shadow-md">
+                    <i class="fa-brands fa-whatsapp text-xl"></i>
+                    <div class="text-left">
+                        <p class="text-sm">Lembrete ao Veterinário</p>
+                        <p class="text-[10px] opacity-75">${vetPhone}</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-sm opacity-70"></i>
+                </a>` : ''}
+            </div>
+
+            <a href="detalhe-fatura.html?id=${atendimentoId}" class="flex items-center justify-center gap-2 text-vetsmart-green font-bold text-sm py-3 border-2 border-vetsmart-green/20 rounded-2xl active:scale-95 transition-all">
+                <i class="fa-solid fa-file-invoice"></i> Ver Fatura Completa
+            </a>
+        `;
+
+        overlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+            sheet.classList.remove('translate-y-full', 'opacity-0');
+        });
+    };
+
+    const closeNotif = () => {
+        sheet.classList.add('translate-y-full', 'opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 350);
+    };
+
+    document.getElementById('btn-close-notif').addEventListener('click', closeNotif);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeNotif(); });
+
+    // ─── Render ───────────────────────────────────────────────────────────
+    function renderVacinas(docs) {
+        const container = document.getElementById('vacinas-list');
+
+        if (docs.length === 0) {
+            container.innerHTML = `
+                <div class="glass-panel rounded-3xl p-10 text-center space-y-3">
+                    <i class="fa-solid fa-syringe text-vetsmart-gold/40 text-5xl"></i>
+                    <p class="font-bold text-vetsmart-green/60">Nenhuma vacinação registrada para este animal.</p>
+                    <p class="text-xs text-gray-400">Use o botão "Nova Vacinação" para registrar.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = '';
+        docs.forEach(docSnap => {
+            const d = docSnap.data();
+            const atendId = docSnap.id;
+            const vacinas = Array.isArray(d.vacinas) && d.vacinas.length > 0 ? d.vacinas : [];
+            const dataAtend = fmtTs(d.data);
+
+            // Determinar pior status entre todas as vacinas deste atendimento
+            let worstStatus = null;
+            vacinas.forEach(v => {
+                const s = calcStatus(v.proximaDose);
+                if (!s) return;
+                if (!worstStatus || s.diff < worstStatus.diff) worstStatus = s;
+            });
+
+            const statusBadge = worstStatus
+                ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black ${worstStatus.cls}">${worstStatus.label}</span>`
+                : '';
+
+            const vacinasHtml = vacinas.map(v => {
+                const st = calcStatus(v.proximaDose);
+                const stBadge = st ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-black ${st.cls} ml-2">${st.label}</span>` : '';
+                return `
+                    <div class="flex justify-between items-start py-2 border-b border-gray-50 last:border-0">
+                        <div class="flex-1 pr-3">
+                            <p class="font-black text-vetsmart-green-dark text-sm">${v.nome || 'Vacina'}${stBadge}</p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">Aplicação: ${fmtDate(v.dataAplicacao)} • Próxima: ${fmtDate(v.proximaDose)}</p>
+                            ${v.lote ? `<p class="text-[10px] text-gray-400">${v.lote}</p>` : ''}
+                        </div>
+                        <button class="btn-notif h-9 w-9 bg-vetsmart-green/5 rounded-xl flex items-center justify-center active:scale-90 transition-transform border border-vetsmart-green/10 flex-shrink-0"
+                            data-atend="${atendId}"
+                            data-vacina='${JSON.stringify(v).replace(/'/g, "&apos;")}'>
+                            <i class="fa-solid fa-bell text-vetsmart-gold text-sm"></i>
+                        </button>
+                    </div>`;
+            }).join('');
+
+            const card = document.createElement('div');
+            card.className = 'glass-panel rounded-3xl overflow-hidden';
+            card.innerHTML = `
+                <a href="detalhe-fatura.html?id=${atendId}" class="flex items-center justify-between px-5 pt-4 pb-3 bg-vetsmart-green/5 hover:bg-vetsmart-green/10 transition-colors">
+                    <div>
+                        <p class="text-[10px] font-black text-vetsmart-green uppercase tracking-widest">Atendimento • ${dataAtend}</p>
+                        <p class="text-sm font-bold text-vetsmart-green-dark mt-0.5">${vacinas.length} vacina(s) registrada(s) ${statusBadge}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-vetsmart-green/30 text-xs"></i>
+                </a>
+                <div class="px-5 pb-4 pt-2 space-y-0">${vacinasHtml || '<p class="text-xs text-gray-400 italic py-2">Sem vacinas detalhadas neste registro.</p>'}</div>
+            `;
+
+            card.querySelectorAll('.btn-notif').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const vacinaData = JSON.parse(btn.dataset.vacina.replace(/&apos;/g, "'"));
+                    openNotif(vacinaData, btn.dataset.atend);
+                });
+            });
+
+            container.appendChild(card);
+        });
+    }
+
+    // ─── Auth + Load ──────────────────────────────────────────────────────
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.replace('login.html'); return; }
+
+        if (!horseId) {
+            document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 font-bold">ID do animal não fornecido.</p>`;
+            return;
+        }
+
+        try {
+            const [horseSnap, vetSnap] = await Promise.all([
+                getDoc(doc(db, 'clientes', horseId)),
+                getDoc(doc(db, 'veterinarios', user.uid))
+            ]);
+
+            if (!horseSnap.exists() || (horseSnap.data().userId && horseSnap.data().userId !== user.uid)) {
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 font-bold">Animal não encontrado ou acesso negado.</p>`;
+                return;
+            }
+
+            const horseData = { id: horseSnap.id, ...horseSnap.data() };
+            horseName = horseData.nome_cavalo || 'Animal';
+            ownerPhone = horseData.telefone_proprietario || '';
+            vetPhone = vetSnap.exists() ? (vetSnap.data().telefone || '') : '';
+
+            document.getElementById('display-horse-name').textContent = horseName;
+            document.getElementById('display-horse-owner').textContent = `Proprietário: ${horseData.nome_proprietario || '---'}`;
+            document.getElementById('back-link').href = `dossie.html?id=${horseId}`;
+            document.getElementById('btn-nova-vacina').href = `vacinacao.html?id=${horseId}`;
+
+            document.getElementById('icon-menu').innerHTML = `
+                <a href="dossie.html?id=${horseId}"><i class="fa-solid fa-info-circle"></i><span>Informações</span></a>
+                <a href="historico.html?id=${horseId}"><i class="fa-solid fa-book-medical"></i><span>Histórico</span></a>
+                <a href="#" class="active"><i class="fa-solid fa-syringe"></i><span>Vacinas</span></a>
+                <a href="exames.html?id=${horseId}"><i class="fa-solid fa-file-alt"></i><span>Exames</span></a>
+            `;
+
+            const vacinasQuery = query(
+                collection(db, 'atendimentos'),
+                where('userId', '==', user.uid),
+                where('horseId', '==', horseId),
+                where('tipo_atendimento', '==', 'Vacinação')
+            );
+            const vacinasSnap = await getDocs(vacinasQuery);
+            const sortedVacinas = vacinasSnap.docs.sort((a, b) => {
+                const ta = a.data().data?.toDate ? a.data().data.toDate() : new Date(a.data().data || 0);
+                const tb = b.data().data?.toDate ? b.data().data.toDate() : new Date(b.data().data || 0);
+                return tb - ta;
+            });
+            renderVacinas(sortedVacinas);
+
+            document.getElementById('loading-spinner').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+
+        } catch (error) {
+            console.error('Erro ao carregar vacinas:', error);
+            mostrarToast('Erro ao carregar dados.', false);
+            document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 font-bold">Erro ao carregar dados.</p>`;
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Meus Cavalos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .input-glass { background: rgba(240,245,243,0.8); border: 2px solid transparent; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .input-glass:focus { border-color: #D2B48C; outline: none; }
+        .select-glass { background: rgba(240,245,243,0.8); border: 2px solid transparent; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .select-glass:focus { border-color: #D2B48C; outline: none; }
+        .nav-active { color: #D2B48C !important; }
+        #sheet-modal { transition: opacity 0.3s ease-in-out; }
+        #sheet-content { transition: transform 0.3s ease-in-out; }
+        .horse-card { border: 1.5px solid #D2B48C; }
+        #toast-container { pointer-events: none; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <div id="toast-container" class="fixed top-5 left-0 right-0 flex flex-col items-center gap-2 z-[9999]"></div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-6">
+        <div class="glass-panel p-6 rounded-3xl w-full max-w-sm space-y-4">
+            <p class="font-black text-vetsmart-green text-lg">Excluir cavalo?</p>
+            <p id="confirm-msg" class="text-vetsmart-green/60 text-sm">Esta ação não pode ser desfeita.</p>
+            <div class="flex gap-3">
+                <button id="confirm-cancel" class="flex-1 py-3 rounded-xl border border-vetsmart-green/20 text-vetsmart-green font-bold">Cancelar</button>
+                <button id="confirm-ok" class="flex-1 py-3 rounded-xl bg-red-500 text-white font-black">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="dashboard-proprietarios.html" class="text-white/80 hover:text-white"><i class="fa-solid fa-chevron-left text-xl"></i></a>
+            <h1 class="font-black text-2xl uppercase">Meus <span class="text-vetsmart-gold">Cavalos</span></h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
+
+        <button id="btn-novo" class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-4 rounded-2xl uppercase tracking-widest text-sm active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
+            <i class="fa-solid fa-plus-circle"></i> Novo Cavalo
+        </button>
+
+        <div id="loader" class="text-center py-10">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-3xl"></i>
+        </div>
+
+        <div id="lista-cavalos" class="space-y-3 hidden"></div>
+
+        <div id="empty-state" class="hidden text-center py-10">
+            <i class="fa-solid fa-horse text-vetsmart-gold/40 text-5xl mb-4"></i>
+            <p class="text-vetsmart-green/40 font-bold">Nenhum cavalo cadastrado.</p>
+            <p class="text-vetsmart-green/30 text-sm mt-1">Clique em "Novo Cavalo" para adicionar.</p>
+        </div>
+
+    </main>
+
+    <!-- Bottom Sheet: Novo Cavalo -->
+    <div id="sheet-modal" class="fixed inset-0 bg-black/40 z-[100] flex items-end justify-center opacity-0 pointer-events-none">
+        <div id="sheet-content" class="glass-panel w-full max-w-md rounded-t-3xl p-6 max-h-[90vh] overflow-y-auto translate-y-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="sheet-title" class="font-black text-vetsmart-green text-xl">Novo Cavalo</h3>
+                <button id="sheet-close" class="w-8 h-8 flex items-center justify-center rounded-full bg-vetsmart-green/10 text-vetsmart-green">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="form-cavalo" class="space-y-3">
+                <input type="hidden" id="edit-horse-id" value="">
+
+                <div>
+                    <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Nome do Cavalo *</label>
+                    <input type="text" id="f-nome" class="input-glass" placeholder="Ex: Trovão" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Raça</label>
+                        <input type="text" id="f-raca" class="input-glass" placeholder="Quarto de Milha">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Pelagem</label>
+                        <input type="text" id="f-pelagem" class="input-glass" placeholder="Alazão">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Sexo</label>
+                        <select id="f-sexo" class="select-glass">
+                            <option value="">Selecione</option>
+                            <option value="Macho">Macho</option>
+                            <option value="Fêmea">Fêmea</option>
+                            <option value="Castrado">Castrado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Data de Nasc.</label>
+                        <input type="date" id="f-nascimento" class="input-glass">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Microchip / Registro</label>
+                    <input type="text" id="f-microchip" class="input-glass" placeholder="Opcional">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Observações</label>
+                    <textarea id="f-obs" class="input-glass" rows="2" placeholder="Condição especial, histórico relevante..."></textarea>
+                </div>
+
+                <div id="sheet-error" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3"></div>
+
+                <button type="submit" id="btn-salvar-cavalo" class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-4 rounded-2xl uppercase tracking-widest text-sm active:scale-95 transition-all mt-2">
+                    <i class="fa-solid fa-floppy-disk mr-2"></i> Salvar Cavalo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-vetsmart-green/95 backdrop-blur-md border-t border-white/10">
+        <div class="max-w-md mx-auto flex justify-around items-center py-2 px-2">
+            <a href="dashboard-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-house text-xl"></i><span class="text-[9px] font-bold uppercase">Início</span>
+            </a>
+            <a href="cavalos-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl nav-active">
+                <i class="fa-solid fa-horse text-xl"></i><span class="text-[9px] font-bold uppercase">Cavalos</span>
+            </a>
+            <a href="faturas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-file-invoice text-xl"></i><span class="text-[9px] font-bold uppercase">Faturas</span>
+            </a>
+            <a href="receitas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-flask text-xl"></i><span class="text-[9px] font-bold uppercase">Receitas</span>
+            </a>
+            <a href="financeiro-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-chart-line text-xl"></i><span class="text-[9px] font-bold uppercase">Financeiro</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, getDocs, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let currentUser = null;
+        let proprietarioData = null;
+        let cavalos = [];
+        let editingId = null;
+
+        // ── Auth Guard ────────────────────────────────────────────────────────
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.replace('index-proprietario.html'); return; }
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (!snap.exists()) { await signOut(auth); window.location.replace('index-proprietario.html'); return; }
+            currentUser = user;
+            proprietarioData = { uid: user.uid, ...snap.data() };
+            loadCavalos();
+        });
+
+        // ── Toast ─────────────────────────────────────────────────────────────
+        function showToast(msg, ok = true) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `pointer-events-auto px-5 py-3 rounded-xl shadow-xl text-white text-sm font-bold flex items-center gap-2 transition-all duration-300 ${ok ? 'bg-vetsmart-green' : 'bg-red-500'}`;
+            const icon = document.createElement('i');
+            icon.className = `fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-exclamation'}`;
+            const span = document.createElement('span');
+            span.textContent = msg;
+            t.appendChild(icon);
+            t.appendChild(document.createTextNode(' '));
+            t.appendChild(span);
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+        }
+
+        // ── Bottom Sheet ──────────────────────────────────────────────────────
+        const sheet = document.getElementById('sheet-modal');
+        const sheetContent = document.getElementById('sheet-content');
+
+        function openSheet(editing = null) {
+            editingId = editing ? editing.id : null;
+            document.getElementById('sheet-title').textContent = editing ? 'Editar Cavalo' : 'Novo Cavalo';
+            document.getElementById('f-nome').value = editing?.nome_cavalo || editing?.nome || '';
+            document.getElementById('f-raca').value = editing?.raca || '';
+            document.getElementById('f-pelagem').value = editing?.pelagem || '';
+            document.getElementById('f-sexo').value = editing?.sexo || '';
+            document.getElementById('f-nascimento').value = editing?.data_nascimento || '';
+            document.getElementById('f-microchip').value = editing?.microchip || '';
+            document.getElementById('f-obs').value = editing?.observacoes || '';
+            document.getElementById('sheet-error').classList.add('hidden');
+            sheet.style.opacity = '1';
+            sheet.style.pointerEvents = 'auto';
+            sheetContent.style.transform = 'translateY(0)';
+        }
+
+        function closeSheet() {
+            sheet.style.opacity = '0';
+            sheet.style.pointerEvents = 'none';
+            sheetContent.style.transform = 'translateY(100%)';
+            document.getElementById('form-cavalo').reset();
+            editingId = null;
+        }
+
+        document.getElementById('btn-novo').addEventListener('click', () => openSheet());
+        document.getElementById('sheet-close').addEventListener('click', closeSheet);
+        sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(); });
+
+        // ── Carregar Cavalos ──────────────────────────────────────────────────
+        async function loadCavalos() {
+            const cpf = proprietarioData.cpf || '';
+            const q = query(collection(db, 'cavalos'), where('cpfProprietario', '==', cpf));
+            const snap = await getDocs(q);
+            cavalos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderLista();
+        }
+
+        function calcularIdade(dataNasc) {
+            if (!dataNasc) return null;
+            const nasc = new Date(dataNasc);
+            const diff = Date.now() - nasc.getTime();
+            const anos = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+            return anos > 0 ? `${anos} ano${anos !== 1 ? 's' : ''}` : 'Menos de 1 ano';
+        }
+
+        function renderLista() {
+            const lista = document.getElementById('lista-cavalos');
+            const empty = document.getElementById('empty-state');
+            document.getElementById('loader').classList.add('hidden');
+
+            if (!cavalos.length) {
+                lista.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+            lista.classList.remove('hidden');
+            empty.classList.add('hidden');
+
+            lista.innerHTML = cavalos.map(c => {
+                const nome = c.nome_cavalo || c.nome || 'Sem nome';
+                const idade = calcularIdade(c.data_nascimento);
+                const info = [c.raca, c.pelagem, c.sexo, idade].filter(Boolean).join(' · ');
+                return `
+                <div class="glass-panel horse-card rounded-2xl overflow-hidden">
+                    <a href="dossie-proprietarios.html?id=${c.id}" class="flex items-center gap-4 p-4">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: linear-gradient(135deg, #D2B48C20, #D2B48C40);">
+                            <i class="fa-solid fa-horse text-vetsmart-gold text-xl"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-black text-vetsmart-green text-lg leading-tight">${nome}</h3>
+                            <p class="text-xs text-vetsmart-green/50 mt-0.5 truncate">${info || 'Sem informações adicionais'}</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-vetsmart-gold/50 text-sm"></i>
+                    </a>
+                    <div class="flex gap-2 px-4 pb-3">
+                        <button onclick="editarCavalo('${c.id}')" class="flex-1 py-2 text-xs font-bold text-vetsmart-green border border-vetsmart-green/20 rounded-xl hover:bg-vetsmart-green/5 active:scale-95 transition-all">
+                            <i class="fa-solid fa-pencil mr-1"></i> Editar
+                        </button>
+                        <button onclick="excluirCavalo('${c.id}','${nome}')" class="flex-1 py-2 text-xs font-bold text-red-500 border border-red-200 rounded-xl hover:bg-red-50 active:scale-95 transition-all">
+                            <i class="fa-solid fa-trash mr-1"></i> Excluir
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Salvar Cavalo ─────────────────────────────────────────────────────
+        document.getElementById('form-cavalo').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('f-nome').value.trim();
+            if (!nome) { document.getElementById('sheet-error').textContent = 'Informe o nome do cavalo.'; document.getElementById('sheet-error').classList.remove('hidden'); return; }
+
+            const btn = document.getElementById('btn-salvar-cavalo');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin mr-2"></i> Salvando...';
+
+            const cpf = proprietarioData.cpf || '';
+            const dados = {
+                nome_cavalo: nome,
+                nome: nome,
+                raca: document.getElementById('f-raca').value.trim(),
+                pelagem: document.getElementById('f-pelagem').value.trim(),
+                sexo: document.getElementById('f-sexo').value,
+                data_nascimento: document.getElementById('f-nascimento').value,
+                microchip: document.getElementById('f-microchip').value.trim(),
+                observacoes: document.getElementById('f-obs').value.trim(),
+                cpfProprietario: cpf,
+                uidProprietario: currentUser.uid,
+                nomeProprietario: proprietarioData.nomeCompleto || '',
+                cadastradoPor: 'proprietario',
+                updatedAt: serverTimestamp()
+            };
+
+            try {
+                if (editingId) {
+                    await updateDoc(doc(db, 'cavalos', editingId), dados);
+                    showToast('Cavalo atualizado!');
+                } else {
+                    dados.criadoEm = serverTimestamp();
+                    await addDoc(collection(db, 'cavalos'), dados);
+                    showToast('Cavalo cadastrado!');
+                }
+                closeSheet();
+                await loadCavalos();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('sheet-error').textContent = 'Erro ao salvar. Tente novamente.';
+                document.getElementById('sheet-error').classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i> Salvar Cavalo';
+            }
+        });
+
+        // ── Editar / Excluir ──────────────────────────────────────────────────
+        window.editarCavalo = (id) => {
+            const c = cavalos.find(x => x.id === id);
+            if (c) openSheet(c);
+        };
+
+        window.excluirCavalo = (id, nome) => {
+            document.getElementById('confirm-msg').textContent = `Excluir "${nome}"? Esta ação não pode ser desfeita.`;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            document.getElementById('confirm-ok').onclick = async () => {
+                document.getElementById('confirm-modal').classList.add('hidden');
+                try {
+                    await deleteDoc(doc(db, 'cavalos', id));
+                    showToast('Cavalo excluído.');
+                    await loadCavalos();
+                } catch (err) {
+                    showToast('Erro ao excluir.', false);
+                }
+            };
+            document.getElementById('confirm-cancel').onclick = () => document.getElementById('confirm-modal').classList.add('hidden');
+        };
+    </script>
+</body>
+</html>

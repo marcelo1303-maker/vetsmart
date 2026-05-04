@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Gestão Atendimentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+        .input-glass, .form-input { background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 10px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .input-glass:focus, .form-input:focus { border-color: #D2B48C; outline: none; box-shadow: 0 0 0 2px #d2b48c30; }
+        .filter-btn { background-color: rgba(255,255,255,0.7); color: #2D5A4E; padding: 0.5rem; border-radius: 8px; transition: all .2s; border: 1px solid #2D5A4E; font-size: 0.8rem; }
+        .filter-btn.active { background-color: #2D5A4E; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(45,90,78,0.2); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        @keyframes pulse-border {
+            0%, 100% {
+                border-color: #2D5A4E; /* amber-500 */
+                box-shadow: 0 0 3px #FBBF24;
+            }
+            50% {
+                border-color: #D97706; /* amber-600 */
+                box-shadow: 0 0 10px 2px rgba(251, 191, 36, 0.4);
+            }
+        }
+        .flashing-filter {
+            animation: pulse-border 1.5s infinite;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-center items-center p-4">
+            <h1 class="font-black text-2xl">GESTÃO DE <span class="text-vetsmart-gold">ATENDIMENTOS</span></h1>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6">
+
+
+        <div class="glass-panel p-5 rounded-2xl mt-6 gap-3">
+            <label class="text-xs font-bold text-vetsmart-green uppercase tracking-wider">Buscar Atendimento</label>
+            <div class="flex gap-2 mt-2">
+                <input id="search-input" type="text" placeholder="Buscar cavalo ou proprietário..." class="form-input flex-1">
+                <button id="btn-search" type="button" class="bg-vetsmart-green text-white font-bold px-5 rounded-lg active:scale-95 transition-transform"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+
+            <div id="filter-container" class="mt-2 grid grid-cols-2 gap-1 text-sm mb-4">
+                <button data-filter="todos" class="filter-btn active">Todos</button>
+                <button id="filter-nao-finalizado" data-filter="nao-finalizado" class="filter-btn">Não Finalizados</button>
+                <button data-filter="pago" class="filter-btn">Finalizados (Pagos)</button>
+                <button data-filter="pendente" class="filter-btn">Pendentes</button>
+            </div>
+        </div>
+
+        <div class="mt-6 pt-2 border-t border-vetsmart-green/10">
+            <h2 class="font-bold text-vetsmart-green text-center uppercase text-sm tracking-wider">Meus Atendimentos</h2>
+       </div>
+
+        <div id="atendimentos-list" class="space-y-3">
+            <div class="flex justify-center p-10"><i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-3xl"></i></div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto p-2">
+            <div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center">
+                <a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-[10px] mt-1">Início</span>
+                </a>
+                <a href="novo-atendimento_1775208974082.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-notes-medical text-lg"></i>
+                    <span class="text-[10px] mt-1">Atender</span>
+                </a>
+                <a href="clientes.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-horse text-lg"></i>
+                    <span class="text-[10px] mt-1">Cavalos</span>
+                </a>
+                <a href="financeiro.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-dollar-sign text-lg"></i>
+                    <span class="text-[10px] mt-1">Caixa</span>
+                </a>
+                <a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-gold font-bold transition-all">
+                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                    <span class="text-[10px] mt-1 LowerCase tracking-tighter">Atendimentos</span>
+                </a>
+                <a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-box-open text-lg"></i>
+                    <span class="text-[10px] mt-1">Estoque</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <script type="module">
+
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, orderBy, onSnapshot, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let allAtendimentos = [];
+        let activeFilter = 'todos';
+        let searchTerm = '';
+        let vetNome = '';
+        const listContainer = document.getElementById('atendimentos-list');
+
+        const toDate = t => t ? (t.toDate ? t.toDate() : new Date(t)) : new Date();
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Busca nome do veterinário para mensagem WhatsApp
+                try {
+                    const vetSnap = await getDoc(doc(db, "veterinarios", user.uid));
+                    if (vetSnap.exists()) vetNome = vetSnap.data().nome || '';
+                } catch(e) {}
+
+                const q = query(
+                    collection(db, "atendimentos"),
+                    where("userId", "==", user.uid)
+                );
+                onSnapshot(q, (snapshot) => {
+                    allAtendimentos = snapshot.docs
+                        .map(d => ({ id: d.id, ...d.data() }))
+                        .sort((a, b) => {
+                            const ta = a.data?.toDate ? a.data.toDate() : new Date(a.data || 0);
+                            const tb = b.data?.toDate ? b.data.toDate() : new Date(b.data || 0);
+                            return tb - ta;
+                        });
+
+                    const naoFinalizadoBtn = document.getElementById('filter-nao-finalizado');
+                    const hasNaoFinalizado = allAtendimentos.some(a => a.status === 'nao-finalizado' || a.status === 'rascunho');
+                    naoFinalizadoBtn.classList.toggle('flashing-filter', hasNaoFinalizado);
+
+                    render();
+                }, (error) => {
+                    console.error("Erro no Firestore:", error);
+                    listContainer.innerHTML = `<div class="p-4 text-center text-red-500">Erro ao carregar dados.</div>`;
+                });
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+        window.excluirAtendimento = async (id) => {
+            if (!confirm("Deseja realmente excluir este registro? Esta ação é irreversível.")) return;
+            try {
+                await deleteDoc(doc(db, "atendimentos", id));
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao excluir. Tente novamente.");
+            }
+        };
+
+        window.enviarZap = (a, vetNome) => {
+            if (!a.pdf_url) {
+                alert("O laudo ainda está sendo gerado. Aguarde alguns instantes e tente novamente.");
+                return;
+            }
+            const telefone = (a.telefone_proprietario || a.telefone || '').replace(/\D/g, '');
+            if (!telefone || telefone.length < 10) {
+                alert("Telefone do proprietário não informado ou inválido.");
+                return;
+            }
+            const msg = `Olá ${a.nome_proprietario || 'Cliente'}, aqui é o veterinário ${vetNome || 'Horse Smart'}. Segue o laudo do atendimento do cavalo ${a.nome_cavalo}: ${a.pdf_url}`;
+            window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        function render() {
+            const filtered = allAtendimentos.filter(a => {
+                const searchMatch =
+                    (a.nome_cavalo || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (a.nome_proprietario || '').toLowerCase().includes(searchTerm.toLowerCase());
+                const statusMatch = activeFilter === 'todos' ||
+                    a.status === activeFilter ||
+                    (activeFilter === 'nao-finalizado' && a.status === 'rascunho');
+                return searchMatch && statusMatch;
+            });
+
+            listContainer.innerHTML = '';
+            if (!filtered.length) {
+                listContainer.innerHTML = `<div class="glass-panel text-center p-8 rounded-2xl"><p class="text-vetsmart-green/70 font-medium text-sm">Nenhum registro encontrado.</p></div>`;
+                return;
+            }
+
+            const statusMap = {
+                pago:             { cls: 'border-emerald-500', text: 'FINALIZADO E PAGO',              bg: 'bg-emerald-100 text-emerald-700' },
+                pendente:         { cls: 'border-amber-500',   text: 'PAGAMENTO PENDENTE',             bg: 'bg-amber-100 text-amber-700' },
+                aguardando:       { cls: 'border-yellow-500',  text: 'AGUARDANDO PAGAMENTO',           bg: 'bg-yellow-100 text-yellow-700' },
+                'nao-finalizado': { cls: 'border-blue-500',    text: 'NÃO FINALIZADO',                 bg: 'bg-blue-100 text-blue-700' },
+                rascunho:         { cls: 'border-blue-500',    text: 'RASCUNHO',                       bg: 'bg-blue-100 text-blue-700' },
+                finalizado:       { cls: 'border-orange-500',  text: 'FINALIZADO - AGUARDANDO PGTO',   bg: 'bg-orange-100 text-orange-700' },
+                despesa:          { cls: 'border-gray-400',    text: 'DESPESA',                        bg: 'bg-gray-100 text-gray-600' },
+            };
+
+            filtered.forEach(a => {
+                const s = statusMap[a.status] || { cls: 'border-gray-400', text: 'INDEFINIDO', bg: 'bg-gray-100 text-gray-700' };
+                const card = document.createElement('div');
+                card.className = `glass-panel rounded-2xl p-4 transition-all border-l-4 ${s.cls}`;
+
+                const dossieLinkAttr = a.horseId
+                    ? `onclick="window.location.href='dossie.html?id=${a.horseId}'"`
+                    : `onclick="window.location.href='detalhe-fatura.html?id=${a.id}'"`;
+
+                const valorF = Number(a.total_geral || a.valor || 0) > 0
+                    ? `R$ ${parseFloat(a.total_geral || a.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                    : 'A definir';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 cursor-pointer" ${dossieLinkAttr}>
+                            <p class="text-[10px] font-bold text-vetsmart-gold-dark uppercase tracking-wider">${toDate(a.data).toLocaleDateString('pt-BR')}</p>
+                            <h3 class="font-black text-vetsmart-green text-lg uppercase truncate leading-tight">${a.nome_cavalo || 'Sem Nome'}</h3>
+                            <p class="text-xs text-vetsmart-green/70 font-medium truncate">${a.nome_proprietario || 'Proprietário'}</p>
+                        </div>
+                        <div class="flex gap-2 ml-2">
+                            ${a.pdf_url
+                                ? `<button class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs btn-zap shadow-sm active:scale-90 transition-transform" title="Enviar laudo por WhatsApp"><i class="fa-brands fa-whatsapp text-lg"></i></button>`
+                                : `<button class="w-8 h-8 rounded-lg bg-gray-200 text-gray-400 flex items-center justify-center text-xs cursor-not-allowed" title="Aguardando geração do laudo"><i class="fa-brands fa-whatsapp text-lg"></i></button>`
+                            }
+                            <button class="w-8 h-8 rounded-lg bg-red-100 text-red-500 flex items-center justify-center text-xs btn-del shadow-sm active:scale-90 transition-transform"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-white/40 flex justify-between items-center">
+                        <span class="text-[9px] font-black px-2 py-1 rounded-lg uppercase ${s.bg}">${s.text}</span>
+                        <p class="font-black text-vetsmart-green text-sm">${valorF}</p>
+                    </div>
+                `;
+
+                card.querySelector('.btn-del').onclick = (e) => { e.stopPropagation(); window.excluirAtendimento(a.id); };
+                const zapBtn = card.querySelector('.btn-zap');
+                if (zapBtn) zapBtn.onclick = (e) => { e.stopPropagation(); window.enviarZap(a, vetNome); };
+                listContainer.appendChild(card);
+            });
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => { searchTerm = e.target.value; render(); });
+        document.getElementById('btn-search').addEventListener('click', () => { searchTerm = document.getElementById('search-input').value; render(); });
+
+        document.getElementById('filter-container').addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.dataset.filter;
+            render();
+        });
+    
+    </script>
+</body>
+</html>

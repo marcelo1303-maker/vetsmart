@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Proprietários</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+       .input-glass {
+             background: rgba(255, 255, 255, 0.7);
+             border: 1px solid #2D5A4E;
+             border-radius: 12px;
+             padding: 12px 16px;
+             width: 100%;
+             font-weight: 500;
+             transition: all .2s;
+        }
+        .input-glass:focus { border-color: #D2B48C; outline: none; }
+        .details-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <div class="flex items-center">
+                <a href="clientes.html" class="h-10 w-10 flex items-center justify-center mr-2"><i class="fa-solid fa-arrow-left"></i></a>
+                <h1 class="font-black text-xl uppercase">Proprietários</h1>
+            </div>
+            <a href="novo-atendimento_1775208974082.html" class="bg-vetsmart-gold text-vetsmart-green font-bold text-sm px-4 py-2 rounded-lg shadow-lg shadow-yellow-900/20 active:scale-95 transition-transform">
+    + NOVO
+</a>
+
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-5 space-y-4">
+        <div class="relative">
+            <input id="search-input" type="text" placeholder="Buscar por nome ou CPF" class="input-glass pl-10 w-full">
+            <i class="fa-solid fa-search text-vetsmart-green/50 absolute left-4 top-1/2 -translate-y-1/2"></i>
+        </div>
+
+        <div id="lista-proprietarios" class="space-y-3">
+            <!-- Proprietários serão carregados aqui -->
+        </div>
+    </main>
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, getDocs, onSnapshot, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let allProprietarios = [];
+        let currentUser = null;
+        const listaContainer = document.getElementById('lista-proprietarios');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loadProprietarios(user.uid);
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+        function loadProprietarios(userId) {
+            const q = query(
+                collection(db, "clientes"),
+                where("userId", "==", userId)
+            );
+
+            onSnapshot(q, (snapshot) => {
+                const proprietariosMap = new Map();
+
+                snapshot.docs.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    const docIdentifier = data.cpf_cnpj || data.cpf || data.cnpj || data.nome_proprietario;
+
+                    if (!docIdentifier) return; 
+
+                    if (!proprietariosMap.has(docIdentifier)) {
+                        proprietariosMap.set(docIdentifier, {
+                            nome: data.nome_proprietario || 'Nome não informado',
+                            doc: docIdentifier,
+                            tipo_pessoa: data.tipo_pessoa,
+                            telefone: data.telefone_proprietario,
+                            animais: []
+                        });
+                    }
+                    proprietariosMap.get(docIdentifier).animais.push({ 
+                        id: data.id, 
+                        nome: data.nome_cavalo, 
+                        horseId: data.horseId 
+                    });
+                });
+                
+                allProprietarios = Array.from(proprietariosMap.values());
+                renderProprietarios(allProprietarios);
+
+                if (allProprietarios.length === 0) {
+                    listaContainer.innerHTML = `<div class='glass-panel text-center p-8 rounded-2xl'><p class='text-vetsmart-green/50 font-medium'>Nenhum proprietário encontrado.</p></div>`;
+                }
+            });
+        }
+
+        function formatDoc(doc, tipo) {
+            if (!doc) return "Não informado";
+            const cleanDoc = doc.replace(/\D/g, '');
+            if (tipo === 'cpf' && cleanDoc.length === 11) {
+                 return `***.${cleanDoc.substring(3, 6)}.${cleanDoc.substring(6, 9)}-**`;
+            } else if (tipo === 'cnpj' && cleanDoc.length === 14) {
+                return `${cleanDoc.substring(0,2)}.${cleanDoc.substring(2,5)}.${cleanDoc.substring(5,8)}/${cleanDoc.substring(8,12)}-**`;
+            }
+            return doc;
+        }
+
+        function renderProprietarios(proprietarios) {
+            listaContainer.innerHTML = '';
+            proprietarios.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'glass-panel rounded-2xl p-4 transition-all mb-3';
+
+                const headerHTML = `
+                    <div class="flex justify-between items-center cursor-pointer">
+                        <div class="flex-1">
+                            <p class="font-black text-vetsmart-green text-lg uppercase truncate">${p.nome}</p>
+                            <p class="text-sm text-vetsmart-green/70 font-medium">${p.tipo_pessoa === 'cnpj' ? 'CNPJ' : 'CPF'}: ${formatDoc(p.doc, p.tipo_pessoa)}</p>
+                            <p class="text-[10px] font-black text-vetsmart-gold uppercase mt-1 tracking-widest">${p.animais.length} animal(is)</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-vetsmart-green/30 transition-transform"></i>
+                    </div>
+                `;
+
+                const wppLink = p.telefone ? `https://wa.me/55${p.telefone.replace(/\D/g, '')}` : '#';
+                const animaisHTML = p.animais.map(a => `
+                    <a href="dossie.html?id=${a.id}" class="flex justify-between items-center bg-white/40 p-3 rounded-xl hover:bg-white transition-all mb-2 border border-vetsmart-green/5">
+                        <div>
+                            <p class="font-bold text-vetsmart-green text-sm">${a.nome || 'Sem nome'}</p>
+                            <p class="text-[9px] text-vetsmart-green/50 font-black uppercase">ID: ${a.horseId || '---'}</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-vetsmart-gold text-xs"></i>
+                    </a>
+                `).join('');
+
+                const detailsHTML = `
+                    <div class="details-content mt-3 pt-3 border-t border-vetsmart-green/5">
+                        <div class="flex items-center justify-between mb-4 bg-vetsmart-green/5 p-3 rounded-xl">
+                            <div class="space-y-1">
+                                <p class="text-[11px] font-medium text-vetsmart-green"><i class="fa-solid fa-phone mr-2 text-vetsmart-gold"></i>${p.telefone || 'Não informado'}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="${wppLink}" target="_blank" class="h-9 w-9 bg-green-500 text-white rounded-full flex items-center justify-center shadow-md active:scale-90 transition-transform"><i class="fab fa-whatsapp"></i></a>
+                                <button class="delete-btn h-9 w-9 bg-red-100 text-red-600 rounded-full flex items-center justify-center active:scale-90 transition-transform" data-doc="${p.doc}"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                            </div>
+                        </div>
+                        <div class="space-y-2">${animaisHTML}</div>
+                    </div>
+                `;
+
+                card.innerHTML = headerHTML + detailsHTML;
+                listaContainer.appendChild(card);
+
+                card.querySelector('.cursor-pointer').addEventListener('click', () => {
+                    const details = card.querySelector('.details-content');
+                    const icon = card.querySelector('.fa-chevron-down');
+                    const isOpen = details.style.maxHeight && details.style.maxHeight !== '0px';
+                    details.style.maxHeight = isOpen ? '0px' : details.scrollHeight + "px";
+                    icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+                });
+
+                card.querySelector('.delete-btn').addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const docId = e.currentTarget.dataset.doc;
+                    if (confirm(`Excluir ${p.nome}? Todos os ${p.animais.length} animais vinculados serão apagados permanentemente.`)) {
+                        const batch = writeBatch(db);
+                        try {
+                            const q = query(collection(db, "clientes"), where("cpf_cnpj", "==", docId), where("userId", "==", currentUser.uid));
+                            const snap = await getDocs(q);
+                            snap.forEach(doc => batch.delete(doc.ref));
+                            await batch.commit();
+                        } catch (err) { 
+                            console.error(err);
+                            alert("Erro ao excluir."); 
+                        }
+                    }
+                });
+            });
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allProprietarios.filter(p => p.nome.toLowerCase().includes(term) || (p.doc && p.doc.includes(term)));
+            renderProprietarios(filtered);
+        });
+    </script>
+</body>
+</html>

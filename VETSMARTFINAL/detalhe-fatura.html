@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Detalhe da Fatura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: { 'sans': ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.85); }
+        .section-title { font-weight: 700; color: #1A3A31; margin-top: 1rem; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 2px solid #D2B48C; display: flex; align-items: center; gap: 8px; }
+        
+        /* Estilos específicos para o PDF */
+        #pdf-content { padding: 10px; }
+        .pdf-only { display: none; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg print:hidden">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="financeiro.html" class="text-white"><i class="fa-solid fa-chevron-left text-xl"></i></a>
+            <h1 class="font-black text-xl tracking-tight uppercase">Fatura</h1>
+            <div class="w-6"></div>
+        </div>
+    </header>
+
+    <main id="main-content" class="max-w-md mx-auto px-4 mt-4">
+        <div id="loader" class="flex flex-col items-center justify-center p-20">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-4xl"></i>
+            <p class="text-vetsmart-green mt-4 font-medium">Carregando dados...</p>
+        </div>
+    </main>
+
+    <div id="cancel-zone" class="max-w-md mx-auto px-4 mt-6 hidden">
+        <button id="btn-cancelar" class="w-full text-red-500 font-semibold text-sm py-3 border border-red-200 rounded-xl hover:bg-red-50 transition-all active:scale-95">
+            <i class="fa-solid fa-trash-can mr-2"></i> Cancelar e Excluir Fatura
+        </button>
+    </div>
+
+    <footer id="footer-actions" class="fixed bottom-0 left-0 right-0 z-40 hidden bg-white/80 backdrop-blur-md border-t border-gray-200">
+        <div class="max-w-md mx-auto p-4">
+            <div class="grid grid-cols-2 gap-3">
+                <button id="btn-pdf" class="bg-gray-800 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-file-pdf"></i> Gerar PDF
+                </button>
+                <button id="btn-whatsapp" class="bg-green-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+        const mainContent = document.getElementById('main-content');
+        const footerActions = document.getElementById('footer-actions');
+        const cancelZone = document.getElementById('cancel-zone');
+        const urlParams = new URLSearchParams(window.location.search);
+        const atendimentoId = urlParams.get('id');
+    
+        let atendimentoData = null;
+    
+        const fmt = (v) => (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatDate = (ts) => {
+            if (!ts) return '---';
+            const date = ts.toDate ? ts.toDate() : new Date(ts);
+            return date.toLocaleDateString('pt-BR');
+        };
+    
+        const renderData = (data) => {
+            atendimentoData = data;
+            
+            let insumosHtml = '';
+            if (data.insumos && Array.isArray(data.insumos) && data.insumos.length > 0) {
+                insumosHtml = data.insumos.map(item => `
+                    <div class="flex justify-between text-sm py-1 border-b border-gray-50 last:border-0">
+                        <span class="text-gray-600">${item.quantidade || 1}x ${item.nome}</span>
+                        <span class="font-semibold text-vetsmart-green-dark">${fmt(item.precovenda || item.valor_unitario || 0)}</span>
+                    </div>
+                `).join('');
+            } else {
+                insumosHtml = '<p class="text-gray-400 text-xs italic">Nenhum insumo utilizado.</p>';
+            }
+    
+            const valorServico = data.valor_servico || data.financeiro?.valorServico || 0;
+            const valorInsumos = data.valor_insumos || data.financeiro?.valorInsumos || 0;
+            const valorTotal = data.total_geral || data.financeiro?.valorTotal || data.valor || 0;
+    
+            mainContent.innerHTML = `
+                <div id="invoice-card" class="space-y-4">
+                    <div id="pdf-branding" class="hidden text-center mb-6">
+                        <h1 class="text-3xl font-black italic tracking-tighter">
+                            <span class="text-vetsmart-green-dark">HORSE</span><span class="text-vetsmart-gold">SMART</span>
+                        </h1>
+                        <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold">Relatório de Atendimento</p>
+                    </div>
+    
+                    <div class="glass-panel p-5 rounded-3xl shadow-sm">
+                        <h2 class="section-title text-xs uppercase tracking-wider"><i class="fa-solid fa-user-tag text-vetsmart-gold"></i> Identificação</h2>
+                        <div class="grid grid-cols-2 gap-y-3 mt-3">
+                            <div><p class="text-[10px] text-gray-400 uppercase font-bold">Proprietário</p><p class="text-sm font-bold text-vetsmart-green-dark">${data.nome_proprietario || data.ownerName || data.cliente || '---'}</p></div>
+                            <div><p class="text-[10px] text-gray-400 uppercase font-bold">Animal</p><p class="text-sm font-bold text-vetsmart-green-dark">${data.nome_cavalo || data.horseName || data.cavalo || '---'}</p></div>
+                            <div><p class="text-[10px] text-gray-400 uppercase font-bold">Data</p><p class="text-sm font-medium text-gray-700">${formatDate(data.timestamp || data.data)}</p></div>
+                            <div><p class="text-[10px] text-gray-400 uppercase font-bold">Status</p><p class="text-sm font-medium text-gray-700">${data.status || 'Pendente'}</p></div>
+                        </div>
+                    </div>
+    
+                    <div class="glass-panel p-5 rounded-3xl shadow-sm">
+                        <h2 class="section-title text-xs uppercase tracking-wider"><i class="fa-solid fa-stethoscope text-vetsmart-gold"></i> Atendimento</h2>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-700 leading-relaxed">${data.servico || data.tipo_atendimento || 'Atendimento'}</p>
+                            <div class="mt-4 pt-3 border-t border-dashed border-gray-200">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-[10px] font-black text-gray-400 uppercase">Valor do Serviço:</span>
+                                    <span class="font-bold text-vetsmart-green">${fmt(valorServico)}</span>
+                                </div>
+                                ${valorInsumos > 0 ? `
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] font-black text-gray-400 uppercase">Valor Insumos:</span>
+                                    <span class="font-bold text-vetsmart-green">${fmt(valorInsumos)}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="glass-panel p-5 rounded-3xl shadow-sm">
+                        <h2 class="section-title text-xs uppercase tracking-wider"><i class="fa-solid fa-box text-vetsmart-gold"></i> Materiais e Insumos</h2>
+                        <div class="mt-2 space-y-1">${insumosHtml}</div>
+                    </div>
+    
+                    <div class="bg-vetsmart-green-dark p-6 rounded-3xl text-white shadow-xl flex justify-between items-center overflow-hidden relative">
+                        <div class="relative z-10">
+                            <p class="text-[10px] opacity-60 uppercase font-black tracking-widest">Total da Fatura</p>
+                            <p class="text-4xl font-black">${fmt(valorTotal)}</p>
+                        </div>
+                        <i class="fa-solid fa-receipt text-6xl absolute -right-4 opacity-10 rotate-12"></i>
+                    </div>
+                </div>
+            `;
+            
+            footerActions.classList.remove('hidden');
+            cancelZone.classList.remove('hidden');
+        };
+    
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                if (!atendimentoId) {
+                    mainContent.innerHTML = "<div class='p-10 text-center font-bold text-red-500'>ID do atendimento não fornecido.</div>";
+                    return;
+                }
+                try {
+                    const docSnap = await getDoc(doc(db, "atendimentos", atendimentoId));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.userId === user.uid) {
+                            renderData(data);
+                        } else {
+                            mainContent.innerHTML = "<div class='p-10 text-center text-gray-500'>Fatura não encontrada ou sem permissão.</div>";
+                        }
+                    } else {
+                        mainContent.innerHTML = "<div class='p-10 text-center text-gray-500'>Fatura não encontrada.</div>";
+                    }
+                } catch (e) {
+                    console.error("Erro ao carregar atendimento:", e);
+                    mainContent.innerHTML = "<div class='p-10 text-center text-red-500'>Erro ao carregar dados.</div>";
+                }
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+    
+        document.getElementById('btn-pdf').addEventListener('click', () => {
+            const element = document.getElementById('invoice-card');
+            const branding = document.getElementById('pdf-branding');
+            
+            branding.classList.remove('hidden');
+            
+            const opt = {
+                margin: 10,
+                filename: `Fatura_${atendimentoData.nome_cavalo || atendimentoData.horseName || atendimentoData.cavalo || 'Atendimento'}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 3, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+    
+            html2pdf().set(opt).from(element).save().then(() => {
+                branding.classList.add('hidden');
+            });
+        });
+    
+        document.getElementById('btn-whatsapp').addEventListener('click', () => {
+            const texto = `*FATURA - HORSE SMART*\n\n` +
+                          `📌 *Cliente:* ${atendimentoData.nome_proprietario || atendimentoData.ownerName || atendimentoData.cliente}\n` +
+                          `🐴 *Animal:* ${atendimentoData.nome_cavalo || atendimentoData.horseName || atendimentoData.cavalo}\n` +
+                          `📅 *Data:* ${formatDate(atendimentoData.data || atendimentoData.timestamp)}\n` +
+                          `📝 *Serviço:* ${atendimentoData.servico || atendimentoData.tipo_atendimento || 'Atendimento'}\n` +
+                          `💰 *TOTAL:* ${fmt(atendimentoData.total_geral || atendimentoData.financeiro?.valorTotal || atendimentoData.valor || 0)}\n\n` +
+                          `_Gerado pelo App Horse Smart_`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+        });
+    
+        document.getElementById('btn-cancelar').addEventListener('click', async () => {
+            if (confirm("⚠️ EXCLUIR FATURA?\nEsta ação removerá permanentemente este atendimento.")) {
+                const btn = document.getElementById('btn-cancelar');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Excluindo...';
+                try {
+                    await deleteDoc(doc(db, "atendimentos", atendimentoId));
+                    alert("Fatura excluída!");
+                    window.location.href = 'financeiro.html';
+                } catch (e) {
+                    alert("Erro ao excluir: " + e.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-trash-can mr-2"></i> Cancelar e Excluir Fatura';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

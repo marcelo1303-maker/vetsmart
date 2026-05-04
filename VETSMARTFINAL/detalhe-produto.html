@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Detalhe do Produto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- Header Section -->
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="estoque.html" class="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></a>
+            <h1 id="product-name-header" class="font-black text-xl">Carregando...</h1>
+            <div class="h-10 w-10"></div> <!-- Spacer -->
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-5">
+        <div id="product-details" class="space-y-4">
+            <div class="glass-panel text-center p-8 rounded-2xl"><p class="text-vetsmart-green/50 font-medium">Carregando detalhes...</p></div>
+        </div>
+    </main>
+
+    <!-- MODAL CONFIRMA EXCLUSÃO -->
+    <div id="delete-modal" class="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 text-center shadow-xl">
+            <h3 class="text-lg font-black text-vetsmart-green mb-2">Tem certeza?</h3>
+            <p class="text-vetsmart-green/90 mb-6">Esta ação não pode ser desfeita. O produto será excluído permanentemente.</p>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="window.confirmDelete()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl active:scale-95 transition-all">Excluir</button>
+                <button onclick="window.closeDeleteModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 rounded-xl active:scale-95 transition-all">Não</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, updateDoc, deleteDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+        let currentUser;
+        let currentProductId;
+        let isEditMode = false;
+    
+        const deleteModal = document.getElementById('delete-modal');
+        window.openDeleteModal = () => { deleteModal.classList.remove('pointer-events-none', 'opacity-0'); }
+        window.closeDeleteModal = () => { deleteModal.classList.add('opacity-0', 'pointer-events-none'); }
+    
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                const urlParams = new URLSearchParams(window.location.search);
+                currentProductId = urlParams.get('id');
+                if (currentProductId) {
+                    loadProductDetails(currentProductId);
+                } else {
+                    alert("ID do produto não encontrado.");
+                    window.location.href = 'estoque.html';
+                }
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+    
+        async function loadProductDetails(productId) {
+            const productRef = doc(db, "estoque", productId);
+            const docSnap = await getDoc(productRef);
+            const detailsContainer = document.getElementById('product-details');
+    
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+    
+                // Validação: userId deve ser do usuário logado
+                if (data.userId !== currentUser.uid) {
+                    alert("Você não tem permissão para acessar este produto.");
+                    window.location.href = 'estoque.html';
+                    return;
+                }
+    
+                document.getElementById('product-name-header').innerText = data.nome;
+                detailsContainer.innerHTML = `
+                    <div class="glass-panel rounded-2xl p-6 text-center">
+                        <p class="text-sm text-vetsmart-green/70">${data.categoria}</p>
+                        <p class="font-black text-8xl text-vetsmart-green my-4" id="current-quantity">${data.quantidade}</p>
+                        <p class="text-sm text-vetsmart-green/70">em estoque</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="window.changeStock(-1)" class="bg-red-500/90 hover:bg-red-600 text-white font-bold py-6 rounded-2xl text-2xl shadow-lg active:scale-95 transition-all"><i class="fa-solid fa-minus mr-2"></i> Retirar</button>
+                        <button onclick="window.changeStock(1)" class="bg-green-500/90 hover:bg-green-600 text-white font-bold py-6 rounded-2xl text-2xl shadow-lg active:scale-95 transition-all"><i class="fa-solid fa-plus mr-2"></i> Adicionar</button>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-4 mt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-vetsmart-green">Informações</h3>
+                            <button onclick="window.toggleEditMode()" class="text-vetsmart-gold hover:text-vetsmart-gold-dark font-bold text-sm">
+                                <i class="fa-solid fa-pencil-alt"></i>
+                            </button>
+                        </div>
+                        <div id="info-container" class="text-sm text-vetsmart-green/90 space-y-1">
+                            <p><strong>Produto:</strong> ${data.nome}</p>
+                            <p><strong>Categoria:</strong> ${data.categoria}</p>
+                            <p><strong>Custo:</strong> R$ ${Number(data.valorUnitario).toFixed(2)}</p>
+                            <p><strong>Venda:</strong> R$ ${Number(data.valorVenda).toFixed(2)}</p>
+                            <p><strong>Estoque Mínimo:</strong> ${data.minimoCritico} unidades</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button onclick="window.openDeleteModal()" class="text-red-500 hover:text-red-700 font-semibold py-2 px-4">
+                            <i class="fa-solid fa-trash-can mr-1"></i> Excluir Produto
+                        </button>
+                    </div>
+                `;
+    
+                window.productData = data;
+            } else {
+                detailsContainer.innerHTML = "<p>Produto não encontrado ou já excluído.</p>";
+            }
+        }
+    
+        window.toggleEditMode = () => {
+            isEditMode = !isEditMode;
+            const infoContainer = document.getElementById('info-container');
+            
+            if (isEditMode) {
+                infoContainer.innerHTML = `
+                    <div class="space-y-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-vetsmart-green/90 uppercase">Produto</label>
+                            <input type="text" id="edit-nome" value="${window.productData.nome}" class="w-full bg-white border border-vetsmart-green/20 rounded px-2 py-1 text-vetsmart-green font-medium">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-vetsmart-green/90 uppercase">Categoria</label>
+                            <input type="text" id="edit-categoria" value="${window.productData.categoria}" class="w-full bg-white border border-vetsmart-green/20 rounded px-2 py-1 text-vetsmart-green font-medium">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] font-bold text-vetsmart-green/90 uppercase">Custo (R$)</label>
+                                <input type="number" id="edit-custo" value="${Number(window.productData.valorUnitario).toFixed(2)}" step="0.01" class="w-full bg-white border border-vetsmart-green/20 rounded px-2 py-1 text-vetsmart-green font-medium">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-vetsmart-green/90 uppercase">Venda (R$)</label>
+                                <input type="number" id="edit-venda" value="${Number(window.productData.valorVenda).toFixed(2)}" step="0.01" class="w-full bg-white border border-vetsmart-green/20 rounded px-2 py-1 text-vetsmart-green font-medium">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-vetsmart-green/90 uppercase">Estoque Mínimo</label>
+                            <input type="number" id="edit-minimo" value="${window.productData.minimoCritico}" class="w-full bg-white border border-vetsmart-green/20 rounded px-2 py-1 text-vetsmart-green font-medium">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-vetsmart-green/10">
+                            <button onclick="window.saveEdits()" class="bg-vetsmart-green text-white font-bold py-2 rounded active:scale-95 transition-all">Salvar</button>
+                            <button onclick="window.toggleEditMode()" class="bg-gray-300 text-gray-700 font-bold py-2 rounded active:scale-95 transition-all">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                loadProductDetails(currentProductId);
+            }
+        };
+    
+        window.saveEdits = async () => {
+            const nome = document.getElementById('edit-nome').value;
+            const categoria = document.getElementById('edit-categoria').value;
+            const custo = parseFloat(document.getElementById('edit-custo').value) || 0;
+            const venda = parseFloat(document.getElementById('edit-venda').value) || 0;
+            const minimo = parseInt(document.getElementById('edit-minimo').value) || 0;
+    
+            if (!nome || !categoria) {
+                alert("Preencha todos os campos obrigatórios.");
+                return;
+            }
+    
+            const itemRef = doc(db, "estoque", currentProductId);
+            try {
+                await updateDoc(itemRef, {
+                    nome: nome,
+                    categoria: categoria,
+                    valorUnitario: custo,
+                    valorVenda: venda,
+                    minimoCritico: minimo,
+                    ultimaAtualizacao: serverTimestamp()
+                });
+                alert("Produto atualizado com sucesso!");
+                isEditMode = false;
+                loadProductDetails(currentProductId);
+            } catch (error) {
+                console.error("Erro ao atualizar produto:", error);
+                alert("Erro ao salvar alterações.");
+            }
+        };
+    
+        window.changeStock = async (change) => {
+            if (!currentProductId) return;
+            const itemRef = doc(db, "estoque", currentProductId);
+            try {
+                await updateDoc(itemRef, { 
+                    quantidade: increment(change),
+                    ultimaAtualizacao: serverTimestamp()
+                });
+                const currentQuantityEl = document.getElementById('current-quantity');
+                const newQuantity = parseInt(currentQuantityEl.innerText) + change;
+                currentQuantityEl.innerText = newQuantity;
+            } catch (error) {
+                console.error("Erro ao atualizar a quantidade: ", error);
+                alert("Não foi possível atualizar o estoque.");
+            }
+        };
+    
+        window.confirmDelete = async () => {
+            if (!currentProductId) return;
+            const itemRef = doc(db, "estoque", currentProductId);
+            try {
+                await deleteDoc(itemRef);
+                alert("Produto excluído com sucesso!");
+                window.location.href = 'estoque.html';
+            } catch (error) {
+                console.error("Erro ao excluir o produto: ", error);
+                alert("Ocorreu um erro ao excluir o produto.");
+                window.closeDeleteModal();
+            }
+        };
+    </script>
+</body>
+</html>

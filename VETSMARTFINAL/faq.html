@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | FAQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F5F3;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2D5A4E;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease-out;
+            opacity: 0;
+        }
+
+        .faq-answer.active {
+            max-height: 500px;
+            opacity: 1;
+            padding: 1rem;
+        }
+
+        .faq-toggle i {
+            transition: transform 0.3s ease-out;
+        }
+
+        .faq-toggle.active i {
+            transform: rotate(180deg);
+        }
+
+        #side-menu {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- ========== HEADER ========== -->
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button id="menu-btn" class="text-white/80 hover:text-white transition-colors">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+            <h1 class="font-black text-2xl">
+                <span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span>
+            </h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <!-- ========== SIDE MENU ========== -->
+    <div id="side-menu" class="fixed inset-y-0 left-0 w-64 bg-vetsmart-green text-white p-6 z-[100] shadow-xl transform -translate-x-full">
+        <h2 class="font-black text-2xl mb-8">
+            <span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span>
+        </h2>
+        <nav class="space-y-2">
+            <a href="perfil.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-user-circle w-5 text-center"></i>
+                <span class="text-sm font-medium">Perfil</span>
+            </a>
+            <a href="seguranca.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-shield-halved w-5 text-center"></i>
+                <span class="text-sm font-medium">Segurança</span>
+            </a>
+            <a href="ajuda.html" class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                <i class="fa-solid fa-circle-question w-5 text-center"></i>
+                <span class="text-sm font-medium">Ajuda</span>
+            </a>
+            <a href="faq.html" class="flex items-center gap-3 p-3 rounded-lg bg-white/20 transition-colors">
+                <i class="fa-solid fa-book w-5 text-center"></i>
+                <span class="text-sm font-medium">FAQ</span>
+            </a>
+        </nav>
+        <button id="logout-btn" class="absolute bottom-6 left-6 right-6 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Fazer Log Out</span>
+        </button>
+    </div>
+
+    <!-- ========== MENU OVERLAY ========== -->
+    <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-[90] hidden cursor-pointer"></div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="max-w-md mx-auto px-4 mt-8 pb-8">
+        <!-- Title -->
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-black text-vetsmart-green">Dúvidas Frequentes</h2>
+            <p class="text-vetsmart-green/70 text-sm mt-2">Encontre respostas rápidas sobre o HorseSmart</p>
+        </div>
+
+        <!-- FAQ Items -->
+        <div class="space-y-3">
+
+            <!-- FAQ 1 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Como registrar um novo cliente?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    Para registrar um novo cliente, ele deve estar ligado a um equino. Basta clicar no ícone "Cavalos" na barra inferior da página inicial. Você será direcionado para uma página que contém um botão de "Novo Cadastro". Após preencher os dados do formulário, o cadastro será realizado e o proprietário aparecerá imediatamente na listagem de clientes da sua conta.
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Um proprietário pode ter vários cavalos?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    Sim, um mesmo proprietário pode estar associado a vários animais. Todas as emissões de cobranças e lembretes são automaticamente enviadas para o CPF e WhatsApp/email cadastrados do proprietário, facilitando a comunicação e o controle financeiro.
+                </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Como agendar atendimentos recorrentes?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    Sim, o sistema permite agendar atendimentos recorrentes. Após aplicar uma vacina ou realizar um exame (mormo, AIE, hemograma), o formulário oferece a opção de selecionar um prazo para nova realização. Isso gera um lembrete automático via WhatsApp tanto para o proprietário quanto para o médico veterinário responsável, alertando quando a data se aproxima.
+                </div>
+            </div>
+
+            <!-- FAQ 5 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Como o histórico do cavalo é mantido?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    O histórico completo de cada cavalo fica salvo no banco de dados do aplicativo, vinculado diretamente ao CPF do proprietário. Este histórico é compartilhado entre os veterinários para consultas, garantindo transparência e um registro claro do bem-estar do animal. Os registros pertencem ao cavalo, não ao veterinário, promovendo um atendimento integrado.
+                </div>
+            </div>
+
+            <!-- FAQ 14 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Como oferecer desconto em um atendimento?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    Existem dois caminhos para oferecer desconto:
+                    <br><br>
+                    <strong class="text-vetsmart-green">Opção 1:</strong> Antes de finalizar a fatura, insira o valor do atendimento já com o desconto aplicado no campo "Valor do Atendimento".
+                    <br><br>
+                    <strong class="text-vetsmart-green">Opção 2:</strong> Após finalizar a fatura, acesse o ícone "Atendimentos" na barra inferior. Abra o atendimento desejado, clique no botão "Oferecer Desconto" e indique a percentagem de desconto. A fatura anterior será cancelada e uma nova cobrança será emitida com laudo e link de pagamento, enviados automaticamente pelo WhatsApp do cliente.
+                </div>
+            </div>
+
+            <!-- FAQ 15 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Como visualizar relatórios financeiros?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    Acesse a aba "Relatórios" na página inicial para visualizar um resumo completo do seu financeiro. O sistema exibe demonstrativos de faturamento e gráficos com filtros diários, semanais, mensais e totais. Para verificar cobranças em aberto ou pagas, acesse o ícone "Caixa", que apresenta uma listagem de todas as cobranças emitidas com seus respectivos status.
+                </div>
+            </div>
+
+            <!-- FAQ 34 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Como o sistema envia notificações aos clientes?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    O sistema envia notificações automáticas em duas situações:
+                    <br><br>
+                    <strong class="text-vetsmart-green">1. Lembretes de Vacinação e Exames:</strong> Notificações são enviadas próximas ao vencimento de exames e datas de reforço de vacinação, conforme definido pelo médico veterinário responsável no momento da aplicação.
+                    <br><br>
+                    <strong class="text-vetsmart-green">2. Emissão de Cobranças:</strong> Quando uma fatura é emitida, o laudo do atendimento e o link de pagamento são enviados automaticamente ao WhatsApp do cliente imediatamente após o encerramento da consulta.
+                </div>
+            </div>
+
+            <!-- FAQ 35 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">O sistema funciona offline?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    Sim, o sistema funciona 100% offline. Todos os dados adicionados, faturas emitidas e laudos gerados são sincronizados e atualizados automaticamente quando você retorna a um ambiente com conexão à internet.
+                </div>
+            </div>
+
+            <!-- FAQ 38 -->
+            <div class="glass-panel rounded-2xl overflow-hidden">
+                <button class="faq-toggle w-full p-4 text-left flex justify-between items-center hover:bg-white/30 transition-colors">
+                    <span class="font-bold text-vetsmart-green text-sm">Como reportar um bug ou problema?</span>
+                    <i class="fa-solid fa-chevron-down text-vetsmart-gold"></i>
+                </button>
+                <div class="faq-answer border-t border-vetsmart-green/20 text-sm text-vetsmart-green/80 leading-relaxed">
+                    Para reportar um bug ou problema técnico, envie um email detalhado para:
+                    <br><br>
+                    <span class="inline-block bg-vetsmart-green/10 rounded px-3 py-2 mt-2 text-vetsmart-green font-semibold">
+                        horsesmartajuda@proton.me
+                    </span>
+                    <br><br>
+                    Descreva o problema com o máximo de detalhes possível para que possamos resolvê-lo rapidamente.
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="glass-panel rounded-2xl p-4 border-l-4 border-vetsmart-gold mt-6 bg-vetsmart-green/5">
+                <div class="flex gap-3">
+                    <i class="fa-solid fa-circle-info text-vetsmart-gold text-lg flex-shrink-0 mt-0.5"></i>
+                    <div class="text-sm text-vetsmart-green/80">
+                        <p class="font-semibold text-vetsmart-green mb-1">Não encontrou sua dúvida?</p>
+                        <p>Acesse a <strong>Central de Ajuda</strong> e nossa equipe entrará em contato em até 24 horas.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ========== BOTTOM NAVIGATION ========== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto p-2">
+            <div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center">
+                <a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green font-bold transition-all">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-[10px] mt-1">Início</span>
+                </a>
+                <a href="novo-atendimento_1775208974082.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-notes-medical text-lg"></i>
+                    <span class="text-[10px] mt-1">Atender</span>
+                </a>
+                <a href="clientes.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-horse text-lg"></i>
+                    <span class="text-[10px] mt-1">Cavalos</span>
+                </a>
+                <a href="financeiro.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-dollar-sign text-lg"></i>
+                    <span class="text-[10px] mt-1">Caixa</span>
+                </a>
+                <a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-calendar-check text-lg"></i>
+                    <span class="text-[10px] mt-1">Atendimentos</span>
+                </a>
+                <a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/70 hover:text-vetsmart-green transition-all">
+                    <i class="fa-solid fa-box-open text-lg"></i>
+                    <span class="text-[10px] mt-1">Estoque</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script type="module">
+        import { auth } from './firebase.js';
+        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ===== Initialization =====
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeAuth();
+            initializeMenuToggle();
+            initializeAccordion();
+        });
+
+        // ===== Authentication Check =====
+        function initializeAuth() {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    window.location.replace('login.html');
+                }
+            });
+        }
+
+        // ===== Menu Toggle =====
+        function initializeMenuToggle() {
+            const menuBtn = document.getElementById('menu-btn');
+            const sideMenu = document.getElementById('side-menu');
+            const menuOverlay = document.getElementById('menu-overlay');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            menuBtn.addEventListener('click', () => {
+                sideMenu.classList.remove('-translate-x-full');
+                menuOverlay.classList.remove('hidden');
+            });
+
+            menuOverlay.addEventListener('click', () => {
+                sideMenu.classList.add('-translate-x-full');
+                menuOverlay.classList.add('hidden');
+            });
+
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+
+        // ===== Accordion Logic =====
+        function initializeAccordion() {
+            const toggleButtons = document.querySelectorAll('.faq-toggle');
+
+            toggleButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const answer = button.nextElementSibling;
+                    const isActive = answer.classList.contains('active');
+
+                    // Close all other accordions
+                    document.querySelectorAll('.faq-answer').forEach((item) => {
+                        item.classList.remove('active');
+                    });
+
+                    document.querySelectorAll('.faq-toggle').forEach((btn) => {
+                        btn.classList.remove('active');
+                    });
+
+                    // Open clicked accordion
+                    if (!isActive) {
+                        answer.classList.add('active');
+                        button.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // ===== Logout =====
+        function handleLogout() {
+            signOut(auth)
+                .then(() => {
+                    window.location.replace('login.html');
+                })
+                .catch((error) => {
+                    console.error("Erro ao fazer logout:", error);
+                    alert('Ocorreu um erro ao tentar fazer logout. Tente novamente.');
+                });
+        }
+    </script>
+
+</body>
+</html>

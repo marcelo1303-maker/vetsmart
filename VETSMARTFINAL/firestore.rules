@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /veterinarios/{uid} {
+      allow create: if request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.email is string
+        && request.resource.data.crmv is string;
+      allow read: if request.auth.uid == uid;
+      allow update: if request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    match /clientes/{docId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read:   if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    match /estoque/{docId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read:   if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    match /proprietarios/{uid} {
+      allow create: if request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.email is string
+        && request.resource.data.cpf is string;
+      allow read:   if request.auth.uid == uid;
+      allow update: if request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    match /cavalos/{docId} {
+      allow create: if request.auth != null
+        && (request.resource.data.userId == request.auth.uid
+            || request.resource.data.uidProprietario == request.auth.uid);
+      allow read: if request.auth != null
+        && (resource.data.userId == request.auth.uid
+            || resource.data.uidProprietario == request.auth.uid);
+      allow update: if request.auth != null
+        && (resource.data.userId == request.auth.uid
+            || resource.data.uidProprietario == request.auth.uid);
+      allow delete: if request.auth != null
+        && resource.data.uidProprietario == request.auth.uid;
+    }
+
+    // Atendimentos: cliente NÃO pode setar nem reverter status='pago'
+    // Somente Admin SDK / webhook pode marcar como pago
+    match /atendimentos/{docId} {
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.userId;
+      allow read: if request.auth != null
+        && (request.auth.uid == resource.data.userId
+            || request.auth.uid == resource.data.uidProprietario);
+      // Update: somente se o documento ATUAL não estiver pago
+      // E somente se o novo status for 'pendente' ou 'cancelado' (não 'pago')
+      allow update: if request.auth != null
+        && request.auth.uid == resource.data.userId
+        && resource.data.status != 'pago'
+        && request.resource.data.status != 'pago';
+      allow delete: if request.auth != null
+        && request.auth.uid == resource.data.userId;
+    }
+
+    match /vacinas/{docId} {
+      allow create: if request.auth != null
+        && (request.resource.data.userId == request.auth.uid
+            || request.resource.data.uidProprietario == request.auth.uid);
+      allow read:   if request.auth != null
+        && (resource.data.userId == request.auth.uid
+            || resource.data.uidProprietario == request.auth.uid);
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /exames/{docId} {
+      allow create: if request.auth != null
+        && (request.resource.data.userId == request.auth.uid
+            || request.resource.data.uidProprietario == request.auth.uid);
+      allow read:   if request.auth != null
+        && (resource.data.userId == request.auth.uid
+            || resource.data.uidProprietario == request.auth.uid);
+      allow update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+
+    match /proprietarios_globais/{docId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.criadoPor == request.auth.uid;
+      allow update: if request.auth != null && resource.data.criadoPor == request.auth.uid;
+      allow delete: if false;
+    }
+
+    match /pedidos_ajuda/{docId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read:   if request.auth != null && request.auth.uid == resource.data.userId;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Coleções exclusivas do backend — frontend bloqueado
+    match /audit_log/{docId}               { allow read, write: if false; }
+    match /stripe_events_processados/{docId} { allow read, write: if false; }
+    match /stripe_events_cf/{docId}         { allow read, write: if false; }
+
+    // Fallback: negar tudo que não foi explicitamente permitido
+    match /{document=**} { allow read, write: if false; }
+  }
+}

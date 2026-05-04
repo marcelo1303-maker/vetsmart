@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title> HORSESMART | Segurança</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F5F3;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2D5A4E;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+        #side-menu { transition: transform 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button id="menu-btn" class="text-white/80 hover:text-white"><i class="fa-solid fa-bars text-xl"></i></button>
+            <h1 class="font-black text-2xl">
+                <span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span>
+            </h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <div id="side-menu" class="fixed inset-y-0 left-0 w-64 bg-vetsmart-green text-white p-6 z-[100] shadow-xl transform -translate-x-full">
+        <h2 class="font-black text-2xl mb-6"><span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span></h2>
+        <nav class="space-y-4">
+            <a href="perfil.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"><i class="fa-solid fa-user-circle w-6 text-center"></i><span>Perfil</span></a>
+            <a href="seguranca.html" class="flex items-center gap-3 p-2 rounded-lg bg-white/10 transition-colors"><i class="fa-solid fa-shield-halved w-6 text-center"></i><span>Segurança</span></a>
+            <a href="ajuda.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"><i class="fa-solid fa-circle-question w-6 text-center"></i><span>Ajuda</span></a>
+            <a href="faq.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"><i class="fa-solid fa-book w-6 text-center"></i><span>FAQ</span></a>
+        </nav>
+        <button id="logout-btn" class="absolute bottom-6 left-6 right-6 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"><i class="fa-solid fa-right-from-bracket mr-2"></i> Fazer Log Out</button>
+    </div>
+    <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-[90] hidden"></div>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
+        <h2 class="text-2xl font-black text-vetsmart-green text-center">Segurança da Conta</h2>
+
+        <div class="glass-panel p-6 rounded-2xl space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-bold text-vetsmart-green/90">Email Cadastrado</label>
+                <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-vetsmart-gold focus:ring focus:ring-vetsmart-gold focus:ring-opacity-50 bg-white/70 p-2" placeholder="Carregando..." readonly>
+            </div>
+            <div>
+                <label for="conta-bancaria" class="block text-sm font-bold text-vetsmart-green/90">Chave PIX (CPF/CNPJ)</label>
+                <input type="text" id="conta-bancaria" name="conta-bancaria" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-vetsmart-gold focus:ring focus:ring-vetsmart-gold focus:ring-opacity-50 bg-white/70 p-2" placeholder="Carregando..." readonly>
+            </div>
+            <div class="flex items-center justify-between">
+                <label for="senha" class="block text-sm font-bold text-vetsmart-green/90">Senha</label>
+            </div>
+            <input type="password" id="senha" name="senha" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-white/70 p-2" value="********" readonly>
+
+            <button id="btn-alterar-seguranca" class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-3 rounded-xl text-sm active:scale-95 transition-all shadow-md mt-4">
+                ALTERAR DADOS DE SEGURANÇA
+            </button>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 z-50">
+        <div class="max-w-md mx-auto p-2">
+            <div class="glass-panel rounded-2xl px-4 py-3 flex justify-between items-center">
+                <a href="dashboard.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green font-bold transition-all"><i class="fa-solid fa-house text-lg"></i><span class="text-[10px] mt-1">Início</span></a>
+                <a href="novo-atendimento_1775208974082.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-notes-medical text-lg"></i><span class="text-[10px] mt-1">Atender</span></a>
+                <a href="clientes.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-horse text-lg"></i><span class="text-[10px] mt-1">Cavalos</span></a>
+                <a href="financeiro.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-dollar-sign text-lg"></i><span class="text-[10px] mt-1">Caixa</span></a>
+                <a href="atendimentos.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-calendar-check text-lg"></i><span class="text-[10px] mt-1">Atendimentos</span></a>
+                <a href="estoque.html" class="flex flex-col items-center text-vetsmart-green/90 hover:text-vetsmart-green transition-all"><i class="fa-solid fa-box-open text-lg"></i><span class="text-[10px] mt-1">Estoque</span></a>
+            </div>
+        </div>
+    </nav>
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+        // --- UI Logic ---
+        const menuBtn = document.getElementById('menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const logoutBtn = document.getElementById('logout-btn');
+        const alterarBtn = document.getElementById('btn-alterar-seguranca');
+
+        const toggleMenu = (show) => {
+            sideMenu.classList.toggle('-translate-x-full', !show);
+            menuOverlay.classList.toggle('hidden', !show);
+        };
+
+        menuBtn.addEventListener('click', () => toggleMenu(true));
+        menuOverlay.addEventListener('click', () => toggleMenu(false));
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.replace('login.html');
+            });
+        });
+
+        alterarBtn.addEventListener('click', () => {
+            if(confirm("Você será redirecionado para a página de recuperação de senha. Deseja continuar?")) {
+                window.location.href = 'recuperacao.html';
+            }
+        });
+
+        // --- Data Loading ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('email').value = user.email || 'Não informado';
+
+                try {
+                    const docRef = doc(db, "veterinarios", user.uid);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        const vetData = docSnap.data();
+                        const pixValue = vetData.pix || vetData.cpf || vetData.cnpj || 'Não configurado';
+                        document.getElementById('conta-bancaria').value = pixValue;
+                    } else {
+                        console.error("Perfil não encontrado no Firestore.");
+                        document.getElementById('conta-bancaria').value = 'Não configurado';
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar dados do veterinário:", error);
+                    document.getElementById('conta-bancaria').value = 'Erro ao carregar';
+                }
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+    </script>
+</body>
+</html>

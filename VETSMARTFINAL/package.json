@@ -1,0 +1,26 @@
+{
+  "name": "vetsmart-final",
+  "version": "1.0.0",
+  "description": "Aplicação final VetSmart com backend e integração de pagamentos.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "vet",
+    "clinic",
+    "stripe"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.1",
+    "firebase-admin": "^13.8.0",
+    "jsonwebtoken": "^9.0.3",
+    "stripe": "^15.12.0"
+  }
+}

@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Atendimento</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@300;400;500;700;900&display=swap');
+        
+        body { 
+            font-family: 'Poppins', 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #F0F5F3 0%, #E8EFF0 100%);
+            color: #1A3A31;
+        }
+        
+        .glass-panel { 
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid #2D5A4E; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); 
+        }
+        
+        .input-glass { 
+            background: rgba(255, 255, 255, 0.9); 
+            border: 1px solid #d1d5db; 
+            border-radius: 12px; 
+            padding: 12px 16px; 
+            width: 100%; 
+            font-weight: 500; 
+            transition: all .2s; 
+        }
+        
+        .input-glass:focus { 
+            border-color: #D2B48C; 
+            outline: none; 
+            box-shadow: 0 0 0 2px #d2b48c30; 
+        }
+
+        .card-item {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(45, 90, 78, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #D2B48C;
+            border-radius: 10px;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Currency mask */
+        .currency-input {
+            text-align: right;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- HEADER PREMIUM -->
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg border-b-4 border-vetsmart-gold">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button onclick="window.history.back()" class="text-white/80 hover:text-white active:scale-90 transition-all">
+                <i class="fa-solid fa-chevron-left text-xl"></i>
+            </button>
+            <h1 class="font-black text-xl tracking-tight absolute left-1/2 -translate-x-1/2 text-white uppercase">Atendimento Clínico</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
+
+        <!-- CARD DE IDENTIFICAÇÃO DO ANIMAL - PREMIUM -->
+        <div class="relative">
+            <div class="glass-panel p-8 rounded-3xl text-center border-b-4 border-vetsmart-green/20 overflow-hidden">
+                <div class="absolute -right-8 -top-8 opacity-5">
+                    <i class="fa-solid fa-horse text-9xl"></i>
+                </div>
+                <div class="absolute -left-6 -bottom-6 opacity-5">
+                    <i class="fa-solid fa-stethoscope text-8xl"></i>
+                </div>
+
+                <div class="relative z-10">
+                    <h2 id="display-horse-name" class="font-black text-4xl text-vetsmart-green-dark leading-tight mb-3">Carregando...</h2>
+                    <p id="display-horse-owner" class="text-vetsmart-green/70 font-semibold text-sm mb-4">Proprietário: -</p>
+                    
+                    <div class="inline-block bg-gradient-to-r from-vetsmart-green/10 to-vetsmart-gold/10 px-6 py-2 rounded-full border border-vetsmart-gold/30">
+                        <span class="font-mono text-xs font-black text-vetsmart-green-dark tracking-widest">ID: <span id="display-horse-id">---</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    
+    
+
+        <div class="glass-panel p-6 rounded-3xl space-y-6 border-t-4 border-vetsmart-green shadow-xl">
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-clipboard-list"></i> Ficha Clínica Completa
+            </h3>
+
+            <div class="space-y-2">
+                <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">Anamnese do Caso</label>
+                <textarea id="anamnese" rows="3" placeholder="Histórico, queixa principal e início dos sinais..." class="input-glass resize-none text-sm"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">Temperatura (°C)</label>
+                    <input type="number" id="temp" step="0.1" placeholder="37.5" class="input-glass">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">Freq. Cardíaca</label>
+                    <input type="number" id="freq_card" placeholder="40" class="input-glass">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">Freq. Resp.</label>
+                    <input type="number" id="freq_resp" placeholder="12" class="input-glass">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">TPC</label>
+                    <input type="number" id="tpc" placeholder="2" class="input-glass">
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">Coloração de Mucosas</label>
+                    <select id="mucosas" class="input-glass">
+                        <option value="Normocorada">Normocorada (Rosa pálido)</option>
+                        <option value="Congesta">Congesta (Vermelha)</option>
+                        <option value="Cianótica">Cianótica (Azulada)</option>
+                        <option value="Ictérica">Ictérica (Amarelada)</option>
+                        <option value="Pálida">Pálida (Isquêmica)</option>
+                        <option value="Halo Toxêmico">Com Halo Toxêmico</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1 block text-center">Motilidade Gastrointestinal</label>
+                    <div class="grid grid-cols-1 gap-2 text-[15px] font-bold">
+                        <div class="space-y-1">
+                            <span>Superior Direito</span>
+                            <select id="mot_sup_dir" class="w-full p-2 border rounded-lg bg-white/50">
+                                <option value="Normal">Normal (+)</option>
+                                <option value="Hipomotilidade">Hipomotilidade (-)</option>
+                                <option value="Hipermotilidade">Hipermotilidade (++)</option>
+                                <option value="Atonia">Atonia (0)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <span>Inferior Direito</span>
+                            <select id="mot_inf_dir" class="w-full p-2 border rounded-lg bg-white/50">
+                                <option value="Normal">Normal (+)</option>
+                                <option value="Hipomotilidade">Hipomotilidade (-)</option>
+                                <option value="Hipermotilidade">Hipermotilidade (++)</option>
+                                <option value="Atonia">Atonia (0)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <span>Superior Esquerdo</span>
+                            <select id="mot_sup_esq" class="w-full p-2 border rounded-lg bg-white/50">
+                                <option value="Normal">Normal (+)</option>
+                                <option value="Hipomotilidade">Hipomotilidade (-)</option>
+                                <option value="Hipermotilidade">Hipermotilidade (++)</option>
+                                <option value="Atonia">Atonia (0)</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1">
+                            <span>Inferior Esquerdo</span>
+                            <select id="mot_inf_esq" class="w-full p-2 border rounded-lg bg-white/50">
+                                <option value="Normal">Normal (+)</option>
+                                <option value="Hipomotilidade">Hipomotilidade (-)</option>
+                                <option value="Hipermotilidade">Hipermotilidade (++)</option>
+                                <option value="Atonia">Atonia (0)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+                <div class="space-y-1 text-center">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase block">Grau de Dor</label>
+                    <input type="range" id="grau_dor" min="1" max="5" step="1" class="w-full h-2 bg-vetsmart-green/20 rounded-lg appearance-none cursor-pointer accent-vetsmart-gold">
+                    <div class="flex justify-between text-[15px] font-black px-1"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+                </div>
+                <div class="space-y-1 text-center">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase block">Desidratação</label>
+                    <input type="range" id="grau_desidratacao" min="1" max="5" step="1" class="w-full h-2 bg-vetsmart-green/20 rounded-lg appearance-none cursor-pointer accent-vetsmart-gold">
+                    <div class="flex justify-between text-[15px] font-black px-1"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl space-y-4 border-t-4 border-vetsmart-gold/50 shadow-xl">
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm">
+                🛠️ Procedimentos e Exames
+            </h3>
+
+            <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-black uppercase text-vetsmart-green-dark">Realizou Palpação Retal?</span>
+                    <div class="flex bg-gray-200 rounded-lg p-1">
+                        <button type="button" onclick="toggleSubForm('palpacao', true)" id="btn-palp-sim" class="px-3 py-1 text-[10px] font-black rounded-md">SIM</button>
+                        <button type="button" onclick="toggleSubForm('palpacao', false)" id="btn-palp-nao" class="px-3 py-1 text-[10px] font-black rounded-md bg-white shadow-sm">NÃO</button>
+                    </div>
+                </div>
+                <div id="form-palpacao" class="hidden">
+                    <textarea id="obs_palpacao" placeholder="Descreva os achados da palpação..." class="input-glass text-xs"></textarea>
+                </div>
+            </div>
+
+            <div class="space-y-2 border-t border-vetsmart-green/10 pt-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-black uppercase text-vetsmart-green-dark">Realizou Sondagem?</span>
+                    <div class="flex bg-gray-200 rounded-lg p-1">
+                        <button type="button" onclick="toggleSubForm('sondagem', true)" id="btn-sond-sim" class="px-3 py-1 text-[10px] font-black rounded-md">SIM</button>
+                        <button type="button" onclick="toggleSubForm('sondagem', false)" id="btn-sond-nao" class="px-3 py-1 text-[10px] font-black rounded-md bg-white shadow-sm">NÃO</button>
+                    </div>
+                </div>
+                <div id="form-sondagem" class="hidden">
+                    <textarea id="obs_sondagem" placeholder="Líquido gástrico, refluxo, pH..." class="input-glass text-xs"></textarea>
+                </div>
+            </div>
+
+            <div class="space-y-2 border-t border-vetsmart-green/10 pt-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-black uppercase text-vetsmart-green-dark">Utilizou Ultrassom?</span>
+                    <div class="flex bg-gray-200 rounded-lg p-1">
+                        <button type="button" onclick="toggleSubForm('ultrassom', true)" id="btn-ultra-sim" class="px-3 py-1 text-[10px] font-black rounded-md">SIM</button>
+                        <button type="button" onclick="toggleSubForm('ultrassom', false)" id="btn-ultra-nao" class="px-3 py-1 text-[10px] font-black rounded-md bg-white shadow-sm">NÃO</button>
+                    </div>
+                </div>
+                <div id="form-ultrassom" class="hidden space-y-2">
+                    <textarea id="obs_ultrassom" placeholder="Achados ultrassonográficos..." class="input-glass text-xs"></textarea>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-vetsmart-green text-xs">R$</span>
+                        <input type="number" id="valor_ultrassom" step="0.01" placeholder="Custo do procedimento" class="input-glass pl-10 text-xs" oninput="atualizarTotaisFinanceiro()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl space-y-4 border-b-4 border-vetsmart-green shadow-xl">
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm">
+                Conduta e Recomendações
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">Conduta Final</label>
+                    <select id="conduta_final" class="input-glass">
+                        <option value="Tratamento clínico concluído">Tratamento clínico concluído</option>
+                        <option value="Necessita observação 24 horas">Necessita observação 24 horas</option>
+                        <option value="Encaminhamento cirúrgico (Hospital)">Encaminhamento cirúrgico (Hospital)</option>
+                    </select>
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[15px] font-black text-vetsmart-green uppercase ml-1">Recomendações ao Proprietário</label>
+                    <textarea id="recomendacoes" rows="3" placeholder="Orientações de manejo, dieta e medicação..." class="input-glass text-sm"></textarea>
+                </div>
+            </div>
+        </div>
+    
+
+        <!-- SEÇÃO ESTOQUE E CONSUMO - COM DESIGN PREMIUM -->
+        <div class="glass-panel p-6 rounded-3xl space-y-5 border-t-4 border-vetsmart-green shadow-xl relative overflow-hidden">
+            <div class="absolute -left-6 -bottom-6 opacity-5 rotate-12">
+                <i class="fa-solid fa-box-open text-9xl"></i>
+            </div>
+            
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm flex items-center justify-center gap-2 relative z-10">
+                <i class="fa-solid fa-flask-vial"></i> Estoque e Consumo
+            </h3>
+            
+            <p class="text-center text-sm text-vetsmart-green/70 relative z-10">Utilizou algum insumo ou medicamento?</p>
+            
+            <div class="flex gap-3 relative z-10">
+                <button id="btn-consumo-sim" type="button" onclick="toggleConsumption(true)" class="flex-1 py-3 rounded-xl bg-white text-vetsmart-green border-2 border-vetsmart-green font-black transition-all active:scale-95">SIM</button>
+                <button id="btn-consumo-nao" type="button" onclick="toggleConsumption(false)" class="flex-1 py-3 rounded-xl bg-vetsmart-green text-vetsmart-gold border-2 border-vetsmart-green font-black transition-all active:scale-95">NÃO</button>
+            </div>
+
+            <div id="consumo-inner" class="hidden space-y-6 pt-4 border-t border-vetsmart-green/20 relative z-10">
+
+                <!-- CADASTRO RÁPIDO MANUAL -->
+                <div class="bg-white border-2 border-vetsmart-green rounded-2xl p-4">
+                    <p class="text-[10px] uppercase tracking-widest mb-3 opacity-80 font-black">Cadastro Rápido Manual</p>
+                    <div class="flex gap-2 items-center">
+                        <input type="text" id="insumo-nome-manual" placeholder="Nome do insumo" class="flex-1 p-3 border border-vetsmart-green/30 rounded-xl font-medium text-sm bg-vetsmart-green/5 outline-none" onkeypress="if(event.key === 'Enter') adicionarInsumoManual()">
+                        <input type="number" id="insumo-valor-manual" placeholder="R$" step="0.01" class="w-24 p-3 border border-vetsmart-green/30 rounded-xl font-medium text-sm bg-vetsmart-green/5 outline-none text-right" onkeypress="if(event.key === 'Enter') adicionarInsumoManual()">
+                        <button type="button" onclick="adicionarInsumoManual()" class="bg-vetsmart-green text-vetsmart-gold h-12 w-12 rounded-xl flex items-center justify-center active:scale-95 transition-transform font-black">
+                            <i class="fa-solid fa-plus text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BUSCA DE ESTOQUE -->
+                <div class="bg-white border-2 border-dashed border-vetsmart-green rounded-2xl p-4">
+                    <p class="text-[10px] uppercase tracking-widest mb-3 opacity-80 font-black">Baixa Automática (Estoque)</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="busca-estoque" placeholder="Buscar no estoque cadastrado..." class="input-glass flex-1 font-bold border-2 border-vetsmart-green/20" onkeypress="if(event.key === 'Enter') buscarEstoque()">
+                        <button type="button" id="btn-buscar-estoque" onclick="buscarEstoque()" class="bg-vetsmart-green text-vetsmart-gold px-5 rounded-xl flex items-center justify-center font-black active:scale-95 transition-transform">
+                            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="resultados-estoque" class="max-h-60 overflow-y-auto mt-3 space-y-2 no-scrollbar"></div>
+                </div>
+
+                <!-- CARRINHO DE INSUMOS -->
+                <div id="lista-insumos-container" class="hidden">
+                    <p class="text-[10px] uppercase tracking-widest mb-3 opacity-80 font-black">Itens Faturados</p>
+                    <ul id="lista-insumos" class="space-y-3 font-medium text-sm"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO FINANCEIRA - PREMIUM -->
+        <div class="glass-panel p-6 rounded-3xl space-y-5 border-t-4 border-vetsmart-gold shadow-2xl">
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm">
+                💰 Faturamento do Atendimento
+            </h3>
+            
+            <div class="space-y-5">
+                <!-- ENTRADA DE VALOR DO SERVIÇO -->
+                <div class="relative bg-white p-6 rounded-3xl shadow-inner border border-vetsmart-green/5">
+                    <label for="valor_servico" class="text-[10px] font-black text-vetsmart-green/40 uppercase ml-1 block mb-3 text-center tracking-[1px]">Honorários Veterinários</label>
+                    <div class="relative flex items-center justify-center">
+                        <span class="absolute left-6 font-black text-vetsmart-green text-2xl">R$</span>
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            id="valor_servico" 
+                            placeholder="0,00" 
+                            class="input-glass w-full pl-16 text-center font-black text-4xl text-vetsmart-green-dark border-none bg-transparent"
+                            oninput="atualizarTotaisFinanceiro()"
+                        >
+                    </div>
+                </div>
+
+                <!-- RESUMO DE CUSTOS -->
+                <div class="bg-vetsmart-green-dark p-6 rounded-3xl space-y-4 shadow-xl border-l-8 border-vetsmart-gold">
+                    <div class="flex justify-between items-center text-white">
+                        <span class="text-[12px] font-black uppercase tracking-widest">Mão de Obra</span>
+                        <span id="display-subtotal-servico" class="font-black text-sm">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-white/70">
+                        <span class="text-[12px] font-black uppercase tracking-widest">Procedimentos (Exames)</span>
+                        <span id="display-subtotal-procedimentos" class="font-black text-sm">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-white/70">
+                        <span class="text-[12px] font-black uppercase tracking-widest">Materiais</span>
+                        <span id="display-subtotal-insumos" class="font-black text-sm">R$ 0,00</span>
+                    </div>
+                    <div class="pt-4 border-t border-white/10 flex flex-col items-center">
+                        <span class="text-[15px] font-black text-vetsmart-gold uppercase tracking-[5px] mb-1">Total Geral</span>
+                        <span id="display-total-geral" class="font-black text-white text-5xl tracking-tighter">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTÕES DE AÇÃO -->
+        <div class="flex flex-col gap-4 mt-10">
+            <button 
+                type="button" 
+                id="btn-emitir-laudo" 
+                onclick="emitirLaudo()" 
+                class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green-dark font-black py-6 rounded-[32px] uppercase tracking-[3px] active:scale-95 transition-all shadow-[0_15px_30px_rgba(210,180,140,0.4)] flex items-center justify-center gap-4 text-lg border-b-8 border-vetsmart-gold-dark"
+            >
+                <i class="fa-solid fa-file-invoice text-2xl"></i>
+                Finalizar e Emitir Laudo
+            </button>
+            
+            <button 
+                type="button" 
+                id="btn-finalizar-mais-tarde" 
+                onclick="finalizarMaisTarde()" 
+                class="w-full bg-white text-gray-400 font-black py-5 rounded-[28px] uppercase tracking-[2px] active:scale-95 transition-all border-2 border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 text-xs"
+            >
+                <i class="fa-solid fa-pause-circle"></i>
+                Salvar Progresso (Pausar)
+            </button>
+            <button
+                type="button"
+                id="btn-stripe"
+                onclick="emitirComStripe()"
+                class="w-full bg-vetsmart-green-dark text-white font-black py-4 rounded-[28px] uppercase tracking-[2px] active:scale-95 transition-all flex items-center justify-center gap-3 text-xs border-2 border-vetsmart-green"
+            >
+                <i class="fa-brands fa-stripe text-lg"></i>
+                Cobrar via Link Stripe
+            </button>
+        </div>
+
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-vetsmart-green text-white px-8 py-6 rounded-2xl font-black shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-center flex flex-col items-center gap-2 max-w-xs">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-4xl text-vetsmart-gold"></i>
+        <span id="toast-msg">Atendimento Salvo!</span>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+        let insumos = [];
+        let allInsumos = [];
+        let currentUser;
+        let horseId, horseName, ownerName, ownerPhone;
+    
+        // Captura de URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        horseId = urlParams.get('id');
+        horseName = urlParams.get('nome');
+        ownerName = urlParams.get('proprietario');
+        ownerPhone = urlParams.get('telefone') || '';
+    
+        if (!horseId || !horseName || !ownerName) {
+            alert("Dados do animal não encontrados. Redirecionando...");
+            window.location.href = 'clientes.html';
+        } else {
+            document.getElementById('display-horse-name').textContent = horseName;
+            document.getElementById('display-horse-owner').textContent = `Proprietário: ${ownerName}`;
+            document.getElementById('display-horse-id').textContent = horseId;
+        }
+    
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                
+                // Carrega insumos do veterinário logado
+                const q = query(collection(db, "estoque"), where("userId", "==", user.uid));
+                const snapshot = await getDocs(q);
+                allInsumos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+    
+        window.removerInsumo = function(idx) {
+            insumos.splice(idx, 1);
+            renderInsumosList();
+            atualizarTotaisFinanceiro();
+        };
+    
+        window.adicionarInsumo = function(id, nome, valor) {
+            if (insumos.some(i => i.id === id)) {
+                mostrarToast("Insumo já adicionado", false);
+                return;
+            }
+            
+            insumos.push({ id, nome, valor: Number(valor) });
+            document.getElementById('busca-estoque').value = ''; // Alterado para 'busca-estoque'
+            document.getElementById('resultados-estoque').innerHTML = ''; // Alterado para 'resultados-estoque'
+            renderInsumosList();
+            atualizarTotaisFinanceiro();
+        };
+
+        // Função adicionarInsumoManual (Adicionada e exposta globalmente)
+        window.adicionarInsumoManual = function() {
+            const nome = document.getElementById('insumo-nome-manual').value.trim();
+            const valor = parseFloat(document.getElementById('insumo-valor-manual').value);
+
+            if (!nome || isNaN(valor) || valor <= 0) {
+                mostrarToast("Preencha o nome e um valor válido para o insumo manual.", false);
+                return;
+            }
+
+            const id = `manual_${Date.now()}`;
+            insumos.push({ id, nome, valor });
+            document.getElementById('insumo-nome-manual').value = '';
+            document.getElementById('insumo-valor-manual').value = '';
+            renderInsumosList();
+            atualizarTotaisFinanceiro();
+            mostrarToast("Insumo manual adicionado!", true);
+        };
+
+        // Função buscarEstoque (Adicionada e exposta globalmente)
+        window.buscarEstoque = function() {
+            const termo = document.getElementById('busca-estoque').value.toLowerCase().trim();
+            const resultados = document.getElementById('resultados-estoque');
+            
+            if (!termo) {
+                resultados.innerHTML = '';
+                return;
+            }
+    
+            const filtered = allInsumos.filter(m => m.nome.toLowerCase().includes(termo));
+            resultados.innerHTML = filtered.map(m => `
+                <div class="p-2 bg-vetsmart-green/10 rounded cursor-pointer hover:bg-vetsmart-green/20 transition-all" onclick="adicionarInsumo('${m.id}', '${m.nome}', ${m.valorVenda})">
+                    <p class="font-bold text-vetsmart-green-dark text-sm">${m.nome}</p>
+                    <p class="text-[10px] text-vetsmart-green/90">R$ ${Number(m.valorVenda).toFixed(2)}</p>
+                </div>
+            `).join('');
+        };
+    
+        function renderInsumosList() {
+            const ul = document.getElementById('lista-insumos');
+            const container = document.getElementById('lista-insumos-container');
+    
+            if (insumos.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+    
+            container.classList.remove('hidden');
+            ul.innerHTML = insumos.map((item, idx) => `
+                <li class="card-item flex justify-between items-center bg-vetsmart-green/5 p-3 rounded-xl border border-vetsmart-green/10">
+                    <span class="truncate pr-2 font-black text-vetsmart-green-dark">${item.nome}</span>
+                    <div class="flex items-center gap-2 whitespace-nowrap">
+                        <span class="font-black text-vetsmart-gold">R$ ${Number(item.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                        <button type="button" onclick="removerInsumo(${idx})" class="text-red-400 hover:text-red-600 transition-colors active:scale-90">
+                            <i class="fa-solid fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </li>
+            `).join('');
+        }
+    
+        window.atualizarTotaisFinanceiro = function() {
+            const valServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            const valUltra = parseFloat(document.getElementById('valor_ultrassom').value) || 0;
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            
+            const totalGeral = valServico + valUltra + totalInsumos;
+    
+            document.getElementById('display-subtotal-servico').textContent = `R$ ${valServico.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('display-subtotal-procedimentos').textContent = `R$ ${valUltra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('display-subtotal-insumos').textContent = `R$ ${totalInsumos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('display-total-geral').textContent = `R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        };
+    
+        async function saveService(status) {
+            const valorServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+    
+            if (valorServico <= 0) {
+                mostrarToast("Valor do serviço deve ser preenchido", false);
+                return;
+            }
+    
+            const buttons = [
+                document.getElementById('btn-emitir-laudo'),
+                document.getElementById('btn-finalizar-mais-tarde')
+            ];
+            buttons.forEach(btn => btn.disabled = true);
+    
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            const valUltra = parseFloat(document.getElementById('valor_ultrassom').value) || 0;
+            const totalGeral = valorServico + valUltra + totalInsumos;
+    
+            // Schema conforme especificação
+            const uniqueId = crypto.randomUUID();
+            const atendimentoData = {
+                uniqueId: uniqueId,
+                userId: currentUser.uid,
+                horseId: horseId,
+                nome_cavalo: horseName,
+                nome_proprietario: ownerName,
+                telefone_proprietario: ownerPhone,
+                tipo_atendimento: 'Clínico',
+                data: serverTimestamp(),
+                status: status === 'finalizado' ? 'pendente' : 'rascunho',
+                pdf_url: null,
+                estoqueJaDecrementado: false, // Cloud Function processará
+                
+                // Dados clínicos
+                anamnese: document.getElementById('anamnese').value,
+                vetais: {
+                    temperatura: document.getElementById('temp').value,
+                    freqCardiaca: document.getElementById('freq_card').value,
+                    freqRespiratoria: document.getElementById('freq_resp').value,
+                    tpc: document.getElementById('tpc').value,
+                    mucosas: document.getElementById('mucosas').value,
+                },
+                motilidade: {
+                    superiorDireito: document.getElementById('mot_sup_dir').value,
+                    inferiorDireito: document.getElementById('mot_inf_dir').value,
+                    superiorEsquerdo: document.getElementById('mot_sup_esq').value,
+                    inferiorEsquerdo: document.getElementById('mot_inf_esq').value,
+                },
+                grauDor: document.getElementById('grau_dor').value,
+                grauDesidratacao: document.getElementById('grau_desidratacao').value,
+                
+                // Procedimentos
+                procedimentos: {
+                    palpacao: { realizado: !document.getElementById('form-palpacao').classList.contains('hidden'), obs: document.getElementById('obs_palpacao').value },
+                    sondagem: { realizado: !document.getElementById('form-sondagem').classList.contains('hidden'), obs: document.getElementById('obs_sondagem').value },
+                    ultrassom: { realizado: !document.getElementById('form-ultrassom').classList.contains('hidden'), obs: document.getElementById('obs_ultrassom').value, valor: valUltra },
+                },
+                
+                // Conduta
+                conduta: {
+                    final: document.getElementById('conduta_final').value,
+                    recomendacoes: document.getElementById('recomendacoes').value,
+                },
+                
+                // Insumos (conforme spec: array de {id, nome, quantidade, valorUnitarioVenda})
+                insumos: insumos.map(item => ({
+                    id: item.id,
+                    nome: item.nome,
+                    quantidade: 1,
+                    precovenda: item.valor
+                })),
+                insumos_utilizados: insumos.map(item => ({
+                    id: item.id,
+                    nome: item.nome,
+                    qtd: 1,
+                    precovenda: item.valor
+                })),
+                
+                // Financeiro
+                valor_servico: valorServico,
+                total_geral: totalGeral,
+                
+                ultimaAtualizacao: serverTimestamp()
+            };
+    
+            try {
+                await setDoc(doc(db, "atendimentos", uniqueId), atendimentoData);
+                const msg = status === 'finalizado' ? "Atendimento finalizado com sucesso!" : "Progresso salvo!";
+                mostrarToast(msg, true, () => {
+                    setTimeout(() => {
+                        window.location.href = `dossie.html?id=${horseId}`;
+                    }, 1500);
+                });
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                mostrarToast("Erro ao salvar. Tente novamente.", false);
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+    
+        window.emitirLaudo = () => saveService('finalizado');
+        window.finalizarMaisTarde = () => saveService('rascunho');
+
+        window.emitirComStripe = async () => {
+            const valorServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            if (valorServico <= 0) { mostrarToast('Valor do serviço deve ser preenchido', false); return; }
+            const valUltra = parseFloat(document.getElementById('valor_ultrassom').value) || 0;
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            const totalGeral = valorServico + valUltra + totalInsumos;
+            const allBtns = ['btn-emitir-laudo','btn-finalizar-mais-tarde','btn-stripe'].map(id => document.getElementById(id));
+            allBtns.forEach(b => b && (b.disabled = true));
+            document.getElementById('btn-stripe').innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Gerando link...';
+            const uniqueId = crypto.randomUUID();
+            const atendimentoData = {
+                uniqueId, pdf_url: null, userId: currentUser.uid, horseId, nome_cavalo: horseName,
+                nome_proprietario: ownerName, telefone_proprietario: ownerPhone,
+                tipo_atendimento: 'Clínico', data: serverTimestamp(), status: 'aguardando',
+                estoqueJaDecrementado: false,
+                anamnese: document.getElementById('anamnese').value,
+                valor_servico: valorServico, total_geral: totalGeral, ultimaAtualizacao: serverTimestamp()
+            };
+            try {
+                await setDoc(doc(db, 'atendimentos', uniqueId), atendimentoData);
+                const idToken = await currentUser.getIdToken();
+                const res = await fetch('/create-payment-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                    body: JSON.stringify({ amount: Math.round(totalGeral * 100), productName: `Atendimento Clínico - ${horseName}`, transacaoId: uniqueId, userId: currentUser.uid })
+                });
+                const data = await res.json();
+                if (data.url) {
+                    mostrarToast('Link Stripe gerado!', true);
+                    setTimeout(() => { window.open(data.url, '_blank'); window.location.href = `dossie.html?id=${horseId}`; }, 1200);
+                } else { throw new Error(data.error || 'Erro ao gerar link'); }
+            } catch (err) {
+                console.error('Stripe error:', err);
+                mostrarToast('Erro Stripe: ' + err.message, false);
+                allBtns.forEach(b => b && (b.disabled = false));
+                document.getElementById('btn-stripe').innerHTML = '<i class="fa-brands fa-stripe text-lg"></i> Cobrar via Link Stripe';
+            }
+        };
+    
+        window.mostrarToast = function(msg, isSuccess = true, callback) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+    
+            document.getElementById('toast-msg').textContent = msg;
+            icon.className = `fa-solid ${isSuccess ? 'fa-circle-check text-vetsmart-gold' : 'fa-circle-xmark text-red-400'} text-4xl`;
+    
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                if (callback) callback();
+            }, 2500);
+        };
+    
+        
+        window.toggleSubForm = function(tipo, mostrar) {
+            const container = document.getElementById(`form-${tipo}`);
+            const btnSim = document.getElementById(`btn-${tipo === 'ultrassom' ? 'ultra' : tipo === 'palpacao' ? 'palp' : 'sond'}-sim`);
+            const btnNao = document.getElementById(`btn-${tipo === 'ultrassom' ? 'ultra' : tipo === 'palpacao' ? 'palp' : 'sond'}-nao`);
+    
+            if (mostrar) {
+                container.classList.remove('hidden');
+                btnSim.classList.add('bg-white', 'shadow-sm');
+                btnNao.classList.remove('bg-white', 'shadow-sm');
+            } else {
+                container.classList.add('hidden');
+                btnNao.classList.add('bg-white', 'shadow-sm');
+                btnSim.classList.remove('bg-white', 'shadow-sm');
+                if(tipo === 'ultrassom') {
+                    document.getElementById('valor_ultrassom').value = '';
+                    atualizarTotaisFinanceiro();
+                }
+            }
+        };
+
+        // Funções para lidar com o toggle de consumo (Expostas globalmente)
+        window.toggleConsumption = function(mostrar) {
+            const consumoInner = document.getElementById('consumo-inner');
+            const btnSim = document.getElementById('btn-consumo-sim');
+            const btnNao = document.getElementById('btn-consumo-nao');
+
+            if (mostrar) {
+                consumoInner.classList.remove('hidden');
+                btnSim.classList.add('bg-white', 'text-vetsmart-green', 'border-vetsmart-green');
+                btnSim.classList.remove('bg-vetsmart-green', 'text-vetsmart-gold', 'border-vetsmart-green');
+                btnNao.classList.remove('bg-white', 'text-vetsmart-green', 'border-vetsmart-green');
+                btnNao.classList.add('bg-vetsmart-green', 'text-vetsmart-gold', 'border-vetsmart-green');
+            } else {
+                consumoInner.classList.add('hidden');
+                btnNao.classList.add('bg-white', 'text-vetsmart-green', 'border-vetsmart-green');
+                btnNao.classList.remove('bg-vetsmart-green', 'text-vetsmart-gold', 'border-vetsmart-green');
+                btnSim.classList.remove('bg-white', 'text-vetsmart-green', 'border-vetsmart-green');
+                btnSim.classList.add('bg-vetsmart-green', 'text-vetsmart-gold', 'border-vetsmart-green');
+                insumos = []; // Limpa os insumos se desativar o consumo
+                renderInsumosList();
+                atualizarTotaisFinanceiro();
+            }
+        };
+
+    </script>
+
+</body>
+</html>

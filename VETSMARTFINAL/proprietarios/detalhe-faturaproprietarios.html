@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Detalhe da Fatura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .nav-active { color: #D2B48C !important; }
+        #toast-container { pointer-events: none; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <div id="toast-container" class="fixed top-5 left-0 right-0 flex flex-col items-center gap-2 z-[9999]"></div>
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="faturas-proprietarios.html" class="text-white/80 hover:text-white"><i class="fa-solid fa-chevron-left text-xl"></i></a>
+            <h1 class="font-black text-xl uppercase">Detalhe <span class="text-vetsmart-gold">Fatura</span></h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-5 space-y-4 pb-6">
+
+        <div id="loader" class="text-center py-10">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-3xl"></i>
+        </div>
+
+        <div id="content" class="hidden space-y-4">
+
+            <!-- Header da fatura -->
+            <div class="glass-panel p-6 rounded-3xl">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 id="f-tipo" class="font-black text-vetsmart-green text-xl"></h2>
+                        <p id="f-data" class="text-sm text-vetsmart-green/50 mt-1"></p>
+                        <p id="f-cavalo" class="text-sm font-bold text-vetsmart-green mt-0.5"></p>
+                    </div>
+                    <div class="text-right">
+                        <p id="f-total" class="font-black text-3xl text-vetsmart-green"></p>
+                        <span id="f-status-badge" class="text-xs font-bold px-3 py-1 rounded-full inline-block mt-1"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botão Pagar -->
+            <div id="pagar-section" class="hidden">
+                <a id="btn-pagar" href="#" target="_blank"
+                   class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-4 rounded-2xl uppercase tracking-widest text-sm active:scale-95 transition-all shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-credit-card"></i> Pagar Agora
+                </a>
+                <p class="text-center text-xs text-vetsmart-green/40 mt-2">
+                    <i class="fa-solid fa-lock mr-1"></i> Pagamento seguro via Stripe
+                </p>
+            </div>
+
+            <!-- Detalhes -->
+            <div class="glass-panel p-5 rounded-2xl space-y-3">
+                <h3 class="font-bold text-vetsmart-green text-sm uppercase tracking-wider border-b border-vetsmart-green/10 pb-2">Detalhes do Atendimento</h3>
+                <div id="f-campos" class="space-y-2 text-sm"></div>
+            </div>
+
+            <!-- Insumos -->
+            <div id="insumos-section" class="glass-panel p-5 rounded-2xl space-y-3 hidden">
+                <h3 class="font-bold text-vetsmart-green text-sm uppercase tracking-wider border-b border-vetsmart-green/10 pb-2">Materiais Utilizados</h3>
+                <div id="insumos-list" class="space-y-1"></div>
+            </div>
+
+            <!-- Laudo / Observações -->
+            <div id="laudo-section" class="glass-panel p-5 rounded-2xl hidden">
+                <div class="flex justify-between items-center border-b border-vetsmart-green/10 pb-2 mb-3">
+                    <h3 class="font-bold text-vetsmart-green text-sm uppercase tracking-wider">Laudo / Observações</h3>
+                    <button id="btn-copiar-laudo" class="text-xs font-bold text-vetsmart-gold hover:underline active:scale-95 transition-all">
+                        <i class="fa-solid fa-copy mr-1"></i> Copiar
+                    </button>
+                </div>
+                <p id="laudo-text" class="text-sm text-vetsmart-green/70 leading-relaxed whitespace-pre-wrap"></p>
+            </div>
+
+            <!-- ID da Fatura -->
+            <div class="text-center">
+                <p id="f-id" class="text-[10px] font-mono text-vetsmart-green/30"></p>
+            </div>
+
+        </div>
+
+        <div id="not-found" class="hidden text-center py-16">
+            <i class="fa-solid fa-file-circle-xmark text-vetsmart-gold/30 text-5xl mb-4"></i>
+            <p class="text-vetsmart-green/40 font-bold">Fatura não encontrada.</p>
+            <a href="faturas-proprietarios.html" class="mt-4 inline-block text-vetsmart-gold font-bold text-sm hover:underline">← Voltar</a>
+        </div>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-vetsmart-green/95 backdrop-blur-md border-t border-white/10">
+        <div class="max-w-md mx-auto flex justify-around items-center py-2 px-2">
+            <a href="dashboard-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-house text-xl"></i><span class="text-[9px] font-bold uppercase">Início</span></a>
+            <a href="cavalos-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-horse text-xl"></i><span class="text-[9px] font-bold uppercase">Cavalos</span></a>
+            <a href="faturas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl nav-active"><i class="fa-solid fa-file-invoice text-xl"></i><span class="text-[9px] font-bold uppercase">Faturas</span></a>
+            <a href="receitas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-flask text-xl"></i><span class="text-[9px] font-bold uppercase">Receitas</span></a>
+            <a href="financeiro-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-chart-line text-xl"></i><span class="text-[9px] font-bold uppercase">Financeiro</span></a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const fmt = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const faturaId = new URLSearchParams(location.search).get('id');
+
+        let currentUser = null;
+        let proprietarioData = null;
+
+        function showToast(msg, ok = true) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `pointer-events-auto px-5 py-3 rounded-xl shadow-xl text-white text-sm font-bold flex items-center gap-2 ${ok ? 'bg-vetsmart-green' : 'bg-red-500'}`;
+            const icon = document.createElement('i');
+            icon.className = `fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-exclamation'}`;
+            const span = document.createElement('span');
+            span.textContent = msg;
+            t.appendChild(icon);
+            t.appendChild(document.createTextNode(' '));
+            t.appendChild(span);
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.replace('index-proprietario.html'); return; }
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (!snap.exists()) { await signOut(auth); window.location.replace('index-proprietario.html'); return; }
+            currentUser = user;
+            proprietarioData = { uid: user.uid, ...snap.data() };
+            if (!faturaId) { showNotFound(); return; }
+            loadFatura();
+        });
+
+        function showNotFound() {
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('not-found').classList.remove('hidden');
+        }
+
+        async function loadFatura() {
+            const snap = await getDoc(doc(db, 'atendimentos', faturaId));
+            if (!snap.exists()) { showNotFound(); return; }
+            const f = { id: snap.id, ...snap.data() };
+
+            // Verificar que a fatura pertence ao proprietário
+            const cpf = proprietarioData.cpf || '';
+            if (f.cpfProprietario && f.cpfProprietario !== cpf && f.userId !== currentUser.uid) {
+                showNotFound(); return;
+            }
+
+            const dt = f.data?.toDate?.() ? f.data.toDate().toLocaleDateString('pt-BR') : '–';
+
+            // Header
+            document.getElementById('f-tipo').textContent = f.tipo_atendimento || 'Atendimento';
+            document.getElementById('f-data').textContent = `Data: ${dt}`;
+            document.getElementById('f-cavalo').textContent = f.nome_cavalo ? `Animal: ${f.nome_cavalo}` : '';
+            document.getElementById('f-total').textContent = fmt(f.total_geral);
+            document.getElementById('f-id').textContent = `ID: ${f.id}`;
+
+            // Status badge
+            const statusMap = {
+                pago: { cls: 'bg-green-100 text-green-700', label: 'PAGO ✓' },
+                pendente: { cls: 'bg-red-100 text-red-600', label: 'PENDENTE' },
+                aguardando: { cls: 'bg-yellow-100 text-yellow-700', label: 'AGUARDANDO' },
+                rascunho: { cls: 'bg-blue-100 text-blue-600', label: 'RASCUNHO' }
+            };
+            const st = statusMap[f.status] || { cls: 'bg-gray-100 text-gray-600', label: f.status?.toUpperCase() || '' };
+            const badge = document.getElementById('f-status-badge');
+            badge.className = `text-xs font-bold px-3 py-1 rounded-full inline-block mt-1 ${st.cls}`;
+            badge.textContent = st.label;
+
+            // Botão pagar
+            if (['pendente','aguardando'].includes(f.status) && f.linkPagamento) {
+                const pagarSection = document.getElementById('pagar-section');
+                pagarSection.classList.remove('hidden');
+                document.getElementById('btn-pagar').href = f.linkPagamento;
+            }
+
+            // Campos detalhados
+            const campos = [
+                { l: 'Veterinário', v: f.veterinario_nome || f.nome_veterinario },
+                { l: 'Proprietário', v: f.nome_proprietario },
+                { l: 'Tipo de Atendimento', v: f.tipo_atendimento },
+                { l: 'Honorários', v: f.valor_servico ? fmt(f.valor_servico) : null },
+                { l: 'Total de Insumos', v: f.subtotal_insumos ? fmt(f.subtotal_insumos) : null },
+                { l: 'Total Geral', v: fmt(f.total_geral) }
+            ].filter(c => c.v);
+
+            document.getElementById('f-campos').innerHTML = campos.map(c =>
+                `<div class="flex justify-between items-center py-1.5 border-b border-vetsmart-green/5 last:border-0">
+                    <span class="text-vetsmart-green/50 font-medium">${c.l}</span>
+                    <span class="font-bold text-vetsmart-green">${c.v}</span>
+                </div>`
+            ).join('');
+
+            // Insumos
+            const insumos = f.insumos || f.lista_insumos || [];
+            if (insumos.length) {
+                document.getElementById('insumos-section').classList.remove('hidden');
+                document.getElementById('insumos-list').innerHTML = insumos.map(ins =>
+                    `<div class="flex justify-between text-sm py-1">
+                        <span class="text-vetsmart-green/70">${ins.nome || ins.name || '–'} ${ins.quantidade ? `× ${ins.quantidade}` : ''}</span>
+                        <span class="font-bold text-vetsmart-green">${ins.valor_total ? fmt(ins.valor_total) : (ins.valor ? fmt(ins.valor) : '')}</span>
+                    </div>`
+                ).join('');
+            }
+
+            // Laudo
+            const laudo = f.observacoes_clinicas || f.laudo || f.anamnese || f.diagnostico || f.observacoes;
+            if (laudo) {
+                document.getElementById('laudo-section').classList.remove('hidden');
+                const laudoEl = document.getElementById('laudo-text');
+                laudoEl.textContent = laudo;
+
+                document.getElementById('btn-copiar-laudo').addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(laudo);
+                        showToast('Laudo copiado!');
+                    } catch {
+                        showToast('Erro ao copiar.', false);
+                    }
+                });
+            }
+
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

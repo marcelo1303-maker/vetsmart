@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Cadastro Proprietário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f4f4f5; }
+        .glass-panel { background: #ffffff; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 4px 24px 0 rgba(0,0,0,0.07); }
+        .form-input { background-color: #f9fafb; border: 1px solid #d1d5db; border-radius: 10px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; color: #1a1a1a; }
+        .form-input:focus { border-color: #D2B48C; outline: none; box-shadow: 0 0 0 2px #d2b48c30; }
+        .form-input.error { border-color: #ef4444; }
+        .field-error { font-size: 0.75rem; color: #ef4444; margin-top: 4px; display: none; }
+        #toast-container { pointer-events: none; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <!-- Toast -->
+    <div id="toast-container" class="fixed top-5 left-0 right-0 flex flex-col items-center gap-2 z-[9999]"></div>
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="index-proprietario.html" class="text-white/80 hover:text-white">
+                <i class="fa-solid fa-chevron-left text-xl"></i>
+            </a>
+            <h1 class="font-black text-xl uppercase">Criar <span class="text-vetsmart-gold">Conta</span></h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-4 pb-6">
+
+        <!-- Aviso Trial -->
+        <div class="bg-vetsmart-gold/10 border border-vetsmart-gold/40 rounded-2xl p-4 flex gap-3">
+            <i class="fa-solid fa-gift text-vetsmart-gold text-xl mt-0.5"></i>
+            <div>
+                <p class="font-bold text-vetsmart-green text-sm">30 dias grátis, depois R$ 9,90/mês</p>
+                <p class="text-vetsmart-green/60 text-xs mt-1">Você será redirecionado para cadastrar seu cartão com segurança no Stripe. Nenhum dado de pagamento é armazenado em nossos servidores.</p>
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl space-y-4">
+
+            <h2 class="font-black text-vetsmart-green text-lg uppercase tracking-tight">Dados Pessoais</h2>
+
+            <div>
+                <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Nome Completo *</label>
+                <input type="text" id="input-nome" class="form-input" placeholder="Seu nome completo" autocomplete="name">
+                <p class="field-error" id="err-nome">Informe seu nome completo.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">CPF *</label>
+                <input type="text" id="input-cpf" class="form-input" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" autocomplete="off">
+                <p class="field-error" id="err-cpf">CPF inválido.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Telefone / WhatsApp *</label>
+                <input type="tel" id="input-tel" class="form-input" placeholder="(00) 00000-0000" maxlength="16" inputmode="tel" autocomplete="tel">
+                <p class="field-error" id="err-tel">Informe o telefone.</p>
+            </div>
+
+            <h2 class="font-black text-vetsmart-green text-lg uppercase tracking-tight pt-2">Acesso</h2>
+
+            <div>
+                <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">E-mail *</label>
+                <input type="email" id="input-email" class="form-input" placeholder="seu@email.com" autocomplete="email">
+                <p class="field-error" id="err-email">Informe um e-mail válido.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Senha *</label>
+                <div class="relative">
+                    <input type="password" id="input-senha" class="form-input pr-10" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                    <button type="button" id="toggle-pwd1" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-eye text-sm"></i>
+                    </button>
+                </div>
+                <p class="field-error" id="err-senha">Mínimo 6 caracteres.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-vetsmart-green uppercase tracking-wider mb-1">Confirmar Senha *</label>
+                <div class="relative">
+                    <input type="password" id="input-senha2" class="form-input pr-10" placeholder="Repita a senha" autocomplete="new-password">
+                    <button type="button" id="toggle-pwd2" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-eye text-sm"></i>
+                    </button>
+                </div>
+                <p class="field-error" id="err-senha2">As senhas não coincidem.</p>
+            </div>
+
+            <!-- LGPD -->
+            <div class="flex gap-3 items-start mt-2">
+                <input type="checkbox" id="check-lgpd" class="w-5 h-5 accent-vetsmart-green mt-0.5 flex-shrink-0 cursor-pointer">
+                <label for="check-lgpd" class="text-sm text-vetsmart-green/70 leading-snug cursor-pointer">
+                    Li e concordo com os
+                    <a href="termos-lgpd.html" target="_blank" class="text-vetsmart-gold font-bold hover:underline">Termos de Uso e Política de Privacidade (LGPD)</a>
+                </label>
+            </div>
+            <p class="field-error" id="err-lgpd">Aceite os termos para continuar.</p>
+
+            <div id="error-global" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm rounded-xl px-4 py-3"></div>
+
+            <button id="btn-cadastrar" class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green font-black py-4 rounded-2xl uppercase tracking-widest text-sm active:scale-95 transition-all shadow-lg mt-2">
+                <i class="fa-solid fa-credit-card mr-2"></i> Criar Conta e Cadastrar Cartão
+            </button>
+
+            <p class="text-center text-xs text-vetsmart-green/40 mt-1">
+                <i class="fa-solid fa-lock mr-1"></i> Pagamento processado com segurança via Stripe
+            </p>
+
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { auth, db, BASE_URL } from "../firebase.js";
+        import { createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Redireciona se já logado como proprietario
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.replace('index-proprietario.html'); return; }
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (snap.exists()) window.location.replace('dashboard-proprietarios.html');
+        });
+
+        // ── Máscaras ──────────────────────────────────────────────────────────
+        function mascaraCPF(v) {
+            v = v.replace(/\D/g, '').slice(0, 11);
+            if (v.length > 9) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+            if (v.length > 6) return v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            if (v.length > 3) return v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+            return v;
+        }
+
+        function mascaraTel(v) {
+            v = v.replace(/\D/g, '').slice(0, 11);
+            if (v.length > 10) return v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            if (v.length > 6) return v.replace(/(\d{2})(\d{4,5})(\d{0,4})/, '($1) $2-$3');
+            if (v.length > 2) return v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+            return v;
+        }
+
+        document.getElementById('input-cpf').addEventListener('input', e => {
+            e.target.value = mascaraCPF(e.target.value);
+        });
+        document.getElementById('input-tel').addEventListener('input', e => {
+            e.target.value = mascaraTel(e.target.value);
+        });
+
+        // ── Validação CPF (Módulo 11) ─────────────────────────────────────────
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+            let s = 0;
+            for (let i = 0; i < 9; i++) s += parseInt(cpf[i]) * (10 - i);
+            let d1 = (s * 10) % 11; if (d1 >= 10) d1 = 0;
+            if (d1 !== parseInt(cpf[9])) return false;
+            s = 0;
+            for (let i = 0; i < 10; i++) s += parseInt(cpf[i]) * (11 - i);
+            let d2 = (s * 10) % 11; if (d2 >= 10) d2 = 0;
+            return d2 === parseInt(cpf[10]);
+        }
+
+        // ── Toggle senhas ─────────────────────────────────────────────────────
+        function togglePwd(inputId, btnId) {
+            const inp = document.getElementById(inputId);
+            const icon = document.querySelector(`#${btnId} i`);
+            if (inp.type === 'password') { inp.type = 'text'; icon.className = 'fa-solid fa-eye-slash text-sm'; }
+            else { inp.type = 'password'; icon.className = 'fa-solid fa-eye text-sm'; }
+        }
+        document.getElementById('toggle-pwd1').addEventListener('click', () => togglePwd('input-senha', 'toggle-pwd1'));
+        document.getElementById('toggle-pwd2').addEventListener('click', () => togglePwd('input-senha2', 'toggle-pwd2'));
+
+        // ── Toast ─────────────────────────────────────────────────────────────
+        function showToast(msg, ok = true, dur = 3500) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `pointer-events-auto px-5 py-3 rounded-xl shadow-xl text-white text-sm font-bold flex items-center gap-2 transition-all duration-300 ${ok ? 'bg-vetsmart-green' : 'bg-red-500'}`;
+            const icon = document.createElement('i');
+            icon.className = `fa-solid ${ok ? 'fa-circle-check' : 'fa-circle-exclamation'}`;
+            const span = document.createElement('span');
+            span.textContent = msg;
+            t.appendChild(icon);
+            t.appendChild(document.createTextNode(' '));
+            t.appendChild(span);
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, dur);
+        }
+
+        function showFieldErr(id, show) {
+            const el = document.getElementById(id);
+            el.style.display = show ? 'block' : 'none';
+            const input = document.getElementById(id.replace('err-', 'input-'));
+            if (input) input.classList.toggle('error', show);
+        }
+
+        // ── Cadastro ──────────────────────────────────────────────────────────
+        document.getElementById('btn-cadastrar').addEventListener('click', async () => {
+            const nome = document.getElementById('input-nome').value.trim();
+            const cpf = document.getElementById('input-cpf').value.trim();
+            const tel = document.getElementById('input-tel').value.trim();
+            const email = document.getElementById('input-email').value.trim();
+            const senha = document.getElementById('input-senha').value;
+            const senha2 = document.getElementById('input-senha2').value;
+            const lgpd = document.getElementById('check-lgpd').checked;
+
+            // Reset erros
+            ['nome','cpf','tel','email','senha','senha2','lgpd'].forEach(f => showFieldErr(`err-${f}`, false));
+            document.getElementById('error-global').classList.add('hidden');
+
+            let ok = true;
+            if (!nome || nome.split(' ').length < 2) { showFieldErr('err-nome', true); ok = false; }
+            if (!validarCPF(cpf)) { showFieldErr('err-cpf', true); ok = false; }
+            if (tel.replace(/\D/g,'').length < 10) { showFieldErr('err-tel', true); ok = false; }
+            if (!email.includes('@')) { showFieldErr('err-email', true); ok = false; }
+            if (senha.length < 6) { showFieldErr('err-senha', true); ok = false; }
+            if (senha !== senha2) { showFieldErr('err-senha2', true); ok = false; }
+            if (!lgpd) { showFieldErr('err-lgpd', true); ok = false; }
+            if (!ok) return;
+
+            const btn = document.getElementById('btn-cadastrar');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin mr-2"></i> Criando conta...';
+
+            try {
+                // 1. Criar usuário Firebase Auth
+                const cred = await createUserWithEmailAndPassword(auth, email, senha);
+                const uid = cred.user.uid;
+                const idToken = await cred.user.getIdToken();
+
+                // 2. Registrar proprietário via backend (Admin SDK — ignora regras Firestore)
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin mr-2"></i> Salvando dados...';
+                const regRes = await fetch(`${BASE_URL}/api/proprietario/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                    body: JSON.stringify({ uid, email, nomeCompleto: nome, cpf: cpf.replace(/\D/g,''), cpfFormatado: cpf, telefone: tel })
+                });
+                if (!regRes.ok) {
+                    const regData = await regRes.json().catch(() => ({}));
+                    throw { code: 'server/register-failed', message: regData.error || 'Erro ao salvar dados.' };
+                }
+
+                // 3. Chamar backend para criar Stripe Checkout
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin mr-2"></i> Configurando pagamento...';
+                const res = await fetch(`${BASE_URL}/create-checkout-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                    body: JSON.stringify({ email, nomeCompleto: nome, cpf: cpf.replace(/\D/g,''), uid })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.url) {
+                    showToast('Conta criada! Redirecionando para o Stripe...', true, 2000);
+                    setTimeout(() => { window.location.href = data.url; }, 2000);
+                } else {
+                    showToast('Conta criada! Entrando no portal...', true, 2000);
+                    setTimeout(() => { window.location.replace('dashboard-proprietarios.html'); }, 2000);
+                }
+
+            } catch (err) {
+                const msgs = {
+                    'auth/email-already-in-use': 'Este e-mail já está cadastrado. Faça login.',
+                    'auth/weak-password': 'Senha muito fraca. Use ao menos 6 caracteres.',
+                    'auth/invalid-email': 'E-mail inválido.'
+                };
+                const errEl = document.getElementById('error-global');
+                errEl.textContent = msgs[err.code] || `Erro: ${err.message}`;
+                errEl.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-credit-card mr-2"></i> Criar Conta e Cadastrar Cartão';
+            }
+        });
+    </script>
+</body>
+</html>

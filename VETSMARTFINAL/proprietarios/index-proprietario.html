@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Portal do Proprietário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top right, #3a7565, #2D5A4E); min-height: 100vh; }
+        .liquid-glass { background: rgba(255,255,255,0.12); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2); }
+        .btn-bounce { transition: all 0.2s cubic-bezier(0.175,0.885,0.32,1.275); }
+        .btn-bounce:active { transform: scale(0.94); }
+        .blob { position: absolute; border-radius: 50%; filter: blur(60px); z-index: 0; opacity: 0.35; }
+        .form-input { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 14px 16px; width: 100%; color: white; font-weight: 500; transition: all .2s; }
+        .form-input::placeholder { color: rgba(255,255,255,0.4); }
+        .form-input:focus { border-color: #D2B48C; outline: none; background: rgba(255,255,255,0.15); }
+        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px #2D5A4E inset; -webkit-text-fill-color: white; }
+        #error-msg { display: none; }
+    </style>
+</head>
+<body class="flex items-center justify-center p-6 relative overflow-hidden">
+
+    <div class="blob w-72 h-72 bg-vetsmart-gold top-[-80px] right-[-80px]"></div>
+    <div class="blob w-80 h-80 bg-black bottom-[-100px] left-[-100px]"></div>
+
+    <main class="w-full max-w-sm z-10">
+
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-vetsmart-gold/20 border border-vetsmart-gold/30 mb-4">
+                <i class="fa-solid fa-person text-vetsmart-gold text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-black tracking-tighter uppercase leading-none">
+                <span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span>
+            </h1>
+            <p class="text-white/50 text-xs mt-1 uppercase tracking-widest">Portal do Proprietário</p>
+        </div>
+
+        <div class="liquid-glass rounded-3xl p-8 space-y-4">
+
+            <div>
+                <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">E-mail</label>
+                <input type="email" id="input-email" placeholder="seu@email.com" class="form-input" autocomplete="email">
+            </div>
+
+            <div>
+                <label class="block text-white/50 text-xs uppercase tracking-widest mb-2">Senha</label>
+                <div class="relative">
+                    <input type="password" id="input-senha" placeholder="••••••••" class="form-input pr-10" autocomplete="current-password">
+                    <button type="button" id="toggle-pwd" class="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors">
+                        <i class="fa-solid fa-eye text-sm"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="error-msg" class="bg-red-500/10 border border-red-500/30 text-red-300 text-sm rounded-xl px-4 py-3"></div>
+
+            <button id="btn-login" class="btn-bounce w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all shadow-lg text-vetsmart-green" style="background: linear-gradient(135deg, #D2B48C, #C19A6B);">
+                <i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar
+            </button>
+
+            <div class="text-center space-y-2 pt-2">
+                <a href="cadastro-proprietarios.html" class="block text-vetsmart-gold/80 hover:text-vetsmart-gold text-sm font-bold transition-colors">
+                    <i class="fa-solid fa-user-plus mr-1"></i> Criar conta — 30 dias grátis
+                </a>
+                <a href="../index.html" class="block text-white/30 hover:text-white/60 text-xs transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Voltar ao início
+                </a>
+            </div>
+
+        </div>
+
+        <p id="loading-msg" class="hidden text-center text-white/60 text-sm mt-4">
+            <i class="fa-solid fa-circle-notch animate-spin mr-2"></i> Entrando...
+        </p>
+
+    </main>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Se já logado como proprietario, redireciona
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (snap.exists()) {
+                window.location.replace('dashboard-proprietarios.html');
+            }
+        });
+
+        // Toggle senha
+        document.getElementById('toggle-pwd').addEventListener('click', () => {
+            const inp = document.getElementById('input-senha');
+            const icon = document.querySelector('#toggle-pwd i');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash text-sm';
+            } else {
+                inp.type = 'password';
+                icon.className = 'fa-solid fa-eye text-sm';
+            }
+        });
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            const email = document.getElementById('input-email').value.trim();
+            const senha = document.getElementById('input-senha').value;
+            const btn = document.getElementById('btn-login');
+            const loading = document.getElementById('loading-msg');
+
+            if (!email || !senha) { showError('Preencha e-mail e senha.'); return; }
+
+            btn.disabled = true;
+            btn.textContent = 'Entrando...';
+            loading.classList.remove('hidden');
+            document.getElementById('error-msg').style.display = 'none';
+
+            try {
+                const cred = await signInWithEmailAndPassword(auth, email, senha);
+                // Verifica se é proprietario
+                const snap = await getDoc(doc(db, 'proprietarios', cred.user.uid));
+                if (!snap.exists()) {
+                    showError('Conta não encontrada no portal. Use o login de veterinário.');
+                    await auth.signOut();
+                    return;
+                }
+                window.location.replace('dashboard-proprietarios.html');
+            } catch (err) {
+                const msgs = {
+                    'auth/user-not-found': 'E-mail não cadastrado.',
+                    'auth/wrong-password': 'Senha incorreta.',
+                    'auth/invalid-email': 'E-mail inválido.',
+                    'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
+                    'auth/invalid-credential': 'E-mail ou senha inválidos.'
+                };
+                showError(msgs[err.code] || 'Erro ao entrar. Tente novamente.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket mr-2"></i> Entrar';
+                loading.classList.add('hidden');
+            }
+        });
+
+        // Enter para logar
+        document.getElementById('input-senha').addEventListener('keydown', e => {
+            if (e.key === 'Enter') document.getElementById('btn-login').click();
+        });
+    </script>
+</body>
+</html>

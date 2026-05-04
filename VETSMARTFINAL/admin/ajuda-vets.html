@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HorseSmart Admin | Central de Ajuda</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { gold: '#D2B48C', 'gold-dark': '#C19A6B', hs: '#2D5A4E' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0D1B18; }
+        .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .card { background: #1A2F2A; border: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-link { display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.55);transition:all .2s; }
+        .sidebar-link:hover { background:rgba(255,255,255,0.06);color:white; }
+        .sidebar-link.active { background:rgba(210,180,140,0.12);color:#D2B48C; }
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#2D5A4E;border-radius:4px}
+        .tab-btn { padding:6px 16px;border-radius:8px;font-size:12px;font-weight:700;transition:all .2s;color:rgba(255,255,255,.4); }
+        .tab-btn.active { background:rgba(210,180,140,0.15);color:#D2B48C; }
+    </style>
+</head>
+<body class="min-h-screen flex text-white">
+
+    <!-- SIDEBAR -->
+    <aside class="w-56 bg-[#111F1C] flex-shrink-0 flex flex-col h-screen sticky top-0 border-r border-white/5">
+        <div class="p-6 border-b border-white/5">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-horse text-gold text-lg"></i>
+                <span class="font-black text-sm tracking-tight">HORSE<span class="text-gold">SMART</span></span>
+            </div>
+            <p class="text-white/30 text-[10px] uppercase tracking-widest mt-1">Admin</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="dashboard.html" class="sidebar-link">
+                <i class="fa-solid fa-chart-line w-4 text-center"></i> Dashboard
+            </a>
+            <a href="cadastro-vets.html" class="sidebar-link">
+                <i class="fa-solid fa-user-doctor w-4 text-center"></i> Veterinários
+            </a>
+            <a href="ajuda-vets.html" class="sidebar-link active">
+                <i class="fa-solid fa-headset w-4 text-center"></i> Central de Ajuda
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/5">
+            <button id="logout-btn" class="sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-auto p-8">
+        <div class="max-w-4xl mx-auto space-y-6">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-2xl font-black">Central de Ajuda</h1>
+                    <p class="text-white/40 text-sm mt-0.5">Pedidos de suporte enviados pelos veterinários</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="flex gap-1">
+                        <button class="tab-btn active" data-filter="todos">Todos</button>
+                        <button class="tab-btn" data-filter="pendente">Pendentes</button>
+                        <button class="tab-btn" data-filter="em_atendimento">Em Atendimento</button>
+                        <button class="tab-btn" data-filter="resolvido">Resolvidos</button>
+                    </div>
+                    <button id="refresh-btn" class="glass px-3 py-2 rounded-xl text-white/50 hover:text-white transition-colors text-xs">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats row -->
+            <div class="grid grid-cols-3 gap-4">
+                <div class="card rounded-xl p-4 text-center">
+                    <p class="text-2xl font-black" id="count-pendente">—</p>
+                    <p class="text-white/40 text-xs mt-1">Pendentes</p>
+                </div>
+                <div class="card rounded-xl p-4 text-center">
+                    <p class="text-2xl font-black text-yellow-400" id="count-atendimento">—</p>
+                    <p class="text-white/40 text-xs mt-1">Em Atendimento</p>
+                </div>
+                <div class="card rounded-xl p-4 text-center">
+                    <p class="text-2xl font-black text-emerald-400" id="count-resolvido">—</p>
+                    <p class="text-white/40 text-xs mt-1">Resolvidos</p>
+                </div>
+            </div>
+
+            <!-- Ticket list -->
+            <div id="ticket-list" class="space-y-3">
+                <div class="card rounded-2xl p-8 text-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-gold text-xl"></i>
+                    <p class="text-white/40 text-sm mt-3">Carregando pedidos...</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- TICKET DETAIL MODAL -->
+    <div id="ticket-modal" class="hidden fixed inset-0 bg-black/70 z-50 items-center justify-center p-6 backdrop-blur-sm">
+        <div class="bg-[#1A2F2A] border border-white/10 rounded-3xl p-8 w-full max-w-lg space-y-5 max-h-[90vh] overflow-auto">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h3 class="font-black text-lg" id="modal-nome">—</h3>
+                    <p class="text-white/40 text-sm" id="modal-email">—</p>
+                </div>
+                <button id="modal-close" class="text-white/40 hover:text-white transition-colors flex-shrink-0">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="glass rounded-xl p-4 space-y-2">
+                <div class="flex justify-between text-xs">
+                    <span class="text-white/40">Protocolo</span>
+                    <span class="font-bold text-gold" id="modal-protocolo">—</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-white/40">Telefone</span>
+                    <span class="font-bold" id="modal-telefone">—</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-white/40">Data</span>
+                    <span class="font-bold" id="modal-data">—</span>
+                </div>
+                <div class="flex justify-between text-xs">
+                    <span class="text-white/40">Status</span>
+                    <span id="modal-status-badge" class="font-bold">—</span>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-white/30 text-xs uppercase tracking-widest mb-2">Mensagem</p>
+                <p class="text-sm text-white/80 leading-relaxed bg-white/5 rounded-xl p-4" id="modal-mensagem">—</p>
+            </div>
+
+            <div class="space-y-2">
+                <p class="text-white/30 text-xs uppercase tracking-widest">Atualizar Status</p>
+                <div class="flex gap-2 flex-wrap">
+                    <button class="status-action-btn flex-1 py-2 rounded-xl text-xs font-bold transition-colors bg-orange-500/10 text-orange-400 hover:bg-orange-500/20" data-status="em_atendimento">
+                        Em Atendimento
+                    </button>
+                    <button class="status-action-btn flex-1 py-2 rounded-xl text-xs font-bold transition-colors bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20" data-status="resolvido">
+                        Resolvido
+                    </button>
+                    <button class="status-action-btn flex-1 py-2 rounded-xl text-xs font-bold transition-colors bg-white/5 text-white/40 hover:bg-white/10" data-status="pendente">
+                        Reabrir
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex gap-3" id="modal-wpp-row">
+                <a id="modal-wpp-btn" href="#" target="_blank"
+                    class="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white font-bold text-sm py-3 rounded-xl hover:bg-green-600 transition-colors">
+                    <i class="fa-brands fa-whatsapp"></i> Responder no WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOKEN = sessionStorage.getItem('adminToken');
+        if (!TOKEN) { window.location.replace('/admin/index.html'); throw new Error('Sem autenticação'); }
+
+        // NOVO-04: Verificar token ANTES de qualquer renderização (sem race condition)
+        fetch('/api/admin/verify-token', { headers: { 'X-Admin-Token': TOKEN } })
+            .then(r => { if (!r.ok) { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); return; } loadTickets(); setInterval(loadTickets, 60000); })
+            .catch(() => { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('adminToken');
+            window.location.href = '/admin/index.html';
+        });
+
+        let allTickets = [];
+        let currentFilter = 'todos';
+        let currentTicketId = null;
+
+        function fmtTs(ts) {
+            if (!ts) return '—';
+            const d = ts._seconds ? new Date(ts._seconds * 1000) : new Date(ts);
+            return d.toLocaleString('pt-BR');
+        }
+
+        const STATUS_CFG = {
+            pendente: { label: 'Pendente', cls: 'bg-red-500/10 text-red-400' },
+            em_atendimento: { label: 'Em Atendimento', cls: 'bg-yellow-500/10 text-yellow-400' },
+            resolvido: { label: 'Resolvido', cls: 'bg-emerald-500/10 text-emerald-400' }
+        };
+
+        function statusBadge(status) {
+            const cfg = STATUS_CFG[status] || { label: status, cls: 'bg-white/10 text-white/50' };
+            return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${cfg.cls}">${cfg.label}</span>`;
+        }
+
+        function renderTickets(list) {
+            const container = document.getElementById('ticket-list');
+            if (!list.length) {
+                container.innerHTML = `<div class="card rounded-2xl p-8 text-center">
+                    <i class="fa-solid fa-inbox text-white/20 text-2xl mb-3"></i>
+                    <p class="text-white/40 text-sm">Nenhum pedido encontrado.</p>
+                </div>`;
+                return;
+            }
+            container.innerHTML = list.map(t => `
+                <button onclick="openTicket('${t.id}')"
+                    class="card rounded-2xl p-5 w-full text-left hover:bg-white/5 transition-colors group space-y-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <p class="font-bold text-sm">${t.nome || '—'}</p>
+                                ${statusBadge(t.status || 'pendente')}
+                            </div>
+                            <p class="text-white/40 text-xs mt-0.5">${t.email || '—'}</p>
+                        </div>
+                        <p class="text-white/30 text-xs flex-shrink-0">${fmtTs(t.criadoEm)}</p>
+                    </div>
+                    <p class="text-white/60 text-sm line-clamp-2 text-left">${t.mensagem || '—'}</p>
+                    <div class="flex items-center gap-3 text-xs text-white/30">
+                        <span><i class="fa-solid fa-hashtag text-[10px] mr-1"></i>${t.numeroProtocolo || t.id.slice(0,8)}</span>
+                        ${t.telefone ? `<span><i class="fa-solid fa-phone text-[10px] mr-1"></i>${t.telefone}</span>` : ''}
+                        <span class="ml-auto group-hover:text-gold transition-colors">Ver detalhes →</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function updateCounts(tickets) {
+            document.getElementById('count-pendente').textContent = tickets.filter(t => (t.status || 'pendente') === 'pendente').length;
+            document.getElementById('count-atendimento').textContent = tickets.filter(t => t.status === 'em_atendimento').length;
+            document.getElementById('count-resolvido').textContent = tickets.filter(t => t.status === 'resolvido').length;
+        }
+
+        function applyFilter(filter) {
+            currentFilter = filter;
+            const filtered = filter === 'todos' ? allTickets : allTickets.filter(t => (t.status || 'pendente') === filter);
+            renderTickets(filtered);
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyFilter(btn.dataset.filter);
+            });
+        });
+
+        function openTicket(id) {
+            const t = allTickets.find(x => x.id === id);
+            if (!t) return;
+            currentTicketId = id;
+
+            document.getElementById('modal-nome').textContent = t.nome || '—';
+            document.getElementById('modal-email').textContent = t.email || '—';
+            document.getElementById('modal-protocolo').textContent = t.numeroProtocolo || id.slice(0, 8).toUpperCase();
+            document.getElementById('modal-telefone').textContent = t.telefone || '—';
+            document.getElementById('modal-data').textContent = fmtTs(t.criadoEm);
+            document.getElementById('modal-mensagem').textContent = t.mensagem || '—';
+            document.getElementById('modal-status-badge').innerHTML = statusBadge(t.status || 'pendente');
+
+            if (t.telefone) {
+                const msg = encodeURIComponent(`Olá ${t.nome || ''}! Aqui é a equipe HorseSmart. Recebemos sua solicitação (Protocolo: ${t.numeroProtocolo || id.slice(0,8)}). Como podemos ajudar?`);
+                document.getElementById('modal-wpp-btn').href = `https://wa.me/55${t.telefone.replace(/\D/g, '')}?text=${msg}`;
+                document.getElementById('modal-wpp-row').classList.remove('hidden');
+            } else {
+                document.getElementById('modal-wpp-row').classList.add('hidden');
+            }
+
+            document.getElementById('ticket-modal').classList.remove('hidden');
+            document.getElementById('ticket-modal').classList.add('flex');
+        }
+
+        document.getElementById('modal-close').addEventListener('click', () => {
+            document.getElementById('ticket-modal').classList.add('hidden');
+            document.getElementById('ticket-modal').classList.remove('flex');
+        });
+
+        document.getElementById('ticket-modal').addEventListener('click', e => {
+            if (e.target === document.getElementById('ticket-modal')) {
+                document.getElementById('ticket-modal').classList.add('hidden');
+                document.getElementById('ticket-modal').classList.remove('flex');
+            }
+        });
+
+        document.querySelectorAll('.status-action-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!currentTicketId) return;
+                const newStatus = btn.dataset.status;
+                try {
+                    const res = await fetch(`/api/admin/ajuda/${currentTicketId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Token': TOKEN },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    if (res.ok) {
+                        const ticket = allTickets.find(t => t.id === currentTicketId);
+                        if (ticket) ticket.status = newStatus;
+                        document.getElementById('modal-status-badge').innerHTML = statusBadge(newStatus);
+                        updateCounts(allTickets);
+                        applyFilter(currentFilter);
+                    }
+                } catch (e) { console.error(e); }
+            });
+        });
+
+        document.getElementById('refresh-btn').addEventListener('click', loadTickets);
+
+        async function loadTickets() {
+            try {
+                const res = await fetch('/api/admin/ajuda', { headers: { 'X-Admin-Token': TOKEN } });
+                const data = await res.json();
+                allTickets = data.requests || [];
+                updateCounts(allTickets);
+                applyFilter(currentFilter);
+            } catch (e) {
+                document.getElementById('ticket-list').innerHTML = `
+                    <div class="card rounded-2xl p-8 text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl mb-3"></i>
+                        <p class="text-white/40 text-sm">Erro ao carregar pedidos.</p>
+                    </div>`;
+            }
+        }
+
+    </script>
+</body>
+</html>

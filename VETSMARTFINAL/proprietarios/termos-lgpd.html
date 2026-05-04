@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Termos de Uso e Privacidade</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        h2 { font-size: 1rem; font-weight: 800; color: #2D5A4E; margin-top: 1.5rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        p { font-size: 0.875rem; color: #4a5568; line-height: 1.7; margin-bottom: 0.75rem; }
+        ul { font-size: 0.875rem; color: #4a5568; line-height: 1.7; padding-left: 1.25rem; list-style: disc; margin-bottom: 0.75rem; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button onclick="history.back()" class="text-white/80 hover:text-white">
+                <i class="fa-solid fa-chevron-left text-xl"></i>
+            </button>
+            <h1 class="font-black text-lg uppercase">Termos & <span class="text-vetsmart-gold">Privacidade</span></h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
+
+        <div class="glass-panel p-6 rounded-3xl">
+            <div class="text-center mb-6">
+                <i class="fa-solid fa-file-shield text-4xl text-vetsmart-gold mb-3"></i>
+                <h1 class="text-xl font-black text-vetsmart-green">Termos de Uso e Política de Privacidade</h1>
+                <p class="text-xs text-vetsmart-green/50 mt-1">Última atualização: Maio de 2026</p>
+            </div>
+
+            <h2>1. Sobre o HorseSmart</h2>
+            <p>O HorseSmart é uma plataforma digital de gestão veterinária equina, que disponibiliza, entre outros serviços, o Portal do Proprietário — ferramenta destinada aos proprietários de equinos para acompanhamento de atendimentos, faturas e histórico animal.</p>
+
+            <h2>2. Aceitação dos Termos</h2>
+            <p>Ao criar uma conta e utilizar o Portal do Proprietário, você concorda integralmente com estes Termos de Uso e com a Política de Privacidade aqui descritos, em conformidade com a Lei nº 13.709/2018 (LGPD).</p>
+
+            <h2>3. Dados Pessoais Coletados</h2>
+            <p>Para operação do portal, coletamos os seguintes dados pessoais:</p>
+            <ul>
+                <li>Nome completo</li>
+                <li>CPF (Cadastro de Pessoa Física)</li>
+                <li>Endereço de e-mail</li>
+                <li>Número de telefone / WhatsApp</li>
+                <li>Dados de pagamento (processados com segurança pelo Stripe — apenas os últimos 4 dígitos do cartão são armazenados em nossos servidores)</li>
+                <li>Dados dos animais sob sua propriedade</li>
+            </ul>
+
+            <h2>4. Finalidade do Tratamento de Dados</h2>
+            <p>Os dados coletados são utilizados exclusivamente para:</p>
+            <ul>
+                <li>Identificação e autenticação do usuário</li>
+                <li>Exibição do histórico veterinário dos seus animais</li>
+                <li>Geração e envio de faturas e cobranças</li>
+                <li>Comunicação sobre atualizações do serviço</li>
+                <li>Cumprimento de obrigações legais</li>
+            </ul>
+
+            <h2>5. Compartilhamento de Dados</h2>
+            <p>Seus dados podem ser compartilhados com:</p>
+            <ul>
+                <li><strong>Stripe Inc.</strong> — para processamento seguro de pagamentos</li>
+                <li><strong>Google LLC (Firebase)</strong> — para armazenamento seguro de dados e autenticação</li>
+                <li>Veterinários cadastrados no HorseSmart que realizam atendimentos em seus animais</li>
+            </ul>
+            <p>Não vendemos, alugamos ou compartilhamos seus dados com terceiros para fins comerciais ou publicitários.</p>
+
+            <h2>6. Segurança dos Dados</h2>
+            <p>Adotamos medidas técnicas e organizacionais para proteger seus dados pessoais contra acesso não autorizado, alteração, divulgação ou destruição, incluindo criptografia em trânsito (HTTPS/TLS) e controles de acesso por perfil.</p>
+
+            <h2>7. Retenção de Dados</h2>
+            <p>Seus dados são mantidos enquanto sua conta estiver ativa. Após o encerramento da conta, os dados podem ser retidos por até 5 (cinco) anos para fins de cumprimento de obrigações legais.</p>
+
+            <h2>8. Direitos do Titular (LGPD Art. 18)</h2>
+            <p>Você tem direito a:</p>
+            <ul>
+                <li>Confirmar a existência de tratamento dos seus dados</li>
+                <li>Acessar seus dados pessoais</li>
+                <li>Corrigir dados incompletos, inexatos ou desatualizados</li>
+                <li>Solicitar a portabilidade dos dados</li>
+                <li>Solicitar a exclusão dos dados pessoais</li>
+                <li>Revogar o consentimento a qualquer momento</li>
+            </ul>
+            <p>Para exercer seus direitos, entre em contato pelo e-mail de suporte disponível no portal.</p>
+
+            <h2>9. Plano e Cobrança</h2>
+            <p>O Portal do Proprietário oferece um período de <strong>30 dias gratuitos</strong> a partir do cadastro. Após o término do trial, é cobrado o valor de <strong>R$ 9,90/mês</strong>, processado via Stripe. O cancelamento pode ser realizado a qualquer momento pelo suporte.</p>
+
+            <h2>10. Cookies</h2>
+            <p>O portal utiliza apenas cookies essenciais para autenticação e funcionamento do serviço. Não utilizamos cookies de rastreamento ou publicidade.</p>
+
+            <h2>11. Alterações nestes Termos</h2>
+            <p>Reservamo-nos o direito de modificar estes Termos a qualquer momento. Alterações significativas serão comunicadas por e-mail com antecedência mínima de 15 dias.</p>
+
+            <h2>12. Contato e Encarregado de Dados (DPO)</h2>
+            <p>Em caso de dúvidas ou requisições sobre seus dados pessoais, entre em contato:</p>
+            <p><strong>E-mail:</strong> privacidade@horsesmart.com.br<br>
+            <strong>Responsável:</strong> [Nome do DPO / Empresa]<br>
+            <strong>CNPJ:</strong> [CNPJ da empresa] — <em>(preencher antes de publicar)</em></p>
+
+            <div class="mt-6 p-4 rounded-2xl bg-vetsmart-gold/10 border border-vetsmart-gold/30 text-center">
+                <p class="text-xs text-vetsmart-green/70 font-bold">
+                    <i class="fa-solid fa-triangle-exclamation text-vetsmart-gold mr-1"></i>
+                    Documento modelo — revisar com assessoria jurídica antes de publicar em produção.
+                </p>
+            </div>
+
+        </div>
+
+    </main>
+</body>
+</html>

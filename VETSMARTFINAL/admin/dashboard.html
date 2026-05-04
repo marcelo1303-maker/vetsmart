@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HorseSmart Admin | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { gold: '#D2B48C', 'gold-dark': '#C19A6B', hs: '#2D5A4E' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0D1B18; }
+        .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .card { background: #1A2F2A; border: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-link { display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.55);transition:all .2s; }
+        .sidebar-link:hover { background:rgba(255,255,255,0.06);color:white; }
+        .sidebar-link.active { background:rgba(210,180,140,0.12);color:#D2B48C; }
+        .tab-btn { padding:6px 18px;border-radius:8px;font-size:12px;font-weight:700;transition:all .2s;color:rgba(255,255,255,0.4); }
+        .tab-btn.active { background:rgba(210,180,140,0.15);color:#D2B48C; }
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#2D5A4E;border-radius:4px}
+    </style>
+</head>
+<body class="min-h-screen flex text-white">
+
+    <!-- SIDEBAR -->
+    <aside class="w-56 bg-[#111F1C] flex-shrink-0 flex flex-col h-screen sticky top-0 border-r border-white/5">
+        <div class="p-6 border-b border-white/5">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-horse text-gold text-lg"></i>
+                <span class="font-black text-sm tracking-tight">HORSE<span class="text-gold">SMART</span></span>
+            </div>
+            <p class="text-white/30 text-[10px] uppercase tracking-widest mt-1">Admin</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="dashboard.html" class="sidebar-link active">
+                <i class="fa-solid fa-chart-line w-4 text-center"></i> Dashboard
+            </a>
+            <a href="cadastro-vets.html" class="sidebar-link">
+                <i class="fa-solid fa-user-doctor w-4 text-center"></i> Veterinários
+            </a>
+            <a href="ajuda-vets.html" class="sidebar-link">
+                <i class="fa-solid fa-headset w-4 text-center"></i> Central de Ajuda
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/5">
+            <button id="logout-btn" class="sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-auto p-8">
+        <div class="max-w-5xl mx-auto space-y-8">
+
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-black">Dashboard</h1>
+                    <p class="text-white/40 text-sm mt-0.5" id="last-updated">Carregando...</p>
+                </div>
+                <button id="refresh-btn" class="flex items-center gap-2 glass px-4 py-2 rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+                    <i class="fa-solid fa-rotate-right text-xs"></i> Atualizar
+                </button>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-3 gap-4">
+                <!-- Vets Ativos -->
+                <div class="card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-white/40 text-xs uppercase tracking-widest">Vets Ativos</p>
+                        <div class="w-8 h-8 rounded-lg bg-gold/10 flex items-center justify-center">
+                            <i class="fa-solid fa-user-doctor text-gold text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end gap-3">
+                        <span class="text-3xl font-black" id="stat-vets">—</span>
+                        <span id="stat-delta" class="text-xs font-bold mb-1 flex items-center gap-1 text-white/30">
+                            <i class="fa-solid fa-minus text-[10px]"></i> 24h
+                        </span>
+                    </div>
+                    <a href="cadastro-vets.html"
+                        class="block w-full text-center bg-gold/10 hover:bg-gold/20 text-gold font-bold text-xs py-2 rounded-lg transition-colors uppercase tracking-widest">
+                        Ver Cadastros →
+                    </a>
+                </div>
+
+                <!-- Atendimentos 30d -->
+                <div class="card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-white/40 text-xs uppercase tracking-widest">Atendimentos (30d)</p>
+                        <div class="w-8 h-8 rounded-lg bg-blue-400/10 flex items-center justify-center">
+                            <i class="fa-solid fa-notes-medical text-blue-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <span class="text-3xl font-black" id="stat-atend">—</span>
+                    <p class="text-white/30 text-xs">últimos 30 dias</p>
+                </div>
+
+                <!-- Faturamento 30d -->
+                <div class="card rounded-2xl p-5 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <p class="text-white/40 text-xs uppercase tracking-widest">Faturamento (30d)</p>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-400/10 flex items-center justify-center">
+                            <i class="fa-solid fa-dollar-sign text-emerald-400 text-xs"></i>
+                        </div>
+                    </div>
+                    <span class="text-3xl font-black" id="stat-revenue">—</span>
+                    <p class="text-white/30 text-xs">atendimentos pagos</p>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="card rounded-2xl p-6 space-y-5">
+                <div class="flex items-center justify-between flex-wrap gap-3">
+                    <h2 class="font-black text-base">Histórico de Desempenho</h2>
+                    <div class="flex items-center gap-2">
+                        <button class="tab-btn active" data-tab="atendimentos">Atendimentos</button>
+                        <button class="tab-btn" data-tab="faturamento">Faturamento</button>
+                    </div>
+                </div>
+                <div class="relative h-72">
+                    <canvas id="main-chart"></canvas>
+                </div>
+                <div class="flex items-center gap-6 text-xs text-white/40">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-gold inline-block rounded"></span>Diário</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-blue-400 inline-block rounded"></span>Média 7 dias</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-emerald-400 inline-block rounded"></span>Média 30 dias</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="grid grid-cols-2 gap-4">
+                <a href="ajuda-vets.html" class="card rounded-2xl p-5 flex items-center gap-4 hover:bg-white/5 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-orange-400/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-headset text-orange-400"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Central de Ajuda</p>
+                        <p class="text-white/40 text-xs">Pedidos dos veterinários</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-white/20 ml-auto group-hover:text-white/40 transition-colors text-xs"></i>
+                </a>
+                <a href="cadastro-vets.html" class="card rounded-2xl p-5 flex items-center gap-4 hover:bg-white/5 transition-colors group">
+                    <div class="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-ranking-star text-gold"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm">Ranking de Vets</p>
+                        <p class="text-white/40 text-xs">Por comissão paga</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-white/20 ml-auto group-hover:text-white/40 transition-colors text-xs"></i>
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const TOKEN = sessionStorage.getItem('adminToken');
+        if (!TOKEN) { window.location.replace('/admin/index.html'); throw new Error('Sem autenticação'); }
+
+        // NOVO-04: Verificar token ANTES de qualquer renderização (sem race condition)
+        fetch('/api/admin/verify-token', { headers: { 'X-Admin-Token': TOKEN } })
+            .then(r => { if (!r.ok) { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); return; } loadData(); })
+            .catch(() => { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); });
+
+        const api = (path) => fetch(`/api/admin/${path}`, { headers: { 'X-Admin-Token': TOKEN } }).then(r => r.json());
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('adminToken');
+            window.location.href = '/admin/index.html';
+        });
+
+        document.getElementById('refresh-btn').addEventListener('click', loadData);
+
+        // ── Chart setup ─────────────────────────────────────────────────
+        let chart;
+        let chartData = null;
+        let activeTab = 'atendimentos';
+
+        function rollingAvg(arr, window) {
+            return arr.map((_, i) => {
+                const slice = arr.slice(Math.max(0, i - window + 1), i + 1);
+                return slice.reduce((a, b) => a + b, 0) / slice.length;
+            });
+        }
+
+        function buildChart(tab) {
+            if (!chartData) return;
+            const { days, dailyCounts, dailyRevenue } = chartData;
+            const labels = days.map(d => {
+                const dt = new Date(d + 'T12:00:00');
+                return dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            });
+            const raw = tab === 'atendimentos' ? dailyCounts : dailyRevenue;
+            const avg7 = rollingAvg(raw, 7);
+            const avg30 = rollingAvg(raw, 30);
+
+            const fmt = (v) => tab === 'faturamento' ? `R$ ${v.toFixed(2)}` : v.toFixed(0);
+
+            if (chart) chart.destroy();
+            chart = new Chart(document.getElementById('main-chart'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Diário',
+                            data: raw,
+                            borderColor: '#D2B48C',
+                            backgroundColor: 'rgba(210,180,140,0.08)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            borderWidth: 2,
+                            fill: true
+                        },
+                        {
+                            label: 'Média 7 dias',
+                            data: avg7,
+                            borderColor: '#60a5fa',
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            pointRadius: 0,
+                            borderWidth: 2,
+                            borderDash: [4, 3]
+                        },
+                        {
+                            label: 'Média 30 dias',
+                            data: avg30,
+                            borderColor: '#34d399',
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            pointRadius: 0,
+                            borderWidth: 2,
+                            borderDash: [8, 4]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1A2F2A',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            titleColor: '#D2B48C',
+                            bodyColor: 'rgba(255,255,255,0.7)',
+                            callbacks: { label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}` }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 }, maxTicksLimit: 10 } },
+                        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.3)', font: { size: 10 }, callback: v => tab === 'faturamento' ? `R$${v}` : v } }
+                    }
+                }
+            });
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeTab = btn.dataset.tab;
+                buildChart(activeTab);
+            });
+        });
+
+        // ── Load data ────────────────────────────────────────────────────
+        async function loadData() {
+            document.getElementById('last-updated').textContent = 'Atualizando...';
+            try {
+                const [vetsData, finData] = await Promise.all([
+                    api('vets'),
+                    api('financeiro')
+                ]);
+
+                // Stats
+                document.getElementById('stat-vets').textContent = vetsData.activeCount ?? '—';
+
+                const delta = vetsData.newIn24h ?? 0;
+                const deltaEl = document.getElementById('stat-delta');
+                if (delta > 0) {
+                    deltaEl.innerHTML = `<i class="fa-solid fa-arrow-trend-up text-[10px]"></i> +${delta} (24h)`;
+                    deltaEl.className = 'text-xs font-bold mb-1 flex items-center gap-1 text-emerald-400';
+                } else if (delta < 0) {
+                    deltaEl.innerHTML = `<i class="fa-solid fa-arrow-trend-down text-[10px]"></i> ${delta} (24h)`;
+                    deltaEl.className = 'text-xs font-bold mb-1 flex items-center gap-1 text-red-400';
+                } else {
+                    deltaEl.innerHTML = `<i class="fa-solid fa-minus text-[10px]"></i> sem mudança (24h)`;
+                    deltaEl.className = 'text-xs font-bold mb-1 flex items-center gap-1 text-white/30';
+                }
+
+                document.getElementById('stat-atend').textContent = finData.totalAtendimentos ?? '—';
+                const rev = finData.totalRevenue ?? 0;
+                document.getElementById('stat-revenue').textContent = `R$ ${rev.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+
+                // Chart
+                chartData = finData;
+                buildChart(activeTab);
+
+                document.getElementById('last-updated').textContent = `Atualizado: ${new Date().toLocaleTimeString('pt-BR')}`;
+            } catch (e) {
+                document.getElementById('last-updated').textContent = 'Erro ao carregar dados.';
+                console.error(e);
+            }
+        }
+
+    </script>
+</body>
+</html>

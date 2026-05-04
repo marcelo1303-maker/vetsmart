@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HorseSmart Admin | Veterinários</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { gold: '#D2B48C', 'gold-dark': '#C19A6B', hs: '#2D5A4E' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #0D1B18; }
+        .glass { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .card { background: #1A2F2A; border: 1px solid rgba(255,255,255,0.06); }
+        .sidebar-link { display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.55);transition:all .2s; }
+        .sidebar-link:hover { background:rgba(255,255,255,0.06);color:white; }
+        .sidebar-link.active { background:rgba(210,180,140,0.12);color:#D2B48C; }
+        ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:#2D5A4E;border-radius:4px}
+    </style>
+</head>
+<body class="min-h-screen flex text-white">
+
+    <!-- SIDEBAR -->
+    <aside class="w-56 bg-[#111F1C] flex-shrink-0 flex flex-col h-screen sticky top-0 border-r border-white/5">
+        <div class="p-6 border-b border-white/5">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-horse text-gold text-lg"></i>
+                <span class="font-black text-sm tracking-tight">HORSE<span class="text-gold">SMART</span></span>
+            </div>
+            <p class="text-white/30 text-[10px] uppercase tracking-widest mt-1">Admin</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="dashboard.html" class="sidebar-link">
+                <i class="fa-solid fa-chart-line w-4 text-center"></i> Dashboard
+            </a>
+            <a href="cadastro-vets.html" class="sidebar-link active">
+                <i class="fa-solid fa-user-doctor w-4 text-center"></i> Veterinários
+            </a>
+            <a href="ajuda-vets.html" class="sidebar-link">
+                <i class="fa-solid fa-headset w-4 text-center"></i> Central de Ajuda
+            </a>
+        </nav>
+        <div class="p-4 border-t border-white/5">
+            <button id="logout-btn" class="sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                <i class="fa-solid fa-right-from-bracket w-4 text-center"></i> Sair
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-auto p-8">
+        <div class="max-w-4xl mx-auto space-y-6">
+
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                    <h1 class="text-2xl font-black">Veterinários Cadastrados</h1>
+                    <p class="text-white/40 text-sm mt-0.5">Ranking por comissão paga à plataforma</p>
+                </div>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="Buscar por nome, CRMV ou e-mail..."
+                        class="glass rounded-xl py-2.5 pl-9 pr-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-gold/40 w-72 transition-colors">
+                </div>
+            </div>
+
+            <!-- Ranking header -->
+            <div class="grid grid-cols-12 gap-3 px-4 text-[10px] uppercase tracking-widest text-white/30 font-bold">
+                <div class="col-span-1">#</div>
+                <div class="col-span-4">Veterinário</div>
+                <div class="col-span-2">CRMV</div>
+                <div class="col-span-2">Cadastro</div>
+                <div class="col-span-2 text-right">Comissão</div>
+                <div class="col-span-1"></div>
+            </div>
+
+            <!-- List -->
+            <div id="vet-list" class="space-y-2">
+                <div class="card rounded-2xl p-6 text-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-gold text-xl"></i>
+                    <p class="text-white/40 text-sm mt-3">Carregando veterinários...</p>
+                </div>
+            </div>
+
+            <!-- Count -->
+            <p id="vet-count" class="text-white/30 text-xs text-center"></p>
+
+        </div>
+    </main>
+
+    <script>
+        const TOKEN = sessionStorage.getItem('adminToken');
+        if (!TOKEN) { window.location.replace('/admin/index.html'); throw new Error('Sem autenticação'); }
+
+        // NOVO-04: Verificar token ANTES de qualquer renderização (sem race condition)
+        fetch('/api/admin/verify-token', { headers: { 'X-Admin-Token': TOKEN } })
+            .then(r => { if (!r.ok) { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); return; } loadVets(); })
+            .catch(() => { sessionStorage.removeItem('adminToken'); window.location.replace('/admin/index.html'); });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            sessionStorage.removeItem('adminToken');
+            window.location.href = '/admin/index.html';
+        });
+
+        let allVets = [];
+
+        function fmtDate(ts) {
+            if (!ts) return '—';
+            const d = ts._seconds ? new Date(ts._seconds * 1000) : new Date(ts);
+            return d.toLocaleDateString('pt-BR');
+        }
+
+        function fmtBRL(v) {
+            return `R$ ${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        }
+
+        function renderVets(list) {
+            const container = document.getElementById('vet-list');
+            document.getElementById('vet-count').textContent = `${list.length} veterinário(s) exibido(s)`;
+
+            if (!list.length) {
+                container.innerHTML = `<div class="card rounded-2xl p-8 text-center">
+                    <i class="fa-solid fa-user-slash text-white/20 text-2xl mb-3"></i>
+                    <p class="text-white/40 text-sm">Nenhum veterinário encontrado.</p>
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = list.map((vet, idx) => {
+                const isAtivo = vet.ativo;
+                const medalColors = ['text-yellow-400', 'text-gray-300', 'text-amber-600'];
+                const medal = idx < 3 ? `<i class="fa-solid fa-medal ${medalColors[idx]}"></i>` : `<span class="text-white/30 font-bold">${idx + 1}</span>`;
+
+                return `
+                <button onclick="window.location.href='perfil-vets.html?uid=${vet.uid}'"
+                    class="card rounded-2xl p-4 w-full text-left hover:bg-white/5 transition-colors active:scale-[0.99] group">
+                    <div class="grid grid-cols-12 gap-3 items-center">
+                        <div class="col-span-1 flex items-center justify-center">${medal}</div>
+                        <div class="col-span-4">
+                            <p class="font-bold text-sm truncate">${vet.nome}</p>
+                            <p class="text-white/40 text-xs truncate">${vet.email || '—'}</p>
+                            <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${isAtivo ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}">
+                                ${isAtivo ? 'Ativo' : 'Inativo'}
+                            </span>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-sm font-bold text-gold">${vet.crmv || '—'}</p>
+                            <p class="text-white/30 text-xs">${vet.crmv_uf || ''}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-sm">${fmtDate(vet.createdAt)}</p>
+                        </div>
+                        <div class="col-span-2 text-right">
+                            <p class="text-sm font-black text-emerald-400">${fmtBRL(vet.comissao)}</p>
+                            <p class="text-white/30 text-[10px]">Fat: ${fmtBRL(vet.faturamentoTotal)}</p>
+                        </div>
+                        <div class="col-span-1 flex justify-end">
+                            <i class="fa-solid fa-chevron-right text-white/20 text-xs group-hover:text-gold transition-colors"></i>
+                        </div>
+                    </div>
+                </button>`;
+            }).join('');
+        }
+
+        document.getElementById('search-input').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase().trim();
+            if (!q) { renderVets(allVets); return; }
+            renderVets(allVets.filter(v =>
+                (v.nome || '').toLowerCase().includes(q) ||
+                (v.email || '').toLowerCase().includes(q) ||
+                (v.crmv || '').toLowerCase().includes(q)
+            ));
+        });
+
+        async function loadVets() {
+            try {
+                const res = await fetch('/api/admin/vets', { headers: { 'X-Admin-Token': TOKEN } });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+                allVets = data.vets || [];
+                renderVets(allVets);
+            } catch (e) {
+                document.getElementById('vet-list').innerHTML = `
+                    <div class="card rounded-2xl p-8 text-center">
+                        <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl mb-3"></i>
+                        <p class="text-white/40 text-sm">Erro ao carregar dados: ${e.message}</p>
+                    </div>`;
+            }
+        }
+
+    </script>
+</body>
+</html>

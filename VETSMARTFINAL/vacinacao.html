@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Vacinação</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@300;400;500;700;900&display=swap');
+
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #F0F5F3 0%, #E8EFF0 100%);
+            color: #1A3A31;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid #2D5A4E;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        .input-glass {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 100%;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .input-glass:focus {
+            border-color: #D2B48C;
+            outline: none;
+            box-shadow: 0 0 0 2px #d2b48c30;
+        }
+
+        .section-label {
+            font-size: 0.65rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #2D5A4E;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body class="pb-32">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg border-b-4 border-vetsmart-gold">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a id="back-link" href="clientes.html" class="h-10 w-10 flex items-center justify-center">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <h1 class="font-black text-xl uppercase tracking-tight">Vacinação</h1>
+            <div class="w-10"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
+
+        <!-- Carregando -->
+        <div id="loading-spinner" class="text-center py-16">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-4xl"></i>
+            <p class="text-vetsmart-green mt-4 font-medium">Carregando dados do animal...</p>
+        </div>
+
+        <!-- Conteúdo principal (oculto até carregar) -->
+        <div id="main-content" class="hidden space-y-6">
+
+            <!-- Identificação do Animal -->
+            <div class="glass-panel rounded-3xl p-5">
+                <div class="flex items-center gap-4">
+                    <div class="h-14 w-14 bg-vetsmart-green rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0">
+                        <i class="fa-solid fa-horse text-vetsmart-gold text-2xl"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h2 id="display-horse-name" class="font-black text-xl text-vetsmart-green-dark truncate">---</h2>
+                        <p id="display-horse-owner" class="text-xs text-vetsmart-green/70 font-medium truncate">Proprietário: ---</p>
+                        <p class="text-[10px] font-black text-vetsmart-gold uppercase tracking-widest mt-1">Vacinação Equina</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adicionar Vacina -->
+            <div class="glass-panel rounded-3xl p-5 space-y-4">
+                <p class="section-label"><i class="fa-solid fa-syringe mr-2 text-vetsmart-gold"></i>Adicionar Vacina</p>
+
+                <div>
+                    <label class="section-label">Nome da Vacina</label>
+                    <input id="vacina-nome" type="text" placeholder="Ex: Encefalomielite, Influenza..." class="input-glass">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="section-label">Data de Aplicação</label>
+                        <input id="vacina-data" type="date" class="input-glass">
+                    </div>
+                    <div>
+                        <label class="section-label">Próxima Dose</label>
+                        <input id="vacina-proxima-dose" type="date" class="input-glass">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="section-label">Lote / Fabricante (opcional)</label>
+                    <input id="vacina-lote" type="text" placeholder="Ex: Lote ABC123 – Zoetis" class="input-glass">
+                </div>
+
+                <button
+                    id="btn-add-vaccine"
+                    type="button"
+                    class="w-full bg-vetsmart-green text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition-all shadow-md"
+                >
+                    <i class="fa-solid fa-plus-circle"></i> Adicionar Vacina
+                </button>
+            </div>
+
+            <!-- Lista de vacinas adicionadas -->
+            <div id="lista-vacinas-container" class="hidden glass-panel rounded-3xl p-5 space-y-3">
+                <p class="section-label"><i class="fa-solid fa-list-check mr-2 text-vetsmart-gold"></i>Vacinas a Aplicar</p>
+                <ul id="lista-vacinas" class="space-y-2"></ul>
+            </div>
+
+            <!-- Insumos do Estoque -->
+            <div class="glass-panel rounded-3xl p-5 space-y-4">
+                <p class="section-label"><i class="fa-solid fa-box-open mr-2 text-vetsmart-gold"></i>Materiais e Insumos (Estoque)</p>
+
+                <div>
+                    <label class="section-label">Buscar no Estoque</label>
+                    <input id="busca-estoque" type="text" placeholder="Digite o nome do insumo..." class="input-glass" oninput="buscarEstoque()">
+                    <div id="resultados-estoque" class="mt-2 space-y-2"></div>
+                </div>
+
+                <div class="border-t border-dashed border-vetsmart-green/10 pt-4">
+                    <p class="section-label">Insumo Manual (não cadastrado)</p>
+                    <div class="flex gap-2">
+                        <input id="insumo-nome-manual" type="text" placeholder="Nome do insumo" class="input-glass flex-1">
+                        <input id="insumo-valor-manual" type="number" placeholder="R$" min="0" step="0.01" class="input-glass w-28">
+                    </div>
+                    <button
+                        type="button"
+                        onclick="adicionarInsumoManual()"
+                        class="mt-2 w-full bg-vetsmart-green/10 text-vetsmart-green font-bold py-2 rounded-xl text-sm active:scale-95 transition-all border border-vetsmart-green/20"
+                    >
+                        <i class="fa-solid fa-plus mr-1"></i> Adicionar Manual
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de insumos adicionados -->
+            <div id="lista-insumos-container" class="hidden glass-panel rounded-3xl p-5 space-y-3">
+                <p class="section-label"><i class="fa-solid fa-boxes-stacked mr-2 text-vetsmart-gold"></i>Insumos Selecionados</p>
+                <ul id="lista-insumos" class="space-y-2"></ul>
+            </div>
+
+            <!-- Financeiro -->
+            <div class="glass-panel rounded-3xl p-5 space-y-4">
+                <p class="section-label"><i class="fa-solid fa-dollar-sign mr-2 text-vetsmart-gold"></i>Cobrança</p>
+
+                <div>
+                    <label class="section-label">Valor do Serviço (visita / aplicação)</label>
+                    <input
+                        id="valor_servico"
+                        type="number"
+                        placeholder="R$ 0,00"
+                        min="0"
+                        step="0.01"
+                        class="input-glass"
+                        oninput="atualizarTotais()"
+                    >
+                </div>
+
+                <div>
+                    <label class="section-label">Observações / Conduta</label>
+                    <textarea id="observacoes" rows="3" placeholder="Reações observadas, recomendações, próximos passos..." class="input-glass resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Totais -->
+            <div class="bg-vetsmart-green-dark rounded-3xl p-6 text-white shadow-xl">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-black uppercase tracking-widest opacity-70">Serviço</span>
+                    <span id="display-subtotal-servico" class="font-bold text-sm">R$ 0,00</span>
+                </div>
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-black uppercase tracking-widest opacity-70">Insumos</span>
+                    <span id="display-subtotal-insumos" class="font-bold text-sm">R$ 0,00</span>
+                </div>
+                <div class="border-t border-white/20 pt-4 mt-2 text-center">
+                    <p class="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Total da Visita</p>
+                    <span id="display-total-geral" class="font-black text-white text-5xl tracking-tighter">R$ 0,00</span>
+                </div>
+            </div>
+
+            <!-- Botões de ação -->
+            <div class="flex flex-col gap-4 mt-10">
+                <button
+                    type="button"
+                    id="btn-finalizar"
+                    onclick="salvarAtendimento('finalizado')"
+                    class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green-dark font-black py-6 rounded-[32px] uppercase tracking-[3px] active:scale-95 transition-all shadow-[0_15px_30px_rgba(210,180,140,0.4)] flex items-center justify-center gap-4 text-lg border-b-8 border-vetsmart-gold-dark"
+                >
+                    <i class="fa-solid fa-circle-check text-2xl"></i>
+                    Finalizar Vacinação
+                </button>
+
+                <button
+                    type="button"
+                    id="btn-salvar-depois"
+                    onclick="salvarAtendimento('rascunho')"
+                    class="w-full bg-white text-gray-400 font-black py-5 rounded-[28px] uppercase tracking-[2px] active:scale-95 transition-all border-2 border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 text-xs"
+                >
+                    <i class="fa-solid fa-pause-circle"></i>
+                    Salvar Progresso (Pausar)
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-vetsmart-green text-white px-8 py-6 rounded-2xl font-black shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-center flex flex-col items-center gap-2 max-w-xs">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-4xl text-vetsmart-gold"></i>
+        <span id="toast-msg">Salvo!</span>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './firebase.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import {
+            collection, doc, getDoc, getDocs, query, where,
+            addDoc, serverTimestamp, increment, writeBatch
+        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+
+        let currentUser = null;
+        let horseData = null;
+        let vacinas = [];
+        let insumos = [];
+        let allInsumos = [];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const horseId = urlParams.get('id');
+
+        function mostrarToast(msg, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').textContent = msg;
+            icon.className = `fa-solid ${isSuccess ? 'fa-circle-check text-vetsmart-gold' : 'fa-circle-xmark text-red-400'} text-4xl`;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 3000);
+        }
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.replace('login.html');
+                return;
+            }
+            currentUser = user;
+
+            if (!horseId) {
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 font-bold">ID do animal não fornecido.</p>`;
+                return;
+            }
+
+            try {
+                const horseRef = doc(db, 'clientes', horseId);
+                const horseSnap = await getDoc(horseRef);
+
+                if (!horseSnap.exists() || (horseSnap.data().userId && horseSnap.data().userId !== user.uid)) {
+                    document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 font-bold">Animal não encontrado ou acesso negado.</p>`;
+                    return;
+                }
+
+                horseData = { id: horseSnap.id, ...horseSnap.data() };
+
+                document.getElementById('display-horse-name').textContent = horseData.nome_cavalo || 'Animal';
+                document.getElementById('display-horse-owner').textContent = `Proprietário: ${horseData.nome_proprietario || '---'}`;
+                document.getElementById('back-link').href = `dossie.html?id=${horseId}`;
+
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('vacina-data').value = today;
+
+                const estoqueQuery = query(collection(db, 'estoque'), where('userId', '==', user.uid));
+                const estoqueSnap = await getDocs(estoqueQuery);
+                allInsumos = estoqueSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                document.getElementById('loading-spinner').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                document.getElementById('loading-spinner').innerHTML = `<p class="text-red-500 font-bold">Erro ao carregar dados.</p>`;
+            }
+        });
+
+        function renderVacinasList() {
+            const container = document.getElementById('lista-vacinas-container');
+            const ul = document.getElementById('lista-vacinas');
+
+            if (vacinas.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            ul.innerHTML = vacinas.map((v, idx) => `
+                <li class="flex justify-between items-start bg-vetsmart-green/5 p-3 rounded-xl border border-vetsmart-green/10">
+                    <div class="flex-1 pr-2">
+                        <p class="font-black text-vetsmart-green-dark text-sm">${v.nome}</p>
+                        <p class="text-[10px] text-gray-500 mt-0.5">Aplicação: ${v.dataAplicacao || '---'} | Próxima dose: ${v.proximaDose || '---'}</p>
+                        ${v.lote ? `<p class="text-[10px] text-gray-400">${v.lote}</p>` : ''}
+                    </div>
+                    <button type="button" onclick="removerVacina(${idx})" class="text-red-400 hover:text-red-600 transition-colors active:scale-90 mt-1">
+                        <i class="fa-solid fa-trash-alt text-sm"></i>
+                    </button>
+                </li>
+            `).join('');
+        }
+
+        function renderInsumosList() {
+            const container = document.getElementById('lista-insumos-container');
+            const ul = document.getElementById('lista-insumos');
+
+            if (insumos.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            ul.innerHTML = insumos.map((item, idx) => `
+                <li class="flex justify-between items-center bg-vetsmart-green/5 p-3 rounded-xl border border-vetsmart-green/10">
+                    <span class="truncate pr-2 font-black text-vetsmart-green-dark text-sm">${item.nome}</span>
+                    <div class="flex items-center gap-2 whitespace-nowrap">
+                        <span class="font-black text-vetsmart-gold text-sm">R$ ${Number(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <button type="button" onclick="removerInsumo(${idx})" class="text-red-400 hover:text-red-600 transition-colors active:scale-90">
+                            <i class="fa-solid fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        window.atualizarTotais = function () {
+            const valServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            const totalGeral = valServico + totalInsumos;
+
+            document.getElementById('display-subtotal-servico').textContent = `R$ ${valServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('display-subtotal-insumos').textContent = `R$ ${totalInsumos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('display-total-geral').textContent = `R$ ${totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        };
+
+        window.removerVacina = function (idx) {
+            vacinas.splice(idx, 1);
+            renderVacinasList();
+        };
+
+        window.removerInsumo = function (idx) {
+            insumos.splice(idx, 1);
+            renderInsumosList();
+            atualizarTotais();
+        };
+
+        window.adicionarInsumo = function (id, nome, valor) {
+            if (insumos.some(i => i.id === id)) {
+                mostrarToast('Insumo já adicionado', false);
+                return;
+            }
+            insumos.push({ id, nome, valor: Number(valor) });
+            document.getElementById('busca-estoque').value = '';
+            document.getElementById('resultados-estoque').innerHTML = '';
+            renderInsumosList();
+            atualizarTotais();
+        };
+
+        window.adicionarInsumoManual = function () {
+            const nome = document.getElementById('insumo-nome-manual').value.trim();
+            const valor = parseFloat(document.getElementById('insumo-valor-manual').value);
+
+            if (!nome || isNaN(valor) || valor < 0) {
+                mostrarToast('Preencha o nome e um valor válido.', false);
+                return;
+            }
+
+            const id = `manual_${Date.now()}`;
+            insumos.push({ id, nome, valor });
+            document.getElementById('insumo-nome-manual').value = '';
+            document.getElementById('insumo-valor-manual').value = '';
+            renderInsumosList();
+            atualizarTotais();
+            mostrarToast('Insumo manual adicionado!', true);
+        };
+
+        window.buscarEstoque = function () {
+            const termo = document.getElementById('busca-estoque').value.toLowerCase().trim();
+            const resultados = document.getElementById('resultados-estoque');
+
+            if (!termo) {
+                resultados.innerHTML = '';
+                return;
+            }
+
+            const filtered = allInsumos.filter(m => m.nome && m.nome.toLowerCase().includes(termo));
+            resultados.innerHTML = filtered.map(m => `
+                <div class="p-2 bg-vetsmart-green/10 rounded cursor-pointer hover:bg-vetsmart-green/20 transition-all" onclick="adicionarInsumo('${m.id}', '${m.nome.replace(/'/g, "\\'")}', ${m.valorVenda || 0})">
+                    <p class="font-bold text-vetsmart-green-dark text-sm">${m.nome}</p>
+                    <p class="text-[10px] text-vetsmart-green/90">R$ ${Number(m.valorVenda || 0).toFixed(2)}</p>
+                </div>
+            `).join('');
+        };
+
+        document.getElementById('btn-add-vaccine').addEventListener('click', () => {
+            const nome = document.getElementById('vacina-nome').value.trim();
+            const dataAplicacao = document.getElementById('vacina-data').value;
+            const proximaDose = document.getElementById('vacina-proxima-dose').value;
+            const lote = document.getElementById('vacina-lote').value.trim();
+
+            if (!nome) {
+                mostrarToast('Informe o nome da vacina.', false);
+                return;
+            }
+
+            vacinas.push({ nome, dataAplicacao, proximaDose, lote });
+
+            document.getElementById('vacina-nome').value = '';
+            document.getElementById('vacina-proxima-dose').value = '';
+            document.getElementById('vacina-lote').value = '';
+
+            renderVacinasList();
+            mostrarToast(`Vacina "${nome}" adicionada!`, true);
+        });
+
+        window.salvarAtendimento = async function (status) {
+            if (vacinas.length === 0) {
+                mostrarToast('Adicione ao menos uma vacina.', false);
+                return;
+            }
+
+            const btnFinalizar = document.getElementById('btn-finalizar');
+            const btnSalvar = document.getElementById('btn-salvar-depois');
+            btnFinalizar.disabled = true;
+            btnSalvar.disabled = true;
+
+            const valorServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            const totalGeral = valorServico + totalInsumos;
+            const observacoes = document.getElementById('observacoes').value.trim();
+
+            const atendimentoData = {
+                userId: currentUser.uid,
+                horseId: horseId,
+                nome_cavalo: horseData.nome_cavalo || '',
+                nome_proprietario: horseData.nome_proprietario || '',
+                telefone_proprietario: horseData.telefone_proprietario || '',
+                tipo_atendimento: 'Vacinação',
+                data: serverTimestamp(),
+                status: status,
+                pdf_url: null,
+                estoqueJaDecrementado: false,
+                vacinas: vacinas,
+                observacoes: observacoes,
+                insumos: insumos.map(item => ({
+                    id: item.id,
+                    nome: item.nome,
+                    quantidade: 1,
+                    precovenda: item.valor
+                })),
+                valor_servico: valorServico,
+                valor_insumos: totalInsumos,
+                total_geral: totalGeral,
+                ultimaAtualizacao: serverTimestamp()
+            };
+
+            try {
+                const insumosDoEstoque = insumos.filter(i => !i.id.startsWith('manual_'));
+
+                if (insumosDoEstoque.length > 0 && status === 'finalizado') {
+                    const batch = writeBatch(db);
+                    const atendimentoRef = doc(collection(db, 'atendimentos'));
+                    batch.set(atendimentoRef, atendimentoData);
+                    insumosDoEstoque.forEach(item => {
+                        const prodRef = doc(db, 'estoque', item.id);
+                        batch.update(prodRef, { quantidade: increment(-1), ultimaAtualizacao: serverTimestamp() });
+                    });
+                    await batch.commit();
+                    Object.assign(atendimentoData, { estoqueJaDecrementado: true });
+                } else {
+                    await addDoc(collection(db, 'atendimentos'), atendimentoData);
+                }
+
+                const msg = status === 'finalizado' ? 'Vacinação finalizada com sucesso!' : 'Progresso salvo!';
+                mostrarToast(msg, true);
+
+                setTimeout(() => {
+                    if (status === 'finalizado' && horseData.telefone_proprietario) {
+                        const telefone = horseData.telefone_proprietario.replace(/\D/g, '');
+                        const nomeVacinas = vacinas.map(v => v.nome).join(', ');
+                        const texto = `*VACINAÇÃO - HORSE SMART*\n\n` +
+                            `🐴 *Animal:* ${horseData.nome_cavalo}\n` +
+                            `💉 *Vacinas aplicadas:* ${nomeVacinas}\n` +
+                            `💰 *Total:* R$ ${totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n\n` +
+                            `_Registro gerado pelo App Horse Smart_`;
+                        window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(texto)}`, '_blank');
+                    }
+                    window.location.href = `dossie.html?id=${horseId}`;
+                }, 1800);
+
+            } catch (error) {
+                console.error('Erro ao salvar vacinação:', error);
+                mostrarToast('Erro ao salvar. Tente novamente.', false);
+                btnFinalizar.disabled = false;
+                btnSalvar.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>

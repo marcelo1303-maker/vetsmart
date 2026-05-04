@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Terapias Complementares</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: { 'sans': ['Poppins', 'Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Poppins', 'Inter', sans-serif; background: linear-gradient(135deg, #F0F5F3 0%, #E8EFF0 100%); color: #1A3A31; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+        .input-glass { background: rgba(255, 255, 255, 0.9); border: 1px solid #d1d5db; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .input-glass:focus { border-color: #D2B48C; outline: none; box-shadow: 0 0 0 2px #d2b48c30; }
+        .label-text { font-size: 10px; font-weight: 900; color: #1A3A31; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+        .terapia-btn { flex: 1; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 900; transition: all .2s; }
+        .terapia-btn.sim { background-color: #2D5A4E; color: #D2B48C; }
+        .terapia-btn.nao { background-color: #e5e7eb; color: #6b7280; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg border-b-4 border-vetsmart-gold">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button id="back-btn" class="text-white/80 hover:text-white active:scale-90 transition-all"><i class="fa-solid fa-chevron-left text-xl"></i></button>
+            <h1 class="font-black text-xl tracking-tight absolute left-1/2 -translate-x-1/2 text-white uppercase">Terapias Compl.</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
+        <div class="glass-panel p-6 rounded-3xl text-center border-b-4 border-vetsmart-green/20">
+            <h2 id="display-horse-name" class="font-black text-3xl text-vetsmart-green-dark leading-tight">Carregando...</h2>
+            <p id="display-horse-owner" class="text-vetsmart-green/70 font-semibold text-sm mb-2">Proprietário: -</p>
+            <span id="display-horse-id" class="font-mono text-xs bg-white px-3 py-1 rounded-full shadow-sm border border-vetsmart-green/10">ID: ---</span>
+        </div>
+
+        <form id="form-terapias" class="space-y-6">
+
+            <div class="glass-panel p-6 rounded-3xl space-y-5 border-t-4 border-vetsmart-green shadow-xl">
+                <h3 class="font-black text-vetsmart-green text-center uppercase tracking-widest text-sm border-b border-vetsmart-green/10 pb-3">
+                    <i class="fa-solid fa-leaf mr-2 text-vetsmart-gold"></i>Terapias Realizadas
+                </h3>
+
+                <div class="space-y-2 border-b border-vetsmart-green/10 pb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-black uppercase text-vetsmart-green-dark"><i class="fa-solid fa-circle-dot mr-1 text-vetsmart-gold"></i>Acupuntura</span>
+                        <div class="flex bg-gray-200 rounded-lg p-1 gap-1">
+                            <button type="button" data-terapia="acupuntura" data-val="sim" class="terapia-btn nao">SIM</button>
+                            <button type="button" data-terapia="acupuntura" data-val="nao" class="terapia-btn sim">NÃO</button>
+                        </div>
+                    </div>
+                    <div id="box-acupuntura" class="hidden pt-2">
+                        <label class="label-text">Pontos e Observações</label>
+                        <textarea name="obs_acupuntura" placeholder="Pontos utilizados, resposta do animal..." class="input-glass text-sm" rows="2"></textarea>
+                        <div class="mt-2 flex gap-2">
+                            <div class="flex-1">
+                                <label class="label-text">Nº de Sessões</label>
+                                <input type="number" name="sessoes_acupuntura" min="1" value="1" class="input-glass text-sm text-center">
+                            </div>
+                            <div class="flex-1">
+                                <label class="label-text">Valor (R$)</label>
+                                <input type="number" name="valor_acupuntura" id="valor_acupuntura" step="0.01" min="0" placeholder="0,00" class="input-glass text-sm text-center" oninput="atualizarTotais()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 border-b border-vetsmart-green/10 pb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-black uppercase text-vetsmart-green-dark"><i class="fa-solid fa-person-walking mr-1 text-vetsmart-gold"></i>Fisioterapia</span>
+                        <div class="flex bg-gray-200 rounded-lg p-1 gap-1">
+                            <button type="button" data-terapia="fisioterapia" data-val="sim" class="terapia-btn nao">SIM</button>
+                            <button type="button" data-terapia="fisioterapia" data-val="nao" class="terapia-btn sim">NÃO</button>
+                        </div>
+                    </div>
+                    <div id="box-fisioterapia" class="hidden pt-2">
+                        <label class="label-text">Técnicas e Observações</label>
+                        <textarea name="obs_fisioterapia" placeholder="Ex: Hidroterapia, exercícios passivos, massagem..." class="input-glass text-sm" rows="2"></textarea>
+                        <div class="mt-2 flex gap-2">
+                            <div class="flex-1">
+                                <label class="label-text">Nº de Sessões</label>
+                                <input type="number" name="sessoes_fisioterapia" min="1" value="1" class="input-glass text-sm text-center">
+                            </div>
+                            <div class="flex-1">
+                                <label class="label-text">Valor (R$)</label>
+                                <input type="number" name="valor_fisioterapia" id="valor_fisioterapia" step="0.01" min="0" placeholder="0,00" class="input-glass text-sm text-center" oninput="atualizarTotais()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 border-b border-vetsmart-green/10 pb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-black uppercase text-vetsmart-green-dark"><i class="fa-solid fa-hand-dots mr-1 text-vetsmart-gold"></i>Quiropraxia</span>
+                        <div class="flex bg-gray-200 rounded-lg p-1 gap-1">
+                            <button type="button" data-terapia="quiropraxia" data-val="sim" class="terapia-btn nao">SIM</button>
+                            <button type="button" data-terapia="quiropraxia" data-val="nao" class="terapia-btn sim">NÃO</button>
+                        </div>
+                    </div>
+                    <div id="box-quiropraxia" class="hidden pt-2">
+                        <label class="label-text">Regiões e Observações</label>
+                        <textarea name="obs_quiropraxia" placeholder="Regiões ajustadas, bloqueios encontrados..." class="input-glass text-sm" rows="2"></textarea>
+                        <div class="mt-2 flex gap-2">
+                            <div class="flex-1">
+                                <label class="label-text">Nº de Sessões</label>
+                                <input type="number" name="sessoes_quiropraxia" min="1" value="1" class="input-glass text-sm text-center">
+                            </div>
+                            <div class="flex-1">
+                                <label class="label-text">Valor (R$)</label>
+                                <input type="number" name="valor_quiropraxia" id="valor_quiropraxia" step="0.01" min="0" placeholder="0,00" class="input-glass text-sm text-center" oninput="atualizarTotais()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 border-b border-vetsmart-green/10 pb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-black uppercase text-vetsmart-green-dark"><i class="fa-solid fa-atom mr-1 text-vetsmart-gold"></i>Ozonioterapia</span>
+                        <div class="flex bg-gray-200 rounded-lg p-1 gap-1">
+                            <button type="button" data-terapia="ozonioterapia" data-val="sim" class="terapia-btn nao">SIM</button>
+                            <button type="button" data-terapia="ozonioterapia" data-val="nao" class="terapia-btn sim">NÃO</button>
+                        </div>
+                    </div>
+                    <div id="box-ozonioterapia" class="hidden pt-2">
+                        <label class="label-text">Via e Observações</label>
+                        <select name="via_ozonio" class="input-glass text-sm mb-2">
+                            <option value="">Selecione a via...</option>
+                            <option>Insuflação retal</option>
+                            <option>Bagging</option>
+                            <option>Injeção local</option>
+                            <option>Autohemoterapia</option>
+                            <option>Outra</option>
+                        </select>
+                        <textarea name="obs_ozonioterapia" placeholder="Concentração, volume, resposta..." class="input-glass text-sm" rows="2"></textarea>
+                        <div class="mt-2 flex gap-2">
+                            <div class="flex-1">
+                                <label class="label-text">Nº de Sessões</label>
+                                <input type="number" name="sessoes_ozonioterapia" min="1" value="1" class="input-glass text-sm text-center">
+                            </div>
+                            <div class="flex-1">
+                                <label class="label-text">Valor (R$)</label>
+                                <input type="number" name="valor_ozonioterapia" id="valor_ozonioterapia" step="0.01" min="0" placeholder="0,00" class="input-glass text-sm text-center" oninput="atualizarTotais()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 border-b border-vetsmart-green/10 pb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-black uppercase text-vetsmart-green-dark"><i class="fa-solid fa-bolt mr-1 text-vetsmart-gold"></i>Laserterapia</span>
+                        <div class="flex bg-gray-200 rounded-lg p-1 gap-1">
+                            <button type="button" data-terapia="laser" data-val="sim" class="terapia-btn nao">SIM</button>
+                            <button type="button" data-terapia="laser" data-val="nao" class="terapia-btn sim">NÃO</button>
+                        </div>
+                    </div>
+                    <div id="box-laser" class="hidden pt-2">
+                        <label class="label-text">Pontos e Parâmetros</label>
+                        <textarea name="obs_laser" placeholder="Potência, tempo por ponto, área tratada..." class="input-glass text-sm" rows="2"></textarea>
+                        <div class="mt-2 flex gap-2">
+                            <div class="flex-1">
+                                <label class="label-text">Nº de Sessões</label>
+                                <input type="number" name="sessoes_laser" min="1" value="1" class="input-glass text-sm text-center">
+                            </div>
+                            <div class="flex-1">
+                                <label class="label-text">Valor (R$)</label>
+                                <input type="number" name="valor_laser" id="valor_laser" step="0.01" min="0" placeholder="0,00" class="input-glass text-sm text-center" oninput="atualizarTotais()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pb-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-black uppercase text-vetsmart-green-dark"><i class="fa-solid fa-plug mr-1 text-vetsmart-gold"></i>Eletroterapia</span>
+                        <div class="flex bg-gray-200 rounded-lg p-1 gap-1">
+                            <button type="button" data-terapia="eletroterapia" data-val="sim" class="terapia-btn nao">SIM</button>
+                            <button type="button" data-terapia="eletroterapia" data-val="nao" class="terapia-btn sim">NÃO</button>
+                        </div>
+                    </div>
+                    <div id="box-eletroterapia" class="hidden pt-2">
+                        <label class="label-text">Modalidade e Observações</label>
+                        <select name="modal_eletroterapia" class="input-glass text-sm mb-2">
+                            <option value="">Selecione a modalidade...</option>
+                            <option>TENS</option>
+                            <option>Ultrassom terapêutico</option>
+                            <option>Magnetoterapia</option>
+                            <option>Eletroestimulação muscular</option>
+                            <option>Outra</option>
+                        </select>
+                        <textarea name="obs_eletroterapia" placeholder="Parâmetros, duração, resposta do animal..." class="input-glass text-sm" rows="2"></textarea>
+                        <div class="mt-2 flex gap-2">
+                            <div class="flex-1">
+                                <label class="label-text">Nº de Sessões</label>
+                                <input type="number" name="sessoes_eletroterapia" min="1" value="1" class="input-glass text-sm text-center">
+                            </div>
+                            <div class="flex-1">
+                                <label class="label-text">Valor (R$)</label>
+                                <input type="number" name="valor_eletroterapia" id="valor_eletroterapia" step="0.01" min="0" placeholder="0,00" class="input-glass text-sm text-center" oninput="atualizarTotais()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <h3 class="font-black text-vetsmart-green text-center uppercase tracking-widest text-sm border-b border-vetsmart-green/10 pb-3">
+                    <i class="fa-solid fa-pen-to-square mr-2 text-vetsmart-gold"></i>Observações Gerais
+                </h3>
+                <textarea name="observacoes_gerais" placeholder="Evolução geral, próximas sessões, recomendações ao proprietário..." class="input-glass" rows="3"></textarea>
+            </div>
+
+            <div class="glass-panel p-6 rounded-3xl space-y-5 border-t-4 border-vetsmart-green shadow-xl relative overflow-hidden">
+                <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm">
+                    <i class="fa-solid fa-flask-vial mr-2"></i>Estoque e Consumo
+                </h3>
+                <p class="text-center text-sm text-vetsmart-green/70">Utilizou algum insumo ou medicamento?</p>
+                <div class="flex gap-3">
+                    <button id="btn-consumo-sim" type="button" class="flex-1 py-3 rounded-xl bg-white text-vetsmart-green border-2 border-vetsmart-green font-black">SIM</button>
+                    <button id="btn-consumo-nao" type="button" class="flex-1 py-3 rounded-xl bg-vetsmart-green text-vetsmart-gold border-2 border-vetsmart-green font-black">NÃO</button>
+                </div>
+                <div id="consumo-inner" class="hidden space-y-4 pt-4 border-t border-vetsmart-green/20">
+                    <div class="bg-white/50 border-2 border-vetsmart-green rounded-2xl p-4">
+                        <p class="text-[10px] uppercase font-black opacity-80 mb-2">Adicionar Manualmente</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="insumo-nome-manual" placeholder="Nome do insumo" class="input-glass flex-1 text-sm">
+                            <input type="number" id="insumo-valor-manual" placeholder="R$" step="0.01" min="0" class="input-glass w-24 text-sm">
+                            <button type="button" id="btn-add-manual" class="bg-vetsmart-green text-vetsmart-gold h-12 w-12 rounded-xl flex items-center justify-center"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="bg-white/50 border-2 border-dashed border-vetsmart-green rounded-2xl p-4">
+                        <p class="text-[10px] uppercase font-black opacity-80 mb-2">Buscar no Estoque</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="busca-estoque" placeholder="Buscar no estoque..." class="input-glass flex-1 text-sm">
+                            <button type="button" id="btn-buscar-estoque" class="bg-vetsmart-green text-vetsmart-gold px-4 rounded-xl"><i class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                        <div id="resultados-estoque" class="max-h-48 overflow-y-auto mt-2 space-y-1"></div>
+                    </div>
+                    <div id="lista-insumos-container" class="hidden pt-2 border-t border-vetsmart-green/10">
+                        <p class="text-[10px] uppercase font-black opacity-80 mb-2">Itens Adicionados</p>
+                        <ul id="lista-insumos" class="space-y-2"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-3xl space-y-5 border-t-4 border-vetsmart-gold shadow-2xl">
+                <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm">💰 Faturamento</h3>
+                <div class="relative bg-white/50 p-4 rounded-2xl">
+                    <label class="label-text text-center mb-2">Honorários Veterinários (R$)</label>
+                    <div class="relative flex items-center justify-center">
+                        <span class="absolute left-4 font-black text-vetsmart-green text-lg">R$</span>
+                        <input type="number" id="valor_servico" step="0.01" min="0" placeholder="0,00" class="input-glass w-full pl-12 text-center font-black text-2xl" oninput="atualizarTotais()">
+                    </div>
+                </div>
+                <div class="bg-vetsmart-green-dark p-5 rounded-2xl space-y-3">
+                    <div class="flex justify-between items-center text-white/70"><span class="text-xs font-bold">Honorários</span><span id="display-subtotal-servico">R$ 0,00</span></div>
+                    <div class="flex justify-between items-center text-white/70"><span class="text-xs font-bold">Terapias</span><span id="display-subtotal-terapias">R$ 0,00</span></div>
+                    <div class="flex justify-between items-center text-white/70"><span class="text-xs font-bold">Materiais</span><span id="display-subtotal-insumos">R$ 0,00</span></div>
+                    <div class="pt-3 border-t border-white/10 text-center"><span class="text-xs font-bold text-vetsmart-gold uppercase">Total Geral</span><span id="display-total-geral" class="block font-black text-white text-4xl">R$ 0,00</span></div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4 mt-4">
+                <button type="submit" id="btn-emitir-laudo" class="w-full bg-vetsmart-gold text-vetsmart-green-dark font-black py-5 rounded-2xl uppercase tracking-widest text-lg active:scale-95 transition-all shadow-lg">
+                    <i class="fa-solid fa-file-invoice mr-2"></i>Finalizar Atendimento
+                </button>
+                <button type="button" id="btn-finalizar-mais-tarde" class="w-full bg-white/80 text-gray-500 font-bold py-3 rounded-2xl text-sm active:scale-95 transition-all">
+                    <i class="fa-solid fa-pause-circle mr-2"></i>Salvar como Rascunho
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { auth, db } from './firebase.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { collection, doc, getDoc, getDocs, query, where, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        let currentUser, horseData, insumos = [], insumosCache = [], utilizouMedicamentos = false;
+        const terapiasAtivas = {};
+
+        const fmt = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        function mostrarToast(msg, isSuccess = true) {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-5 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl shadow-lg text-white z-50 font-semibold ${isSuccess ? 'bg-vetsmart-green' : 'bg-red-500'}`;
+            const icon = document.createElement('i');
+            icon.className = `fa-solid ${isSuccess ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2`;
+            toast.appendChild(icon);
+            toast.appendChild(document.createTextNode(msg));
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        document.querySelectorAll('[data-terapia]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const terapia = this.dataset.terapia;
+                const val = this.dataset.val;
+                const box = document.getElementById(`box-${terapia}`);
+                const btns = document.querySelectorAll(`[data-terapia="${terapia}"]`);
+                terapiasAtivas[terapia] = val === 'sim';
+                btns.forEach(b => {
+                    b.classList.toggle('sim', b.dataset.val === val);
+                    b.classList.toggle('nao', b.dataset.val !== val);
+                });
+                box.classList.toggle('hidden', val !== 'sim');
+                atualizarTotais();
+            });
+        });
+
+        window.atualizarTotais = function() {
+            const valServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            const terapiaIds = ['acupuntura','fisioterapia','quiropraxia','ozonioterapia','laser','eletroterapia'];
+            const valTerapias = terapiaIds.reduce((s, t) => {
+                const el = document.getElementById(`valor_${t}`);
+                return s + (el && !document.getElementById(`box-${t}`).classList.contains('hidden') ? parseFloat(el.value) || 0 : 0);
+            }, 0);
+            const totalInsumos = utilizouMedicamentos ? insumos.reduce((s, i) => s + i.valor, 0) : 0;
+            const total = valServico + valTerapias + totalInsumos;
+            document.getElementById('display-subtotal-servico').textContent = fmt(valServico);
+            document.getElementById('display-subtotal-terapias').textContent = fmt(valTerapias);
+            document.getElementById('display-subtotal-insumos').textContent = fmt(totalInsumos);
+            document.getElementById('display-total-geral').textContent = fmt(total);
+        };
+
+        document.getElementById('btn-consumo-sim').addEventListener('click', () => {
+            utilizouMedicamentos = true;
+            document.getElementById('consumo-inner').classList.remove('hidden');
+            document.getElementById('btn-consumo-sim').className = 'flex-1 py-3 rounded-xl bg-vetsmart-green text-vetsmart-gold border-2 border-vetsmart-green font-black';
+            document.getElementById('btn-consumo-nao').className = 'flex-1 py-3 rounded-xl bg-white text-vetsmart-green border-2 border-vetsmart-green font-black';
+        });
+        document.getElementById('btn-consumo-nao').addEventListener('click', () => {
+            utilizouMedicamentos = false;
+            insumos = [];
+            renderInsumosList();
+            document.getElementById('consumo-inner').classList.add('hidden');
+            document.getElementById('btn-consumo-nao').className = 'flex-1 py-3 rounded-xl bg-vetsmart-green text-vetsmart-gold border-2 border-vetsmart-green font-black';
+            document.getElementById('btn-consumo-sim').className = 'flex-1 py-3 rounded-xl bg-white text-vetsmart-green border-2 border-vetsmart-green font-black';
+            atualizarTotais();
+        });
+
+        document.getElementById('btn-add-manual').addEventListener('click', () => {
+            const nome = document.getElementById('insumo-nome-manual').value.trim();
+            const valor = parseFloat(document.getElementById('insumo-valor-manual').value);
+            if (!nome || !valor || valor <= 0) { mostrarToast('Preencha nome e valor.', false); return; }
+            insumos.push({ id: `manual_${Date.now()}`, nome, valor });
+            renderInsumosList();
+            atualizarTotais();
+            document.getElementById('insumo-nome-manual').value = '';
+            document.getElementById('insumo-valor-manual').value = '';
+        });
+
+        document.getElementById('btn-buscar-estoque').addEventListener('click', buscarEstoque);
+        document.getElementById('busca-estoque').addEventListener('input', buscarEstoque);
+
+        function buscarEstoque() {
+            const term = document.getElementById('busca-estoque').value.toLowerCase().trim();
+            const container = document.getElementById('resultados-estoque');
+            if (!term) { container.innerHTML = ''; return; }
+            const filtrados = insumosCache.filter(i => i.nome.toLowerCase().includes(term) && (i.quantidade === undefined || i.quantidade > 0));
+            container.innerHTML = filtrados.length === 0
+                ? '<p class="text-center py-2 text-vetsmart-green/50 text-xs font-semibold">Nenhum insumo encontrado</p>'
+                : filtrados.map(i => `
+                    <div class="bg-white/70 p-2 rounded-xl border flex justify-between items-center cursor-pointer hover:bg-vetsmart-gold/10" onclick="selecionarInsumo('${i.id}','${i.nome.replace(/'/g,"\\'")}',${i.valorVenda || 0})">
+                        <p class="font-bold text-sm text-vetsmart-green">${i.nome}</p>
+                        <span class="font-black text-vetsmart-gold text-sm">${fmt(i.valorVenda)}</span>
+                    </div>`).join('');
+        }
+
+        window.selecionarInsumo = function(id, nome, valor) {
+            insumos.push({ id, nome, valor: parseFloat(valor) });
+            renderInsumosList();
+            atualizarTotais();
+            document.getElementById('busca-estoque').value = '';
+            document.getElementById('resultados-estoque').innerHTML = '';
+        };
+
+        window.removerInsumo = function(idx) {
+            insumos.splice(idx, 1);
+            renderInsumosList();
+            atualizarTotais();
+        };
+
+        function renderInsumosList() {
+            const container = document.getElementById('lista-insumos-container');
+            const ul = document.getElementById('lista-insumos');
+            if (!insumos.length) { container.classList.add('hidden'); return; }
+            container.classList.remove('hidden');
+            ul.innerHTML = insumos.map((i, idx) => `
+                <li class="flex justify-between items-center bg-vetsmart-green/5 p-3 rounded-xl border border-vetsmart-green/10">
+                    <span class="font-bold text-sm text-vetsmart-green-dark truncate pr-2">${i.nome}</span>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="font-black text-vetsmart-gold text-sm">${fmt(i.valor)}</span>
+                        <button type="button" onclick="removerInsumo(${idx})" class="text-red-400 hover:text-red-600 active:scale-90 transition-all"><i class="fa-solid fa-trash-alt text-xs"></i></button>
+                    </div>
+                </li>`).join('');
+        }
+
+        async function saveService(status) {
+            if (!currentUser || !horseData) { mostrarToast('Dados não carregados.', false); return; }
+
+            const valServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            const terapiaIds = ['acupuntura','fisioterapia','quiropraxia','ozonioterapia','laser','eletroterapia'];
+            const valTerapias = terapiaIds.reduce((s, t) => {
+                const el = document.getElementById(`valor_${t}`);
+                return s + (el && !document.getElementById(`box-${t}`).classList.contains('hidden') ? parseFloat(el.value) || 0 : 0);
+            }, 0);
+            const totalInsumos = utilizouMedicamentos ? insumos.reduce((s, i) => s + i.valor, 0) : 0;
+            const totalGeral = valServico + valTerapias + totalInsumos;
+
+            if (totalGeral <= 0 && status === 'finalizado') {
+                mostrarToast('Preencha pelo menos um valor para finalizar.', false);
+                return;
+            }
+
+            document.querySelectorAll('button').forEach(b => b.disabled = true);
+
+            const form = document.getElementById('form-terapias');
+            const fd = new FormData(form);
+            const uniqueId = crypto.randomUUID();
+
+            const terapiasData = {};
+            terapiaIds.forEach(t => {
+                terapiasData[t] = {
+                    realizado: terapiasAtivas[t] || false,
+                    obs: fd.get(`obs_${t}`) || '',
+                    sessoes: parseInt(fd.get(`sessoes_${t}`)) || 0,
+                    valor: terapiasAtivas[t] ? (parseFloat(fd.get(`valor_${t}`)) || 0) : 0,
+                    ...(t === 'ozonioterapia' ? { via: fd.get('via_ozonio') || '' } : {}),
+                    ...(t === 'eletroterapia' ? { modalidade: fd.get('modal_eletroterapia') || '' } : {}),
+                };
+            });
+
+            const atendimentoData = {
+                uniqueId,
+                tipo_atendimento: 'Terapias Complementares',
+                data: serverTimestamp(),
+                ultimaAtualizacao: serverTimestamp(),
+                userId: currentUser.uid,
+                horseId: horseData.id,
+                nome_cavalo: horseData.nome_cavalo,
+                nome_proprietario: horseData.nome_proprietario,
+                telefone_proprietario: horseData.telefone_proprietario || '',
+                terapias: terapiasData,
+                observacoes_gerais: fd.get('observacoes_gerais') || '',
+                insumos: utilizouMedicamentos ? insumos.map(i => ({ id: i.id || null, nome: i.nome, quantidade: 1, precovenda: i.valor })) : [],
+                insumos_utilizados: utilizouMedicamentos ? insumos.map(i => ({ id: i.id || null, nome: i.nome, qtd: 1, precovenda: i.valor })) : [],
+                estoqueJaDecrementado: false,
+                valor_servico: valServico,
+                valor_terapias: valTerapias,
+                total_geral: totalGeral,
+                status: status === 'finalizado' ? 'pendente' : 'rascunho',
+                pdf_url: null
+            };
+
+            try {
+                await setDoc(doc(db, 'atendimentos', uniqueId), atendimentoData);
+                mostrarToast(status === 'finalizado' ? 'Atendimento finalizado!' : 'Rascunho salvo!', true);
+
+                if (status === 'finalizado' && horseData.telefone_proprietario) {
+                    const tel = horseData.telefone_proprietario.replace(/\D/g, '');
+                    const msg = `Olá! As terapias complementares de ${horseData.nome_cavalo} foram concluídas.\n\nTotal: ${fmt(totalGeral)}`;
+                    setTimeout(() => {
+                        window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`, '_blank');
+                        window.location.href = `dossie.html?id=${horseData.id}`;
+                    }, 1500);
+                } else {
+                    setTimeout(() => window.location.href = `dossie.html?id=${horseData.id}`, 1500);
+                }
+            } catch (err) {
+                console.error('Erro ao salvar:', err);
+                mostrarToast('Erro ao salvar. Tente novamente.', false);
+                document.querySelectorAll('button').forEach(b => b.disabled = false);
+            }
+        }
+
+        document.getElementById('form-terapias').addEventListener('submit', e => { e.preventDefault(); saveService('finalizado'); });
+        document.getElementById('btn-finalizar-mais-tarde').addEventListener('click', () => saveService('rascunho'));
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) { window.location.replace('login.html'); return; }
+                currentUser = user;
+                const horseId = new URLSearchParams(window.location.search).get('id');
+                if (!horseId) { mostrarToast('Cavalo não identificado.', false); return; }
+
+                document.getElementById('back-btn').onclick = () => window.location.href = `dossie.html?id=${horseId}`;
+
+                const [horseSnap, estoqueSnap] = await Promise.all([
+                    getDoc(doc(db, 'clientes', horseId)),
+                    getDocs(query(collection(db, 'estoque'), where('userId', '==', user.uid)))
+                ]);
+
+                if (!horseSnap.exists() || (horseSnap.data().userId && horseSnap.data().userId !== user.uid)) {
+                    mostrarToast('Acesso negado ou cavalo não encontrado.', false);
+                    return;
+                }
+                horseData = { id: horseSnap.id, ...horseSnap.data() };
+                insumosCache = estoqueSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                document.getElementById('display-horse-name').innerText = horseData.nome_cavalo;
+                document.getElementById('display-horse-owner').innerText = `Proprietário: ${horseData.nome_proprietario}`;
+                document.getElementById('display-horse-id').innerText = `ID: ${horseData.id}`;
+            });
+        });
+    </script>
+</body>
+</html>

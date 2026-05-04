@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Financeiro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .filter-btn { padding: 0.5rem 0.9rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; color: #2D5A4E; transition: all .2s; border: 1px solid transparent; }
+        .filter-btn.active { background-color: #2D5A4E; color: white; }
+        .nav-active { color: #D2B48C !important; }
+        .bar-chart-bar { transition: height 0.6s ease-out; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-center items-center p-4">
+            <h1 class="font-black text-2xl uppercase">Meu <span class="text-vetsmart-gold">Financeiro</span></h1>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-5">
+
+        <div id="loader" class="text-center py-10">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-3xl"></i>
+        </div>
+
+        <div id="content" class="hidden space-y-5">
+
+            <!-- Filtros de período -->
+            <div class="glass-panel p-3 rounded-2xl">
+                <div class="flex gap-1 justify-center">
+                    <button class="filter-btn active" data-meses="3">3 Meses</button>
+                    <button class="filter-btn" data-meses="6">6 Meses</button>
+                    <button class="filter-btn" data-meses="12">12 Meses</button>
+                </div>
+            </div>
+
+            <!-- Cards Resumo -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass-panel p-4 rounded-2xl col-span-2">
+                    <p class="text-xs font-bold text-vetsmart-green/60 uppercase">Total Gasto no Período</p>
+                    <p id="total-periodo" class="text-3xl font-black text-vetsmart-green mt-1">R$ 0,00</p>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-xs font-bold text-vetsmart-green/60 uppercase">Média Mensal</p>
+                    <p id="media-mensal" class="text-xl font-black text-vetsmart-green mt-1">R$ 0,00</p>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-xs font-bold text-red-500/70 uppercase">Em Aberto</p>
+                    <p id="total-aberto" class="text-xl font-black text-vetsmart-green mt-1">R$ 0,00</p>
+                </div>
+            </div>
+
+            <!-- Gráfico de Barras Mensais -->
+            <div class="glass-panel p-5 rounded-3xl">
+                <h3 class="font-black text-vetsmart-green text-sm uppercase tracking-wider mb-4">
+                    <i class="fa-solid fa-chart-bar text-vetsmart-gold mr-2"></i> Gastos por Mês
+                </h3>
+                <div id="chart-wrapper" class="flex items-end justify-around gap-1 h-32"></div>
+                <div id="chart-labels" class="flex justify-around mt-2 gap-1"></div>
+            </div>
+
+            <!-- Breakdown por Cavalo -->
+            <div class="glass-panel p-5 rounded-3xl">
+                <h3 class="font-black text-vetsmart-green text-sm uppercase tracking-wider mb-4">
+                    <i class="fa-solid fa-horse text-vetsmart-gold mr-2"></i> Gastos por Cavalo
+                </h3>
+                <div id="breakdown-cavalos" class="space-y-4">
+                    <p class="text-vetsmart-green/40 text-sm text-center py-4">Sem dados no período.</p>
+                </div>
+            </div>
+
+            <!-- Últimas faturas pagas -->
+            <div class="glass-panel p-5 rounded-3xl">
+                <h3 class="font-black text-vetsmart-green text-sm uppercase tracking-wider mb-3">
+                    <i class="fa-solid fa-receipt text-vetsmart-gold mr-2"></i> Últimos Pagamentos
+                </h3>
+                <div id="ultimas-faturas" class="space-y-2">
+                    <p class="text-vetsmart-green/40 text-sm text-center py-4">Nenhum pagamento no período.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-vetsmart-green/95 backdrop-blur-md border-t border-white/10">
+        <div class="max-w-md mx-auto flex justify-around items-center py-2 px-2">
+            <a href="dashboard-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-house text-xl"></i><span class="text-[9px] font-bold uppercase">Início</span></a>
+            <a href="cavalos-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-horse text-xl"></i><span class="text-[9px] font-bold uppercase">Cavalos</span></a>
+            <a href="faturas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-file-invoice text-xl"></i><span class="text-[9px] font-bold uppercase">Faturas</span></a>
+            <a href="receitas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-flask text-xl"></i><span class="text-[9px] font-bold uppercase">Receitas</span></a>
+            <a href="financeiro-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl nav-active"><i class="fa-solid fa-chart-line text-xl"></i><span class="text-[9px] font-bold uppercase">Financeiro</span></a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const fmt = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        let currentUser = null;
+        let proprietarioData = null;
+        let allAtendimentos = [];
+        let mesesFiltro = 3;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.replace('index-proprietario.html'); return; }
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (!snap.exists()) { await signOut(auth); window.location.replace('index-proprietario.html'); return; }
+            currentUser = user;
+            proprietarioData = { uid: user.uid, ...snap.data() };
+            await loadAtendimentos();
+        });
+
+        async function loadAtendimentos() {
+            const cpf = proprietarioData.cpf || '';
+            const q = query(collection(db, 'atendimentos'), where('cpfProprietario', '==', cpf));
+            const snap = await getDocs(q);
+            allAtendimentos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            renderFinanceiro();
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+        }
+
+        function getDataInicio(meses) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - meses);
+            d.setDate(1); d.setHours(0, 0, 0, 0);
+            return d;
+        }
+
+        function toDate(ts) {
+            if (!ts) return null;
+            if (ts.toDate) return ts.toDate();
+            return new Date(ts);
+        }
+
+        function renderFinanceiro() {
+            const inicio = getDataInicio(mesesFiltro);
+            const pagas = allAtendimentos.filter(a => a.status === 'pago' && toDate(a.data) >= inicio);
+            const abertas = allAtendimentos.filter(a => ['pendente','aguardando'].includes(a.status));
+
+            const totalPeriodo = pagas.reduce((s, a) => s + (a.total_geral || 0), 0);
+            const mediaM = mesesFiltro > 0 ? totalPeriodo / mesesFiltro : 0;
+            const totalAberto = abertas.reduce((s, a) => s + (a.total_geral || 0), 0);
+
+            document.getElementById('total-periodo').textContent = fmt(totalPeriodo);
+            document.getElementById('media-mensal').textContent = fmt(mediaM);
+            document.getElementById('total-aberto').textContent = fmt(totalAberto);
+
+            renderChart(pagas);
+            renderBreakdown(pagas);
+            renderUltimasFaturas(pagas);
+        }
+
+        function renderChart(pagas) {
+            const meses = [];
+            const agora = new Date();
+            for (let i = mesesFiltro - 1; i >= 0; i--) {
+                const d = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+                meses.push({ ano: d.getFullYear(), mes: d.getMonth(), label: d.toLocaleDateString('pt-BR', { month: 'short' }) });
+            }
+            const totais = meses.map(m => pagas
+                .filter(a => { const dt = toDate(a.data); return dt && dt.getFullYear() === m.ano && dt.getMonth() === m.mes; })
+                .reduce((s, a) => s + (a.total_geral || 0), 0)
+            );
+            const maxVal = Math.max(...totais, 1);
+            const wrapper = document.getElementById('chart-wrapper');
+            const labels = document.getElementById('chart-labels');
+            wrapper.innerHTML = '';
+            labels.innerHTML = '';
+            totais.forEach((val, i) => {
+                const pct = Math.max(4, (val / maxVal) * 100);
+                wrapper.innerHTML += `
+                    <div class="flex flex-col items-center flex-1 gap-1">
+                        <span class="text-[9px] text-vetsmart-green/50 font-bold leading-tight text-center">${val > 0 ? fmt(val).replace('R$','').trim() : ''}</span>
+                        <div class="w-full rounded-t-lg bar-chart-bar" style="height:${pct}%; background: linear-gradient(180deg, #D2B48C, #2D5A4E); min-height:6px;"></div>
+                    </div>`;
+                labels.innerHTML += `<span class="text-[10px] text-vetsmart-green/50 font-bold flex-1 text-center capitalize">${meses[i].label}</span>`;
+            });
+        }
+
+        function renderBreakdown(pagas) {
+            const porCavalo = {};
+            pagas.forEach(a => {
+                const nome = a.nome_cavalo || 'Sem nome';
+                porCavalo[nome] = (porCavalo[nome] || 0) + (a.total_geral || 0);
+            });
+            const lista = Object.entries(porCavalo).sort((a, b) => b[1] - a[1]);
+            const totalGeral = lista.reduce((s, [, v]) => s + v, 0);
+            const el = document.getElementById('breakdown-cavalos');
+            if (!lista.length) { el.innerHTML = '<p class="text-vetsmart-green/40 text-sm text-center py-4">Sem dados no período.</p>'; return; }
+            function escapeHTML(str) {
+                return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+            }
+            el.innerHTML = lista.map(([nome, val]) => {
+                const pct = totalGeral > 0 ? Math.round((val / totalGeral) * 100) : 0;
+                return `<div>
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-sm font-bold text-vetsmart-green">${escapeHTML(nome)}</span>
+                        <span class="text-sm font-black text-vetsmart-green">${fmt(val)} <span class="text-vetsmart-green/40 font-normal">${pct}%</span></span>
+                    </div>
+                    <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-700" style="width:${pct}%; background: linear-gradient(90deg, #2D5A4E, #D2B48C);"></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderUltimasFaturas(pagas) {
+            const el = document.getElementById('ultimas-faturas');
+            const recentes = [...pagas].sort((a, b) => {
+                const da = toDate(a.data) || new Date(0);
+                const db2 = toDate(b.data) || new Date(0);
+                return db2 - da;
+            }).slice(0, 5);
+            if (!recentes.length) { el.innerHTML = '<p class="text-vetsmart-green/40 text-sm text-center py-4">Nenhum pagamento no período.</p>'; return; }
+            el.innerHTML = recentes.map(a => {
+                const dt = toDate(a.data)?.toLocaleDateString('pt-BR') || '–';
+                return `<a href="detalhe-faturaproprietarios.html?id=${a.id}" class="flex items-center gap-3 p-3 bg-white/40 border border-vetsmart-green/10 rounded-xl hover:bg-vetsmart-gold/5 transition-colors">
+                    <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-check text-green-600 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-vetsmart-green truncate">${a.nome_cavalo || 'Atendimento'}</p>
+                        <p class="text-xs text-vetsmart-green/50">${dt}</p>
+                    </div>
+                    <span class="font-black text-vetsmart-green text-sm flex-shrink-0">${fmt(a.total_geral)}</span>
+                </a>`;
+            }).join('');
+        }
+
+        // ── Filtros ────────────────────────────────────────────────────────────
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                mesesFiltro = parseInt(btn.dataset.meses);
+                renderFinanceiro();
+            });
+        });
+    </script>
+</body>
+</html>

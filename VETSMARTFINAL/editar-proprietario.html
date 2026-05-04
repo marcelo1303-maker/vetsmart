@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Editar Proprietário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <a href="#" id="back-link" class="text-white/80 hover:text-white"><i class="fa-solid fa-chevron-left text-xl"></i></a>
+            <h1 class="font-black text-2xl tracking-tight absolute left-1/2 -translate-x-1/2">EDITAR DADOS</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-4 space-y-5">
+        <div id="edit-form-container">
+            <div id="loading-spinner" class="text-center py-10">
+                <i class="fa-solid fa-spinner fa-spin text-vetsmart-green text-4xl"></i>
+            </div>
+            <!-- O formulário será carregado aqui -->
+        </div>
+    </main>
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+        const editFormContainer = document.getElementById('edit-form-container');
+        const backLink = document.getElementById('back-link');
+        const params = new URLSearchParams(window.location.search);
+        const clientDocId = params.get('id');
+    
+        backLink.href = `dossie.html?id=${clientDocId}`;
+    
+        function renderForm(data) {
+            const isPj = data.tipo_pessoa === 'cnpj';
+            const docPrincipal = data.cpf || data.cnpj || data.cpf_cnpj;
+    
+            const formContent = `
+                <form id="edit-owner-form" class="space-y-4">
+                    <div class="glass-panel p-4 rounded-2xl space-y-3">
+                        <h3 class="text-[10px] font-black text-vetsmart-gold uppercase tracking-widest mb-2">Dados Pessoais</h3>
+                        <div>
+                            <label class="block text-[10px] font-bold text-vetsmart-green/50 uppercase ml-2 mb-1">${isPj ? 'Razão Social' : 'Nome do Proprietário'}</label>
+                            <input type="text" id="owner-name" class="form-input bg-white/70 border-none shadow-sm" value="${data.nome_proprietario || ''}" required>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-vetsmart-green/50 uppercase ml-2 mb-1">Telefone (WhatsApp)</label>
+                            <input type="tel" id="owner-phone" class="form-input bg-white/70 border-none shadow-sm" value="${data.telefone_proprietario || ''}" required>
+                        </div>
+                    </div>
+    
+                    <div class="glass-panel p-4 rounded-2xl space-y-3">
+                        <h3 class="text-[10px] font-black text-vetsmart-gold uppercase tracking-widest mb-2">Endereço</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-2">
+                                <label class="block text-[10px] font-bold text-vetsmart-green/50 uppercase ml-2 mb-1">Logradouro</label>
+                                <input type="text" id="logradouro" class="form-input bg-white/70 border-none shadow-sm" value="${data.logradouro || ''}">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-vetsmart-green/50 uppercase ml-2 mb-1">Nº</label>
+                                <input type="text" id="numero" class="form-input bg-white/70 border-none shadow-sm" value="${data.numero || ''}">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[10px] font-bold text-vetsmart-green/50 uppercase ml-2 mb-1">Cidade</label>
+                                <input type="text" id="cidade" class="form-input bg-white/70 border-none shadow-sm" value="${data.cidade || ''}">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-vetsmart-green/50 uppercase ml-2 mb-1">UF</label>
+                                <input type="text" id="uf" class="form-input bg-white/70 border-none shadow-sm" value="${data.uf || ''}">
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="flex gap-3 pt-4">
+                        <button type="button" onclick="window.location.href='dossie.html?id=${clientDocId}'" class="flex-1 bg-gray-200 text-gray-600 font-bold py-4 rounded-2xl active:scale-95 transition-all text-sm">CANCELAR</button>
+                        <button type="submit" id="btn-save" class="flex-[2] bg-vetsmart-green text-white font-black py-4 rounded-2xl uppercase tracking-widest shadow-lg active:scale-95 transition-all text-sm">SALVAR</button>
+                    </div>
+                </form>
+            `;
+            editFormContainer.innerHTML = formContent;
+    
+            const editOwnerForm = document.getElementById('edit-owner-form');
+            editOwnerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btnSave = document.getElementById('btn-save');
+                btnSave.disabled = true;
+                btnSave.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+    
+                const updatedData = {
+                    nome_proprietario: document.getElementById('owner-name').value,
+                    telefone_proprietario: document.getElementById('owner-phone').value,
+                    logradouro: document.getElementById('logradouro').value,
+                    numero: document.getElementById('numero').value,
+                    cidade: document.getElementById('cidade').value,
+                    uf: document.getElementById('uf').value,
+                    updatedAt: serverTimestamp()
+                };
+    
+                try {
+                    // 1. Atualiza no banco privado (clientes)
+                    await updateDoc(doc(db, "clientes", clientDocId), updatedData);
+                    
+                    // 2. Atualiza na Base Global (proprietarios_globais) usando o documento original (CPF/CNPJ)
+                    if (docPrincipal) {
+                        const docLimpo = docPrincipal.replace(/\D/g, '');
+                        await setDoc(doc(db, "proprietarios_globais", docLimpo), {
+                            nome_proprietario: updatedData.nome_proprietario,
+                            telefone: updatedData.telefone_proprietario,
+                            cidade: updatedData.cidade,
+                            uf: updatedData.uf,
+                            updatedAt: serverTimestamp()
+                        }, { merge: true });
+                    }
+    
+                    alert("Dados atualizados!");
+                    window.location.href = `dossie.html?id=${clientDocId}`;
+                } catch (error) {
+                    console.error(error);
+                    alert("Erro ao salvar.");
+                    btnSave.disabled = false;
+                    btnSave.innerText = 'SALVAR';
+                }
+            });
+        }
+    
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const docSnap = await getDoc(doc(db, "clientes", clientDocId));
+                    if (docSnap.exists() && docSnap.data().userId === user.uid) {
+                        renderForm(docSnap.data());
+                    } else {
+                        editFormContainer.innerHTML = "<p class='text-center p-8'>Cadastro não encontrado.</p>";
+                    }
+                } catch (e) { console.error(e); }
+            } else { window.location.replace('login.html'); }
+        });
+    </script>
+
+</body>
+</html>

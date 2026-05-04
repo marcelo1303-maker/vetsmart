@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Odontoplastia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'vetsmart-green': '#2D5A4E',
+                        'vetsmart-green-dark': '#1A3A31',
+                        'vetsmart-gold': '#D2B48C',
+                        'vetsmart-gold-dark': '#C19A6B',
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Poppins:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Poppins', 'Inter', sans-serif; background-color: #F0F5F3; color: #1A3A31; }
+        .glass-panel { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); }
+        .input-glass { background: rgba(255, 255, 255, 0.9); border: 1px solid #d1d5db; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; }
+        .input-glass:focus { border-color: #D2B48C; outline: none; box-shadow: 0 0 0 2px #d2b48c30; }
+        .select-glass { background: rgba(255, 255, 255, 0.9); border: 1px solid #d1d5db; border-radius: 12px; padding: 12px 16px; width: 100%; font-weight: 500; transition: all .2s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg border-b-4 border-vetsmart-gold">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button id="back-btn" class="text-white/80 hover:text-white active:scale-90 transition-all"><i class="fa-solid fa-chevron-left text-xl"></i></button>
+            <h1 class="font-black text-xl tracking-tight absolute left-1/2 -translate-x-1/2 text-white uppercase">Odontoplastia</h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-6">
+        <div class="glass-panel p-6 rounded-3xl text-center border-b-4 border-vetsmart-green/20">
+            <h2 id="display-horse-name" class="font-black text-3xl text-vetsmart-green-dark leading-tight">Carregando...</h2>
+            <span id="display-horse-id" class="font-mono text-xs bg-white px-3 py-1 rounded-full shadow-sm border border-vetsmart-green/10">ID: ---</span>
+        </div>
+
+        <form id="form-atendimento" class="space-y-6">
+            <input type="hidden" id="horse-id-hidden" name="horse_id">
+            <input type="hidden" name="servico" value="odontoplastia">
+
+            <div class="glass-panel p-6 rounded-3xl space-y-6 border-t-2 border-vetsmart-green shadow-xl">
+                <h3 class="font-black text-vetsmart-green text-center uppercase tracking-widest text-sm border-b border-vetsmart-gold pb-3 flex items-center justify-center gap-2"><i class="fa-solid fa-tooth"></i> Procedimento Odontológico</h3>
+                
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[15px] font-black text-vetsmart-green-dark uppercase ml-1 block text-center">Score de Condição Corporal</label>
+                        <div class="flex items-center bg-white border-2 border-vetsmart-green/10 rounded-2xl p-1 shadow-sm">
+                            <button type="button" onclick="ajustarEscore(-1)" class="w-12 h-12 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all active:scale-90"><i class="fa-solid fa-minus"></i></button>
+                            <input type="number" id="escore_corporal" name="escore_corporal" value="5" min="1" max="9" readonly class="flex-1 text-center font-black text-vetsmart-green-dark text-2xl bg-transparent border-none focus:ring-0">
+                            <button type="button" onclick="ajustarEscore(1)" class="w-12 h-12 flex items-center justify-center bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all active:scale-90"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[15px] font-black text-vetsmart-green-dark uppercase ml-1 block text-center">Gravidade das Pontas</label>
+                        <div class="flex gap-1 h-10">
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="odonto_pontas" value="1" class="hidden peer"><div class="h-full flex items-center justify-center border-2 border-vetsmart-green/10 rounded-xl text-10px font-black peer-checked:bg-vetsmart-green peer-checked:text-white transition-all peer-checked:border-vetsmart-green">1</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="odonto_pontas" value="2" class="hidden peer" checked><div class="h-full flex items-center justify-center border-2 border-vetsmart-green/10 rounded-xl text-10px font-black peer-checked:bg-vetsmart-green peer-checked:text-white transition-all peer-checked:border-vetsmart-green">2</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="odonto_pontas" value="3" class="hidden peer"><div class="h-full flex items-center justify-center border-2 border-vetsmart-green/10 rounded-xl text-10px font-black peer-checked:bg-vetsmart-green peer-checked:text-white transition-all peer-checked:border-vetsmart-green">3</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="odonto_pontas" value="4" class="hidden peer"><div class="h-full flex items-center justify-center border-2 border-vetsmart-green/10 rounded-xl text-10px font-black peer-checked:bg-vetsmart-green peer-checked:text-white transition-all peer-checked:border-vetsmart-green">4</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="odonto_pontas" value="5" class="hidden peer"><div class="h-full flex items-center justify-center border-2 border-vetsmart-green/10 rounded-xl text-10px font-black peer-checked:bg-vetsmart-green peer-checked:text-white transition-all peer-checked:border-vetsmart-green">5</div></label>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-vetsmart-green/5 p-5 rounded-3xl border border-vetsmart-green/10">
+                    <h4 class="text-[15px] font-black text-vetsmart-green-dark uppercase tracking-[2px] mb-4 text-center">Procedimentos Realizados</h4>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="nivelamento" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Nivelamento de Molares</div></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="bit_seat" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Bit Seat</div></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="reducao_inc" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Redução de Incisivos</div></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="exodontia" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Exodontia</div></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="odontoplastia" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Odontoplastia</div></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="restauracao" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Restauração</div></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="extracao deciduo" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Extração Decíduo</div></label>
+                        <label class="cursor-pointer"><input type="checkbox" name="proc_odonto" value="tratamento periodontal" class="hidden peer"><div class="p-3 rounded-xl border border-vetsmart-green/20 bg-white text-[10px] font-black text-center peer-checked:bg-vetsmart-green peer-checked:text-white transition-all uppercase">Tratamento Periodontal</div></label>
+
+
+
+
+                    </div>
+                </div>
+
+                <div class="p-5 bg-red-50/50 rounded-3xl border-2 border-dashed border-red-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="font-black text-vetsmart-green-dark text-sm uppercase">Lacerações Bucais?</span>
+                        <div class="flex gap-2">
+                            <label><input type="radio" name="repro_laceracao" value="nao" class="hidden peer" checked onclick="document.getElementById('box-laceracao').classList.add('hidden')"><div class="px-5 py-2 border-2 border-red-200 rounded-xl text-[10px] font-black peer-checked:bg-red-500 peer-checked:text-white peer-checked:border-red-500 transition-all uppercase">Não</div></label>
+                            <label><input type="radio" name="repro_laceracao" value="sim" class="hidden peer" onclick="document.getElementById('box-laceracao').classList.remove('hidden')"><div class="px-5 py-2 border-2 border-red-200 rounded-xl text-[10px] font-black peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 transition-all uppercase">Sim</div></label>
+                        </div>
+                    </div>
+                    <div id="box-laceracao" class="hidden space-y-4 animate-fadeIn">
+                        <label class="text-[15px] font-black text-red-500 uppercase block text-center mb-1">Gravidade da Lesão</label>
+                        <div class="flex justify-between gap-1">
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="laceracao_grau" value="1" class="hidden peer"><div class="py-2 border-2 border-red-100 rounded-lg text-center text-[15px] font-black peer-checked:bg-red-500 peer-checked:text-white transition-all uppercase">1</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="laceracao_grau" value="2" class="hidden peer" checked><div class="py-2 border-2 border-red-100 rounded-lg text-center text-[15px] font-black peer-checked:bg-red-500 peer-checked:text-white transition-all uppercase">2</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="laceracao_grau" value="3" class="hidden peer"><div class="py-2 border-2 border-red-100 rounded-lg text-center text-[15px] font-black peer-checked:bg-red-500 peer-checked:text-white transition-all uppercase">3</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="laceracao_grau" value="4" class="hidden peer"><div class="py-2 border-2 border-red-100 rounded-lg text-center text-[15px] font-black peer-checked:bg-red-500 peer-checked:text-white transition-all uppercase">4</div></label>
+                            <label class="flex-1 cursor-pointer"><input type="radio" name="laceracao_grau" value="5" class="hidden peer"><div class="py-2 border-2 border-red-100 rounded-lg text-center text-[15px] font-black peer-checked:bg-red-500 peer-checked:text-white transition-all uppercase">5</div></label>
+
+
+                        </div>
+                        <textarea name="laceracao_obs" placeholder="Descreva as lesões observadas (Ex: Ulcerações em 106, 206...)" class="input-glass w-full text-xs font-bold" rows="3"></textarea>
+                    </div>
+                </div>
+
+                        <div class="bg-vetsmart-green/5 p-5 rounded-3xl border border-vetsmart-green/10">
+                            <h4 class="text-[15px] font-black text-vetsmart-green uppercase tracking-[2px] mb-4 text-center">Detecção de Patologias e Anomalias nos Incisivos</h4>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="underbite_underjet" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Underbite/Underjet</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="curvatura_dorsal" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Curvatura Dorsal</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="curvatura_ventral" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Curvatura Ventral</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="desvio_diagonal" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Desvio Diagonal (DGL)</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="diastema" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Diastema</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="doenca_periodontal" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Doença Periodontal</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="extracao_permanente" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Extração Permanente</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="fragmento_deciduo" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Fragmento de Decíduo</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="ausencia" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Ausência</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="supranumerario" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Supranumerário</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="shroe" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">SHROE</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="retracao_genvival" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Retração Gengival</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="carie" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Cárie</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="calculo" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Cálculo</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="giroversao" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Giroversão</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="fistula" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Fístula</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="exposicao_pulpar" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Exposição Pulpar</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="gengivite" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Gengivite</div>
+                                </label>
+                        
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="odonto_det" value="hiperplasia_gengival" class="hidden peer">
+                                    <div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Hiperplasia Gengival</div>
+                                </label>
+                        
+                            </div>
+                        </div>
+                        <div class="bg-vetsmart-green/5 p-5 rounded-3xl border border-vetsmart-green/10 mb-6">
+                            <h4 class="text-[15px] font-black text-vetsmart-green uppercase tracking-[2px] mb-4 text-center">Detecção em Caninos</h4>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="doenca_periodontal" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Doença Periodontal</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="carie" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Cárie</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="calculo" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Cálculo</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="gengivite" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Gengivite</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="srhoe" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">SRHOE</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="fratura" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Fratura</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="ausencia" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Ausência</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="saliencia_barra" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Saliência em Barra</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="fistula" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Fístula</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="rudimentar" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Rudimentar</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="canino_det" value="presenca" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Presença</div></label>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-vetsmart-green/5 p-5 rounded-3xl border border-vetsmart-green/10 mb-6">
+                            <h4 class="text-[15px] font-black text-vetsmart-green uppercase tracking-[2px] mb-4 text-center">Dente de Lobo</h4>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <label class="cursor-pointer"><input type="checkbox" name="lobo_det" value="extracao" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Extração</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="lobo_det" value="incluso" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Incluso</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="lobo_det" value="molarizado" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Molarizado</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="lobo_det" value="presenca" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Presença</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="lobo_det" value="ausencia" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Ausência</div></label>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-vetsmart-green/5 p-5 rounded-3xl border border-vetsmart-green/10">
+                            <h4 class="text-[15px] font-black text-vetsmart-green uppercase tracking-[2px] mb-4 text-center">Detecção em Molares e Pré-Molares</h4>
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="gancho" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Gancho</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="rampa" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Rampa</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="onda" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Onda</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="degrau" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Degrau</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="molar_alto" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Molar Alto</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="doenca_periodontal" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Doença Periodontal</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="diastema" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Diastema</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="ausencia" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Ausência</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="fratura" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Fratura</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="defeito_cemento" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Defeito de Cemento</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="carie" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Cárie</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="desvio" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Desvio</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="erupcao" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Erupção</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="eot" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">EOT</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="supranumerario" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Supranumerário</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="extracao_permanente" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Extração Permanente</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="giroversao" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Giroversão</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="fistula" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Fístula</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="retracao_gengival" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Retração Gengival</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="molar_det" value="fragmento_deciduo" class="hidden peer"><div class="px-3 py-2 rounded-lg border border-vetsmart-green/10 text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green-dark uppercase transition-all">Fragmento de Decíduo</div></label>
+                            </div>
+                        </div>
+                        <div class="bg-vetsmart-green/5  text-vetsmart-green-dark p-6 rounded-3xl space-y-4 shadow-lg">
+                            <h4 class="font-black text-center uppercase tracking-[2px] text-xs">Sedação Farmacológica</h4>
+                            <div class="flex flex-wrap text- [15px] gap-2 justify-center">
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_deto" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Detomidina</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_xila" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Xilazina</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_butor" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Butorfanol</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_ace" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Acepromazina</div></label>
+                                
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_morf" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Morfina</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_tolaz" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Tolazine</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_fenil" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Fenilbutazona</div></label>
+                                <label class="cursor-pointer"><input type="checkbox" name="sed_outro" class="hidden peer"><div class="px-3 py-2 border border-vetsmart-green/10 rounded-xl text-[10px] font-black peer-checked:bg-vetsmart-gold peer-checked:text-vetsmart-green transition-all uppercase">Outro</div></label>
+                            </div>
+                            
+                            <div class="relative">
+                                <label class="text-[12px] font-black uppercase opacity ml-1">Volume Total (ml)</label>
+                                <input type="number" step="0.1" name="sed_vol" placeholder="Ex: 1.5" class="w-full bg-vetsmart-gold/30 border-2 border-vetsmart-green rounded-2xl py-3 text-center font-black text-xl text-vetsmart-green-dark placeholder:text-vetsmart-greenocus:border-white focus:outline-none transition-all">
+                                <span class="absolute right-6 top-10 font-black opacity">ML</span>
+                            </div>
+                        </div>
+                        
+
+                        <div class="space-y-1">
+                            <label class="text-[15px] font-black text-vetsmart-green-dark uppercase ml-1">Previsão Retorno</label>
+                            <select name="odonto_retorno" class="select-glass w-full text-xs font-bold">
+                                <option value="180">Em 6 Meses</option>
+                                <option value="365" selected>Em 12 Meses</option>
+                                <option value="outro">Outro Período</option>
+                            </select>
+                        </div>
+                    </div>
+                    <textarea name="odonto_obs_final" placeholder="Instruções pós-procedimento, medicações prescritas, etc..." class="input-glass w-full text-sm" rows="4"></textarea>
+                </div>
+            </div>
+                    <!-- SEÇÃO ESTOQUE E CONSUMO - COM DESIGN PREMIUM -->
+        <div class="glass-panel p-6 rounded-3xl space-y-5 border-t-4 border-vetsmart-green shadow-xl relative overflow-hidden">
+            <div class="absolute -left-6 -bottom-6 opacity-5 rotate-12">
+                <i class="fa-solid fa-box-open text-9xl"></i>
+            </div>
+            
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm flex items-center justify-center gap-2 relative z-10">
+                <i class="fa-solid fa-flask-vial"></i> Estoque e Consumo
+            </h3>
+            
+            <p class="text-center text-sm text-vetsmart-green/70 relative z-10">Utilizou algum insumo ou medicamento?</p>
+            
+            <div class="flex gap-3 relative z-10">
+                <button id="btn-consumo-sim" type="button" onclick="toggleConsumption(true)" class="flex-1 py-3 rounded-xl bg-white text-vetsmart-green border-2 border-vetsmart-green font-black transition-all active:scale-95">SIM</button>
+                <button id="btn-consumo-nao" type="button" onclick="toggleConsumption(false)" class="flex-1 py-3 rounded-xl bg-vetsmart-green text-vetsmart-gold border-2 border-vetsmart-green font-black transition-all active:scale-95">NÃO</button>
+            </div>
+
+            <div id="consumo-inner" class="hidden space-y-6 pt-4 border-t border-vetsmart-green/20 relative z-10">
+
+                <!-- CADASTRO RÁPIDO MANUAL -->
+                <div class="bg-white border-2 border-vetsmart-green rounded-2xl p-4">
+                    <p class="text-[10px] uppercase tracking-widest mb-3 opacity-80 font-black">Cadastro Rápido Manual</p>
+                    <div class="flex gap-2 items-center">
+                        <input type="text" id="insumo-nome-manual" placeholder="Nome do insumo" class="flex-1 p-3 border border-vetsmart-green/30 rounded-xl font-medium text-sm bg-vetsmart-green/5 outline-none" onkeypress="if(event.key === 'Enter') adicionarInsumoManual()">
+                        <input type="number" id="insumo-valor-manual" placeholder="R$" step="0.01" class="w-24 p-3 border border-vetsmart-green/30 rounded-xl font-medium text-sm bg-vetsmart-green/5 outline-none text-right" onkeypress="if(event.key === 'Enter') adicionarInsumoManual()">
+                        <button type="button" onclick="adicionarInsumoManual()" class="bg-vetsmart-green text-vetsmart-gold h-12 w-12 rounded-xl flex items-center justify-center active:scale-95 transition-transform font-black">
+                            <i class="fa-solid fa-plus text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BUSCA DE ESTOQUE -->
+                <div class="bg-white border-2 border-dashed border-vetsmart-green rounded-2xl p-4">
+                    <p class="text-[10px] uppercase tracking-widest mb-3 opacity-80 font-black">Baixa Automática (Estoque)</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="busca-estoque" placeholder="Buscar no estoque cadastrado..." class="input-glass flex-1 font-bold border-2 border-vetsmart-green/20" onkeypress="if(event.key === 'Enter') buscarEstoque()">
+                        <button type="button" id="btn-buscar-estoque" onclick="buscarEstoque()" class="bg-vetsmart-green text-vetsmart-gold px-5 rounded-xl flex items-center justify-center font-black active:scale-95 transition-transform">
+                            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="resultados-estoque" class="max-h-60 overflow-y-auto mt-3 space-y-2 no-scrollbar"></div>
+                </div>
+
+                <!-- CARRINHO DE INSUMOS -->
+                <div id="lista-insumos-container" class="hidden">
+                    <p class="text-[10px] uppercase tracking-widest mb-3 opacity-80 font-black">Itens Faturados</p>
+                    <ul id="lista-insumos" class="space-y-3 font-medium text-sm"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO FINANCEIRA - PREMIUM -->
+        <div class="glass-panel p-6 rounded-3xl space-y-5 border-t-4 border-vetsmart-gold shadow-2xl">
+            <h3 class="font-black text-vetsmart-green-dark text-center uppercase tracking-[3px] text-sm">
+                💰 Faturamento do Atendimento
+            </h3>
+            
+            <div class="space-y-5">
+                <!-- ENTRADA DE VALOR DO SERVIÇO -->
+                <div class="relative bg-white p-6 rounded-3xl shadow-inner border border-vetsmart-green/5">
+                    <label for="valor_servico" class="text-[10px] font-black text-vetsmart-green/40 uppercase ml-1 block mb-3 text-center tracking-[1px]">Honorários Veterinários</label>
+                    <div class="relative flex items-center justify-center">
+                        <span class="absolute left-6 font-black text-vetsmart-green text-2xl">R$</span>
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            id="valor_servico" 
+                            placeholder="0,00" 
+                            class="input-glass w-full pl-16 text-center font-black text-4xl text-vetsmart-green-dark border-none bg-transparent"
+                            oninput="atualizarTotaisFinanceiro()"
+                        >
+                    </div>
+                </div>
+
+                <!-- RESUMO DE CUSTOS -->
+                <div class="bg-vetsmart-green-dark p-6 rounded-3xl space-y-4 shadow-xl border-l-8 border-vetsmart-gold">
+                    <div class="flex justify-between items-center text-white/70">
+                        <span class="text-[10px] font-black uppercase tracking-widest">Mão de Obra</span>
+                        <span id="display-subtotal-servico" class="font-black text-sm">R$ 0,00</span>
+                    </div>
+                    <div class="flex justify-between items-center text-white/70">
+                        <span class="text-[10px] font-black uppercase tracking-widest">Materiais</span>
+                        <span id="display-subtotal-insumos" class="font-black text-sm">R$ 0,00</span>
+                    </div>
+                    <div class="pt-4 border-t border-white/10 flex flex-col items-center">
+                        <span class="text-[11px] font-black text-vetsmart-gold uppercase tracking-[5px] mb-1">Total Geral</span>
+                        <span id="display-total-geral" class="font-black text-white text-5xl tracking-tighter">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTÕES DE AÇÃO -->
+        <div class="flex flex-col gap-4 mt-10">
+            <button 
+                type="button" 
+                id="btn-emitir-laudo" 
+                onclick="emitirLaudo()" 
+                class="w-full bg-vetsmart-gold hover:bg-vetsmart-gold-dark text-vetsmart-green-dark font-black py-6 rounded-[32px] uppercase tracking-[3px] active:scale-95 transition-all shadow-[0_15px_30px_rgba(210,180,140,0.4)] flex items-center justify-center gap-4 text-lg border-b-8 border-vetsmart-gold-dark"
+            >
+                <i class="fa-solid fa-file-invoice text-2xl"></i>
+                Finalizar e Emitir Laudo
+            </button>
+            
+            <button 
+                type="button" 
+                id="btn-finalizar-mais-tarde" 
+                onclick="finalizarMaisTarde()" 
+                class="w-full bg-white text-gray-400 font-black py-5 rounded-[28px] uppercase tracking-[2px] active:scale-95 transition-all border-2 border-gray-200 hover:bg-gray-50 flex items-center justify-center gap-3 text-xs"
+            >
+                <i class="fa-solid fa-pause-circle"></i>
+                Salvar Progresso (Pausar)
+            </button>
+            <button
+                type="button"
+                id="btn-stripe"
+                onclick="emitirComStripe()"
+                class="w-full bg-vetsmart-green-dark text-white font-black py-4 rounded-[28px] uppercase tracking-[2px] active:scale-95 transition-all flex items-center justify-center gap-3 text-xs border-2 border-vetsmart-green"
+            >
+                <i class="fa-brands fa-stripe text-lg"></i>
+                Cobrar via Link Stripe
+            </button>
+        </div>
+
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-vetsmart-green text-white px-8 py-6 rounded-2xl font-black shadow-2xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-center flex flex-col items-center gap-2 max-w-xs">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-4xl text-vetsmart-gold"></i>
+        <span id="toast-msg">Atendimento Salvo!</span>
+    </div>
+
+    <script type="module">
+        import { auth, db } from "./firebase.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { collection, query, where, getDocs, addDoc, serverTimestamp, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+let utilizouMedicamentos = false;
+        let insumos = [];
+        let allInsumos = [];
+        let currentUser;
+        let horseId, horseName, ownerName;
+    
+        const urlParams = new URLSearchParams(window.location.search);
+        horseId = urlParams.get('id');
+        horseName = urlParams.get('nome');
+        ownerName = urlParams.get('proprietario');
+    
+        if (!horseId || !horseName || !ownerName) {
+            alert("Dados do animal não encontrados. Redirecionando...");
+            window.location.href = 'clientes.html';
+        } else {
+            document.getElementById('display-horse-name').textContent = horseName;
+            document.getElementById('display-horse-id').textContent = horseId;
+            document.getElementById('horse-id-hidden').value = horseId;
+        }
+    
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                const q = query(collection(db, "estoque"), where("userId", "==", user.uid));
+                const snapshot = await getDocs(q);
+                allInsumos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+    
+        window.removerInsumo = function(idx) {
+            insumos.splice(idx, 1);
+            renderInsumosList();
+            atualizarTotaisFinanceiro();
+        };
+    
+        window.buscarInsumo = function() {
+            const termo = document.getElementById('busca-medicamento').value.toLowerCase().trim();
+            const resultados = document.getElementById('resultados-medicamentos');
+            
+            if (!termo) {
+                resultados.innerHTML = '';
+                return;
+            }
+    
+            const filtered = allInsumos.filter(m => m.nome.toLowerCase().includes(termo));
+            resultados.innerHTML = filtered.map(m => `
+                <div class="p-2 bg-vetsmart-green/10 rounded cursor-pointer hover:bg-vetsmart-green/20 transition-all" onclick="adicionarInsumo('${m.id}', '${m.nome}', ${m.valorVenda})">
+                    <p class="font-bold text-vetsmart-green-dark text-sm">${m.nome}</p>
+                    <p class="text-[10px] text-vetsmart-green/90">R$ ${Number(m.valorVenda).toFixed(2)}</p>
+                </div>
+            `).join('');
+        };
+    
+        window.adicionarInsumo = function(id, nome, valor) {
+            if (insumos.some(i => i.id === id)) {
+                mostrarToast("Insumo já adicionado", false);
+                return;
+            }
+            
+            insumos.push({ id, nome, valor: Number(valor) });
+            document.getElementById('busca-medicamento').value = '';
+            document.getElementById('resultados-medicamentos').innerHTML = '';
+            renderInsumosList();
+            atualizarTotaisFinanceiro();
+        };
+    
+        window.ajustarEscore = function(change) {
+            const input = document.getElementById('escore_corporal');
+            let valor = parseInt(input.value) + change;
+            if (valor < 1) valor = 1;
+            if (valor > 9) valor = 9;
+            input.value = valor;
+        };
+    
+        function renderInsumosList() {
+            const ul = document.getElementById('lista-insumos');
+            const container = document.getElementById('lista-insumos-container');
+    
+            if (insumos.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+    
+            container.classList.remove('hidden');
+            ul.innerHTML = insumos.map((item, idx) => `
+                <li class="card-item flex justify-between items-center bg-vetsmart-green/5 p-3 rounded-xl border border-vetsmart-green/10">
+                    <span class="truncate pr-2 font-black text-vetsmart-green-dark">${item.nome}</span>
+                    <div class="flex items-center gap-2 whitespace-nowrap">
+                        <span class="font-black text-vetsmart-gold">R$ ${Number(item.valor).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
+                        <button type="button" onclick="removerInsumo(${idx})" class="text-red-400 hover:text-red-600 transition-colors active:scale-90">
+                            <i class="fa-solid fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </li>
+            `).join('');
+        }
+    
+        function atualizarTotaisFinanceiro() {
+            const valServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            const totalGeral = valServico + totalInsumos;
+    
+            document.getElementById('display-subtotal-servico').textContent = `R$ ${valServico.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('display-subtotal-insumos').textContent = `R$ ${totalInsumos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('display-total-geral').textContent = `R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+    
+        async function saveService(status) {
+            const valorServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+    
+            if (valorServico <= 0) {
+                mostrarToast("Valor do serviço deve ser preenchido", false);
+                return;
+            }
+    
+            const buttons = [
+                document.getElementById('btn-emitir-laudo'),
+                document.getElementById('btn-finalizar-mais-tarde')
+            ];
+            buttons.forEach(btn => btn.disabled = true);
+    
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            const totalGeral = valorServico + totalInsumos;
+    
+            const procedimentosSelecionados = Array.from(document.querySelectorAll('input[name="proc_odonto"]:checked')).map(el => el.value);
+            const laceracao = document.querySelector('input[name="repro_laceracao"]:checked').value;
+    
+            const uniqueId = crypto.randomUUID();
+            const atendimentoData = {
+                uniqueId: uniqueId,
+                pdf_url: null,
+                userId: currentUser.uid,
+                horseId: horseId,
+                nome_cavalo: horseName,
+                nome_proprietario: ownerName,
+                tipo_atendimento: 'Odontoplastia',
+                data: serverTimestamp(),
+                status: status === 'finalizado' ? 'pendente' : 'rascunho',
+                estoqueJaDecrementado: false,
+                
+                odonto: {
+                    escore_corporal: parseInt(document.getElementById('escore_corporal').value),
+                    gravidade_pontas: document.querySelector('input[name="odonto_pontas"]:checked').value,
+                    procedimentos: procedimentosSelecionados,
+                    laceracao_bucal: laceracao,
+                    descricao_laceracao: laceracao === 'sim' ? document.getElementById('desc_laceracao').value : '',
+                    lesoes_orais: document.getElementById('lesoes_orais').value,
+                    raio_x: document.querySelector('input[name="fez_raio_x"]:checked').value,
+                    exame_neurolog: document.getElementById('exame_neurolog').value,
+                    outras_obs: document.getElementById('outras_obs').value,
+                },
+                
+                insumos: insumos.map(item => ({
+                    id: item.id,
+                    nome: item.nome,
+                    quantidade: 1,
+                    precovenda: item.valor
+                })),
+                insumos_utilizados: insumos.map(item => ({
+                    id: item.id,
+                    nome: item.nome,
+                    qtd: 1,
+                    precovenda: item.valor
+                })),
+                
+                valor_servico: valorServico,
+                total_geral: totalGeral,
+                
+                ultimaAtualizacao: serverTimestamp()
+            };
+    
+            try {
+                await setDoc(doc(db, "atendimentos", uniqueId), atendimentoData);
+                const msg = status === 'finalizado' ? "Atendimento finalizado com sucesso!" : "Progresso salvo!";
+                mostrarToast(msg, true, () => {
+                    setTimeout(() => {
+                        window.location.href = `dossie.html?id=${horseId}`;
+                    }, 1500);
+                });
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                mostrarToast("Erro ao salvar. Tente novamente.", false);
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+    
+        window.emitirLaudo = () => saveService('finalizado');
+        window.finalizarMaisTarde = () => saveService('rascunho');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const backBtn = document.getElementById('back-btn');
+            if (backBtn) backBtn.onclick = () => window.location.href = horseId ? `dossie.html?id=${horseId}` : 'modelo_atendimentos.html';
+        });
+
+        window.emitirComStripe = async () => {
+            const valorServico = parseFloat(document.getElementById('valor_servico').value) || 0;
+            if (valorServico <= 0) { mostrarToast('Valor do serviço deve ser preenchido', false); return; }
+            const totalInsumos = insumos.reduce((acc, item) => acc + item.valor, 0);
+            const totalGeral = valorServico + totalInsumos;
+            const allBtns = ['btn-emitir-laudo','btn-finalizar-mais-tarde','btn-stripe'].map(id => document.getElementById(id));
+            allBtns.forEach(b => b && (b.disabled = true));
+            document.getElementById('btn-stripe').innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Gerando link...';
+            const uniqueId = crypto.randomUUID();
+            const procedimentosSelecionados = Array.from(document.querySelectorAll('input[name="proc_odonto"]:checked')).map(el => el.value);
+            const laceracao = document.querySelector('input[name="repro_laceracao"]:checked')?.value || 'nao';
+            const atendimentoData = {
+                uniqueId, pdf_url: null, userId: currentUser.uid, horseId,
+                nome_cavalo: horseName, nome_proprietario: ownerName,
+                tipo_atendimento: 'Odontoplastia', data: serverTimestamp(), status: 'aguardando',
+                estoqueJaDecrementado: false,
+                odonto: {
+                    escore_corporal: parseInt(document.getElementById('escore_corporal').value),
+                    gravidade_pontas: document.querySelector('input[name="odonto_pontas"]:checked')?.value,
+                    procedimentos: procedimentosSelecionados,
+                    laceracao_bucal: laceracao,
+                    descricao_laceracao: laceracao === 'sim' ? document.getElementById('desc_laceracao').value : '',
+                    lesoes_orais: document.getElementById('lesoes_orais').value,
+                    raio_x: document.querySelector('input[name="fez_raio_x"]:checked')?.value,
+                    exame_neurolog: document.getElementById('exame_neurolog').value,
+                    outras_obs: document.getElementById('outras_obs').value,
+                },
+                insumos: insumos.map(i => ({ id: i.id, nome: i.nome, quantidade: 1, precovenda: i.valor })),
+                insumos_utilizados: insumos.map(i => ({ id: i.id, nome: i.nome, qtd: 1, precovenda: i.valor })),
+                valor_servico: valorServico, total_geral: totalGeral, ultimaAtualizacao: serverTimestamp()
+            };
+            try {
+                await setDoc(doc(db, 'atendimentos', uniqueId), atendimentoData);
+                const idToken = await currentUser.getIdToken();
+                const res = await fetch('/create-payment-link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                    body: JSON.stringify({ amount: Math.round(totalGeral * 100), productName: `Odontoplastia - ${horseName}`, transacaoId: uniqueId, userId: currentUser.uid })
+                });
+                const data = await res.json();
+                if (data.url) {
+                    mostrarToast('Link Stripe gerado!', true);
+                    setTimeout(() => { window.open(data.url, '_blank'); window.location.href = `dossie.html?id=${horseId}`; }, 1200);
+                } else { throw new Error(data.error || 'Erro ao gerar link'); }
+            } catch (err) {
+                console.error('Stripe error:', err);
+                mostrarToast('Erro Stripe: ' + err.message, false);
+                allBtns.forEach(b => b && (b.disabled = false));
+                document.getElementById('btn-stripe').innerHTML = '<i class="fa-brands fa-stripe text-lg"></i> Cobrar via Link Stripe';
+            }
+        };
+    
+        function mostrarToast(msg, isSuccess = true, callback) {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+    
+            document.getElementById('toast-msg').textContent = msg;
+            icon.className = `fa-solid ${isSuccess ? 'fa-circle-check text-vetsmart-gold' : 'fa-circle-xmark text-red-400'} text-4xl`;
+    
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                if (callback) callback();
+            }, 2500);
+        }
+    
+        window.mostrarToast = mostrarToast;
+        window.atualizarTotaisFinanceiro = atualizarTotaisFinanceiro;
+        window.buscarInsumo = buscarInsumo;
+    </script>
+
+</body>
+</html>
+

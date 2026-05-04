@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Minhas Faturas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .tab-btn { flex: 1; padding: 0.6rem; border-radius: 8px; font-size: 0.75rem; font-weight: 700; color: #2D5A4E; transition: all .2s; text-align: center; cursor: pointer; position: relative; }
+        .tab-btn.active { background-color: #2D5A4E; color: white; }
+        .badge { position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; font-size: 9px; font-weight: 900; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+        .nav-active { color: #D2B48C !important; }
+        #notif-banner { display: none; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- Notificação em tempo real -->
+    <div id="notif-banner" class="bg-vetsmart-gold text-vetsmart-green px-4 py-3 font-bold text-sm text-center animate-pulse">
+        <i class="fa-solid fa-bell mr-2"></i> <span id="notif-msg">Nova fatura recebida!</span>
+    </div>
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-center items-center p-4">
+            <h1 class="font-black text-2xl uppercase">Minhas <span class="text-vetsmart-gold">Faturas</span></h1>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-4">
+
+        <!-- Abas -->
+        <div class="glass-panel p-2 rounded-2xl">
+            <div class="flex gap-1">
+                <div class="tab-btn active relative" data-tab="aberto" id="tab-aberto-btn">
+                    Em Aberto
+                    <span class="badge" id="badge-aberto" style="display:none">0</span>
+                </div>
+                <div class="tab-btn relative" data-tab="pago" id="tab-pago-btn">
+                    Pagas
+                    <span class="badge" id="badge-pago" style="display:none; background: #16a34a;">0</span>
+                </div>
+                <div class="tab-btn relative" data-tab="atrasado" id="tab-atrasado-btn">
+                    Atrasadas
+                    <span class="badge" id="badge-atrasado" style="display:none">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="text-center py-10">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-3xl"></i>
+        </div>
+
+        <!-- Listas -->
+        <div id="list-aberto" class="space-y-3 hidden"></div>
+        <div id="list-pago" class="space-y-3 hidden"></div>
+        <div id="list-atrasado" class="space-y-3 hidden"></div>
+
+        <div id="empty-msg" class="hidden text-center py-10">
+            <i class="fa-solid fa-file-invoice text-vetsmart-gold/30 text-4xl mb-3"></i>
+            <p class="text-vetsmart-green/40 font-bold text-sm">Nenhuma fatura nesta categoria.</p>
+        </div>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-vetsmart-green/95 backdrop-blur-md border-t border-white/10">
+        <div class="max-w-md mx-auto flex justify-around items-center py-2 px-2">
+            <a href="dashboard-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-house text-xl"></i><span class="text-[9px] font-bold uppercase">Início</span></a>
+            <a href="cavalos-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-horse text-xl"></i><span class="text-[9px] font-bold uppercase">Cavalos</span></a>
+            <a href="faturas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl nav-active"><i class="fa-solid fa-file-invoice text-xl"></i><span class="text-[9px] font-bold uppercase">Faturas</span></a>
+            <a href="receitas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-flask text-xl"></i><span class="text-[9px] font-bold uppercase">Receitas</span></a>
+            <a href="financeiro-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors"><i class="fa-solid fa-chart-line text-xl"></i><span class="text-[9px] font-bold uppercase">Financeiro</span></a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const fmt = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        let currentUser = null;
+        let proprietarioData = null;
+        let allFaturas = [];
+        let activeTab = 'aberto';
+        let unsubscribe = null;
+        let initialLoad = true;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.replace('index-proprietario.html'); return; }
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (!snap.exists()) { await signOut(auth); window.location.replace('index-proprietario.html'); return; }
+            currentUser = user;
+            proprietarioData = { uid: user.uid, ...snap.data() };
+            subscribeToFaturas();
+        });
+
+        function subscribeToFaturas() {
+            const cpf = proprietarioData.cpf || '';
+            const q = query(collection(db, 'atendimentos'), where('cpfProprietario', '==', cpf));
+
+            unsubscribe = onSnapshot(q, (snap) => {
+                const novas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                if (!initialLoad && novas.length > allFaturas.length) {
+                    const banner = document.getElementById('notif-banner');
+                    banner.style.display = 'block';
+                    setTimeout(() => { banner.style.display = 'none'; }, 4000);
+                }
+
+                allFaturas = novas;
+                initialLoad = false;
+                renderAll();
+                document.getElementById('loader').classList.add('hidden');
+            });
+        }
+
+        function classifyFatura(f) {
+            if (['pago'].includes(f.status)) return 'pago';
+            if (['pendente','aguardando'].includes(f.status)) {
+                // Verifica se está atrasada (mais de 30 dias pendente)
+                const dt = f.data?.toDate?.() || (f.data ? new Date(f.data) : null);
+                if (dt && (Date.now() - dt.getTime()) > 30 * 24 * 3600 * 1000) return 'atrasado';
+                return 'aberto';
+            }
+            return null; // rascunho/despesa: não mostra
+        }
+
+        function renderAll() {
+            const grupos = { aberto: [], pago: [], atrasado: [] };
+            allFaturas.forEach(f => {
+                const cat = classifyFatura(f);
+                if (cat) grupos[cat].push(f);
+            });
+
+            // Badges
+            ['aberto','pago','atrasado'].forEach(cat => {
+                const badge = document.getElementById(`badge-${cat}`);
+                const count = grupos[cat].length;
+                if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
+                else { badge.style.display = 'none'; }
+            });
+
+            // Listas
+            ['aberto','pago','atrasado'].forEach(cat => {
+                const el = document.getElementById(`list-${cat}`);
+                const items = grupos[cat].sort((a, b) => {
+                    const da = a.data?.toDate?.() || new Date(a.data || 0);
+                    const db2 = b.data?.toDate?.() || new Date(b.data || 0);
+                    return db2 - da;
+                });
+
+                if (!items.length) { el.innerHTML = ''; }
+                else {
+                    el.innerHTML = items.map(f => {
+                        const dt = f.data?.toDate?.() ? f.data.toDate().toLocaleDateString('pt-BR') : '–';
+                        const statusColors = {
+                            pago: 'border-l-green-500 bg-green-50/50',
+                            pendente: 'border-l-red-400',
+                            aguardando: 'border-l-yellow-400'
+                        };
+                        const cls = statusColors[f.status] || '';
+                        return `
+                        <a href="detalhe-faturaproprietarios.html?id=${f.id}" class="glass-panel rounded-2xl p-4 flex items-center gap-3 border-l-4 ${cls} active:scale-[0.98] transition-all">
+                            <div class="w-10 h-10 rounded-xl bg-vetsmart-gold/10 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-file-invoice text-vetsmart-gold"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-bold text-vetsmart-green truncate">${f.nome_cavalo || 'Atendimento'}</p>
+                                <p class="text-xs text-vetsmart-green/50">${f.tipo_atendimento || '–'} · ${dt}</p>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <p class="font-black text-vetsmart-green">${fmt(f.total_geral)}</p>
+                                <i class="fa-solid fa-chevron-right text-vetsmart-green/30 text-xs mt-1"></i>
+                            </div>
+                        </a>`;
+                    }).join('');
+                }
+
+                el.classList.toggle('hidden', cat !== activeTab);
+            });
+
+            document.getElementById('empty-msg').classList.toggle('hidden', !!grupos[activeTab].length);
+        }
+
+        // ── Tabs ──────────────────────────────────────────────────────────────
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeTab = btn.dataset.tab;
+                ['aberto','pago','atrasado'].forEach(cat => {
+                    document.getElementById(`list-${cat}`).classList.toggle('hidden', cat !== activeTab);
+                });
+                const hasFaturas = document.getElementById(`list-${activeTab}`).children.length > 0;
+                document.getElementById('empty-msg').classList.toggle('hidden', hasFaturas);
+            });
+        });
+    </script>
+</body>
+</html>

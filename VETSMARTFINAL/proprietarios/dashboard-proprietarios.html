@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HORSESMART | Dashboard Proprietário</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { 'vetsmart-green': '#2D5A4E', 'vetsmart-gold': '#D2B48C', 'vetsmart-gold-dark': '#C19A6B' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F0F5F3; }
+        .glass-panel { background: rgba(255,255,255,0.6); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid #2D5A4E; box-shadow: 0 8px 32px 0 rgba(31,38,135,0.1); }
+        .nav-active { color: #D2B48C !important; }
+        .bar-chart-bar { transition: height 0.5s ease-out; }
+        #side-menu { transition: transform 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="pb-28">
+
+    <!-- Side Menu -->
+    <div id="side-menu" class="fixed inset-y-0 left-0 w-64 bg-vetsmart-green text-white p-6 z-[100] shadow-xl transform -translate-x-full">
+        <h2 class="font-black text-2xl mb-6"><span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span></h2>
+        <p class="text-white/40 text-xs uppercase tracking-widest mb-4">Portal do Proprietário</p>
+        <nav class="space-y-3">
+            <a href="dashboard-proprietarios.html" class="flex items-center gap-3 p-2 rounded-lg bg-white/10"><i class="fa-solid fa-house w-6 text-center"></i><span>Início</span></a>
+            <a href="cavalos-proprietarios.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"><i class="fa-solid fa-horse w-6 text-center"></i><span>Meus Cavalos</span></a>
+            <a href="faturas-proprietarios.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"><i class="fa-solid fa-file-invoice w-6 text-center"></i><span>Faturas</span></a>
+            <a href="financeiro-proprietarios.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"><i class="fa-solid fa-chart-line w-6 text-center"></i><span>Financeiro</span></a>
+            <a href="termos-lgpd.html" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 transition-colors"><i class="fa-solid fa-file-shield w-6 text-center"></i><span>Termos LGPD</span></a>
+        </nav>
+        <button id="logout-btn" class="absolute bottom-6 left-6 right-6 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+            <i class="fa-solid fa-right-from-bracket mr-2"></i> Sair
+        </button>
+    </div>
+    <div id="menu-overlay" class="fixed inset-0 bg-black/50 z-[90] hidden"></div>
+
+    <header class="bg-vetsmart-green text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-between items-center p-4">
+            <button id="menu-btn" class="text-white/80 hover:text-white"><i class="fa-solid fa-bars text-xl"></i></button>
+            <h1 class="font-black text-2xl"><span class="text-white">HORSE</span><span class="text-vetsmart-gold">SMART</span></h1>
+            <div class="w-8"></div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-6 space-y-5">
+
+        <!-- Loader -->
+        <div id="loader" class="text-center py-16">
+            <i class="fa-solid fa-circle-notch animate-spin text-vetsmart-gold text-4xl"></i>
+            <p class="text-vetsmart-green/50 mt-3 text-sm">Carregando portal...</p>
+        </div>
+
+        <div id="content" class="hidden space-y-5">
+
+            <!-- Boas-vindas -->
+            <div class="glass-panel p-6 rounded-3xl">
+                <p id="saudacao" class="text-vetsmart-green/60 text-sm font-bold">Bem-vindo(a)!</p>
+                <h2 id="prop-nome" class="text-2xl font-black text-vetsmart-green mt-1">...</h2>
+            </div>
+
+            <!-- Trial Banner -->
+            <div id="trial-card" class="glass-panel p-5 rounded-2xl hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-black text-vetsmart-green uppercase tracking-wider">
+                        <i class="fa-solid fa-gift text-vetsmart-gold mr-1"></i> Período de Teste
+                    </span>
+                    <span id="trial-days" class="text-xs font-bold text-vetsmart-gold"></span>
+                </div>
+                <div class="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div id="trial-bar" class="h-full rounded-full transition-all duration-700" style="background: linear-gradient(90deg, #2D5A4E, #D2B48C); width: 0%"></div>
+                </div>
+                <p class="text-[10px] text-vetsmart-green/50 mt-1.5">Após o trial: R$ 9,90/mês</p>
+            </div>
+
+            <!-- Banner expirado -->
+            <div id="trial-expired-banner" class="hidden bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-red-400 text-xl mt-0.5"></i>
+                <div>
+                    <p class="font-bold text-red-600 text-sm">Trial expirado</p>
+                    <p class="text-red-500/80 text-xs mt-1">Seu período gratuito encerrou. Entre em contato para renovar seu plano e continuar usando o portal.</p>
+                </div>
+            </div>
+
+            <!-- Cards Resumo -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-xs font-bold text-vetsmart-green/60 uppercase">Cavalos</p>
+                    <p id="card-cavalos" class="text-3xl font-black text-vetsmart-green mt-1">–</p>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-xs font-bold text-red-500/70 uppercase">Faturas Abertas</p>
+                    <p id="card-faturas" class="text-3xl font-black text-vetsmart-green mt-1">–</p>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-xs font-bold text-vetsmart-green/60 uppercase">Gasto no Mês</p>
+                    <p id="card-gasto-mes" class="text-xl font-black text-vetsmart-green mt-1">–</p>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl">
+                    <p class="text-xs font-bold text-vetsmart-green/60 uppercase">Atendimentos</p>
+                    <p id="card-atendimentos" class="text-3xl font-black text-vetsmart-green mt-1">–</p>
+                </div>
+            </div>
+
+            <!-- Gráfico 6 meses -->
+            <div class="glass-panel p-5 rounded-3xl">
+                <h3 class="font-black text-vetsmart-green text-sm uppercase tracking-wider mb-4">
+                    <i class="fa-solid fa-chart-bar text-vetsmart-gold mr-2"></i> Gastos — Últimos 6 Meses
+                </h3>
+                <div id="chart-wrapper" class="flex items-end justify-around gap-1 h-28">
+                    <!-- barras geradas via JS -->
+                </div>
+                <div id="chart-labels" class="flex justify-around mt-2 gap-1">
+                    <!-- labels geradas via JS -->
+                </div>
+            </div>
+
+            <!-- Preview Cavalos -->
+            <div class="glass-panel p-5 rounded-3xl">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-black text-vetsmart-green text-sm uppercase tracking-wider">
+                        <i class="fa-solid fa-horse text-vetsmart-gold mr-2"></i> Meus Cavalos
+                    </h3>
+                    <a href="cavalos-proprietarios.html" class="text-xs font-bold text-vetsmart-gold hover:underline">Ver todos</a>
+                </div>
+                <div id="cavalos-preview" class="space-y-2">
+                    <p class="text-center text-vetsmart-green/40 text-sm py-4">Nenhum cavalo cadastrado.</p>
+                </div>
+            </div>
+
+            <!-- Atendimentos recentes -->
+            <div class="glass-panel p-5 rounded-3xl">
+                <h3 class="font-black text-vetsmart-green text-sm uppercase tracking-wider mb-3">
+                    <i class="fa-solid fa-calendar-check text-vetsmart-gold mr-2"></i> Atendimentos Recentes
+                </h3>
+                <div id="atendimentos-recentes" class="space-y-2">
+                    <p class="text-center text-vetsmart-green/40 text-sm py-4">Nenhum atendimento encontrado.</p>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Nav -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-vetsmart-green/95 backdrop-blur-md border-t border-white/10">
+        <div class="max-w-md mx-auto flex justify-around items-center py-2 px-2">
+            <a href="dashboard-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl nav-active">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Início</span>
+            </a>
+            <a href="cavalos-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-horse text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Cavalos</span>
+            </a>
+            <a href="faturas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-file-invoice text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Faturas</span>
+            </a>
+            <a href="receitas-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-flask text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Receitas</span>
+            </a>
+            <a href="financeiro-proprietarios.html" class="flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl text-white/50 hover:text-vetsmart-gold transition-colors">
+                <i class="fa-solid fa-chart-line text-xl"></i>
+                <span class="text-[9px] font-bold uppercase">Financeiro</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from "../firebase.js";
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const fmt = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        let currentUser = null;
+        let proprietarioData = null;
+
+        // ── Auth Guard ────────────────────────────────────────────────────────
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.replace('index-proprietario.html'); return; }
+            const snap = await getDoc(doc(db, 'proprietarios', user.uid));
+            if (!snap.exists()) { await signOut(auth); window.location.replace('index-proprietario.html'); return; }
+            currentUser = user;
+            proprietarioData = { uid: user.uid, ...snap.data() };
+            initDashboard();
+        });
+
+        // ── Menu lateral ──────────────────────────────────────────────────────
+        const menuBtn = document.getElementById('menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const overlay = document.getElementById('menu-overlay');
+
+        function openMenu() { sideMenu.style.transform = 'translateX(0)'; overlay.classList.remove('hidden'); }
+        function closeMenu() { sideMenu.style.transform = 'translateX(-100%)'; overlay.classList.add('hidden'); }
+
+        menuBtn.addEventListener('click', openMenu);
+        overlay.addEventListener('click', closeMenu);
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.replace('index-proprietario.html');
+        });
+
+        // ── Dashboard ─────────────────────────────────────────────────────────
+        async function initDashboard() {
+            const d = proprietarioData;
+            const cpf = d.cpf || d.cpfFormatado?.replace(/\D/g,'') || '';
+
+            // Saudação
+            const hora = new Date().getHours();
+            const s = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+            document.getElementById('saudacao').textContent = `${s},`;
+            document.getElementById('prop-nome').textContent = (d.nomeCompleto || '').split(' ')[0];
+
+            // Trial
+            if (d.plano === 'trial' && d.trialFim) {
+                const trialFim = d.trialFim.toDate ? d.trialFim.toDate() : new Date(d.trialFim);
+                const trialInicio = d.trialInicio?.toDate ? d.trialInicio.toDate() : new Date(trialFim.getTime() - 30*24*3600*1000);
+                const now = new Date();
+                const diasRestantes = Math.max(0, Math.ceil((trialFim - now) / (1000*60*60*24)));
+                const diasTotais = Math.ceil((trialFim - trialInicio) / (1000*60*60*24));
+                const pct = Math.max(0, Math.min(100, ((diasTotais - diasRestantes) / diasTotais) * 100));
+
+                if (now > trialFim) {
+                    document.getElementById('trial-expired-banner').classList.remove('hidden');
+                } else {
+                    const trialCard = document.getElementById('trial-card');
+                    trialCard.classList.remove('hidden');
+                    document.getElementById('trial-days').textContent = `${diasRestantes} dia${diasRestantes !== 1 ? 's' : ''} restante${diasRestantes !== 1 ? 's' : ''}`;
+                    setTimeout(() => { document.getElementById('trial-bar').style.width = pct + '%'; }, 100);
+                }
+            }
+
+            // Cavalos
+            const cavalosQ = query(collection(db, 'cavalos'), where('cpfProprietario', '==', cpf));
+            const [cavalosSnap, atendSnap] = await Promise.all([
+                getDocs(cavalosQ),
+                getDocs(query(collection(db, 'atendimentos'), where('cpfProprietario', '==', cpf)))
+            ]);
+
+            const cavalos = cavalosSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            const atendimentos = atendSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // Cards
+            document.getElementById('card-cavalos').textContent = cavalos.length;
+            document.getElementById('card-atendimentos').textContent = atendimentos.length;
+
+            const emAberto = atendimentos.filter(a => ['pendente','aguardando'].includes(a.status));
+            document.getElementById('card-faturas').textContent = emAberto.length;
+
+            const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0,0,0,0);
+            const gastoMes = atendimentos
+                .filter(a => a.status === 'pago' && a.data)
+                .filter(a => { const dt = a.data?.toDate ? a.data.toDate() : new Date(a.data); return dt >= inicioMes; })
+                .reduce((s, a) => s + (a.total_geral || 0), 0);
+            document.getElementById('card-gasto-mes').textContent = fmt(gastoMes);
+
+            // Gráfico 6 meses
+            renderChart(atendimentos);
+
+            // Preview cavalos
+            renderCavalosPreview(cavalos);
+
+            // Atendimentos recentes
+            renderAtendimentosRecentes(atendimentos);
+
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+        }
+
+        function renderChart(atendimentos) {
+            const meses = [];
+            const agora = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+                meses.push({ ano: d.getFullYear(), mes: d.getMonth(), label: d.toLocaleDateString('pt-BR', { month: 'short' }) });
+            }
+            const totais = meses.map(m => atendimentos
+                .filter(a => a.status === 'pago' && a.data)
+                .filter(a => { const dt = a.data?.toDate ? a.data.toDate() : new Date(a.data); return dt.getFullYear() === m.ano && dt.getMonth() === m.mes; })
+                .reduce((s, a) => s + (a.total_geral || 0), 0)
+            );
+            const maxVal = Math.max(...totais, 1);
+            const wrapper = document.getElementById('chart-wrapper');
+            const labels = document.getElementById('chart-labels');
+            wrapper.innerHTML = '';
+            labels.innerHTML = '';
+            totais.forEach((val, i) => {
+                const pct = Math.max(4, (val / maxVal) * 100);
+                wrapper.innerHTML += `
+                    <div class="flex flex-col items-center flex-1 gap-1">
+                        <span class="text-[9px] text-vetsmart-green/50 font-bold">${val > 0 ? fmt(val).replace('R$','').trim() : ''}</span>
+                        <div class="w-full rounded-t-lg bar-chart-bar" style="height:${pct}%; background: linear-gradient(180deg, #D2B48C, #2D5A4E); min-height: 6px;"></div>
+                    </div>`;
+                labels.innerHTML += `<span class="text-[10px] text-vetsmart-green/50 font-bold flex-1 text-center capitalize">${meses[i].label}</span>`;
+            });
+        }
+
+        function renderCavalosPreview(cavalos) {
+            const el = document.getElementById('cavalos-preview');
+            if (!cavalos.length) return;
+            function escapeHTML(str) {
+                return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+            }
+            el.innerHTML = cavalos.slice(0, 3).map(c => `
+                <a href="dossie-proprietarios.html?id=${encodeURIComponent(c.id)}" class="flex items-center gap-3 p-3 bg-vetsmart-gold/5 border border-vetsmart-gold/20 rounded-xl hover:bg-vetsmart-gold/10 transition-colors">
+                    <div class="w-9 h-9 rounded-xl bg-vetsmart-gold/20 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-horse text-vetsmart-gold"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-vetsmart-green text-sm truncate">${escapeHTML(c.nome_cavalo || c.nome || '–')}</p>
+                        <p class="text-xs text-vetsmart-green/50 truncate">${escapeHTML([c.raca, c.pelagem].filter(Boolean).join(' · ') || 'Sem raça')}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-vetsmart-green/30 text-xs"></i>
+                </a>`).join('');
+        }
+
+        function renderAtendimentosRecentes(atendimentos) {
+            const el = document.getElementById('atendimentos-recentes');
+            const recentes = atendimentos
+                .filter(a => a.data)
+                .sort((a, b) => {
+                    const da = a.data?.toDate ? a.data.toDate() : new Date(a.data);
+                    const db2 = b.data?.toDate ? b.data.toDate() : new Date(b.data);
+                    return db2 - da;
+                })
+                .slice(0, 3);
+            if (!recentes.length) return;
+            const statusCls = { pago: 'text-green-600', pendente: 'text-red-500', aguardando: 'text-yellow-500', rascunho: 'text-blue-500' };
+            el.innerHTML = recentes.map(a => {
+                const dt = a.data?.toDate ? a.data.toDate() : new Date(a.data);
+                return `<div class="flex items-center gap-3 p-3 bg-white/40 rounded-xl border border-vetsmart-green/10">
+                    <div class="w-9 h-9 rounded-xl bg-vetsmart-green/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-stethoscope text-vetsmart-green text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-vetsmart-green text-sm truncate">${a.nome_cavalo || '–'}</p>
+                        <p class="text-xs text-vetsmart-green/50">${a.tipo_atendimento || 'Atendimento'} · ${dt.toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <span class="text-xs font-bold ${statusCls[a.status] || 'text-gray-500'}">${fmt(a.total_geral)}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // Garantir que barras animam após render
+        setTimeout(() => {
+            document.querySelectorAll('.bar-chart-bar').forEach(b => b.style.height = b.style.height);
+        }, 200);
+    </script>
+</body>
+</html>
